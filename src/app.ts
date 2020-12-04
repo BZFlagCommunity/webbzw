@@ -151,6 +151,7 @@ const createShader = (gl: WebGLRenderingContext, vertCode: string, fragCode: str
 
 const textarea = document.querySelector("textarea");
 const canvas = document.querySelector("canvas");
+const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 
 const viewMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-300,1];
 const modelMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
@@ -243,7 +244,7 @@ window.onload = () => {
     viewMatrix[14] = viewMatrix[14] > -1 ? -1 : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
   });
 
-  let THETA = 45, PHI = 35, oldTime = 0;
+  let THETA = 45, PHI = 20, oldTime = 0;
 
   const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
   if(!shader){
@@ -272,7 +273,7 @@ window.onload = () => {
     const dt = time - oldTime;
     oldTime = time;
 
-    if(!drag){
+    if(!drag && autoRotate.checked){
       THETA += .015 * dt;
     }
 
