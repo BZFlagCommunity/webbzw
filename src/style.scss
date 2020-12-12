@@ -1,10 +1,17 @@
-@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700&family=Source+Code+Pro&display=swap");
 
 @mixin mobile{
   @media only screen and (max-width: 768px){
     @content;
   }
 }
+
+// syntax highlighter theme
+$highlight-comment: #AAA;
+$highlight-number: #F93;
+$highlight-symbol: #3AF;
+$highlight-headers: #F55;
+$highlight-keyword: #A8F;
 
 $border-color: #222;
 
@@ -50,12 +57,62 @@ main{
   }
 }
 
-textarea{
-  padding: .2rem .5rem;
-  background-color: #000;
-  resize: none;
-  border: none;
+.editor{
+  display: flex;
+  position: relative;
   border-right: 1px solid $border-color;
-  border-radius: 0;
-  outline: none;
+
+  & > *{
+    padding: .2rem .5rem;
+    // background-color: #000;
+    font-size: .8rem;
+    font-family: "Source Code Pro", monospace;
+    flex: 1;
+  }
+
+  textarea{
+    background-color: #000;
+    color: transparent;
+    caret-color: #FFF;
+    resize: none;
+    border: none;
+    border-radius: 0;
+    outline: none;
+
+    &::selection{
+      background-color: rgba(255, 255 ,255, .2);
+    }
+  }
+
+  .highlight{
+    margin: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    cursor: text;
+    overflow: auto;
+
+    .comment{
+      color: $highlight-comment;
+    }
+
+    .number{
+      color: $highlight-number;
+    }
+
+    .symbol{
+      color: $highlight-symbol;
+    }
+
+    .header{
+      color: $highlight-headers;
+    }
+
+    .keyword{
+      color: $highlight-keyword;
+    }
+  }
 }

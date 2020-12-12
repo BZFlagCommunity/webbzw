@@ -14,7 +14,10 @@
     <label for="auto-rotate">Auto rotate</label>
   </header>
   <main>
-    <textarea placeholder="bzw source"></textarea>
+    <div class="editor">
+      <textarea placeholder="bzw source" spellcheck="false"></textarea>
+      <pre class="highlight"></pre>
+    </div>
     <canvas></canvas>
   </main>
   <script><%- js.app %></script>

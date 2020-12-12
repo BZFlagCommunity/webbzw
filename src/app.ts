@@ -149,7 +149,8 @@ const createShader = (gl: WebGLRenderingContext, vertCode: string, fragCode: str
 
 //#endregion
 
-const textarea = document.querySelector("textarea");
+const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
+const highlight = document.querySelector(".editor .highlight") as HTMLDivElement;
 const canvas = document.querySelector("canvas");
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 
@@ -158,8 +159,9 @@ const modelMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
 
 const MOUSE_SPEED = 75;
 
-let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .1\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .1\n  color 2\nend\n`;
+let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
 textarea.value = source;
+setTimeout(runHighlighter);
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
@@ -188,6 +190,65 @@ const map: {
   objects: []
 };
 
+const HIGHLIGHT_HEADERS = [
+  "world",
+  "options",
+  "waterLevel",
+  "dynamicColor",
+  "textureMatrix",
+  "material",
+  "transform",
+  "physics",
+  "arc",
+  "base",
+  "box",
+  "cone",
+  "define",
+  "group",
+  "link",
+  "mesh",
+  "meshbox",
+  "meshpyr",
+  "pyramid",
+  "sphere",
+  "teleporter",
+  "tetra",
+  "weapon",
+  "zone",
+  "face",
+  "endface",
+  "enddef",
+  "drawInfo",
+  "lod",
+  "end"
+];
+const HIGHLIGHT_HEADERS_REGEX = new RegExp(`^(${HIGHLIGHT_HEADERS.join("|")})`, "gm");
+
+const HIGHLIGHT_KEYWORDS = [
+  "position",
+  "size",
+  "shift",
+  "rotation",
+  "color",
+  "name",
+  "flagHeight"
+];
+const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(^\\s*${HIGHLIGHT_KEYWORDS.join("|")})`, "gm");
+
+function runHighlighter(){
+  highlight.innerHTML = textarea.value
+    .replace(/([-\.*/"=]+)/g, `<span class="symbol">$1</span>`)
+    .replace(/(#.*$)/gm, `<span class="comment">$1</span>`)
+    .replace(/([0-9]+)/g, `<span class="number">$1</span>`)
+    .replace(HIGHLIGHT_HEADERS_REGEX, `<span class="header">$1</span>`)
+    .replace(HIGHLIGHT_KEYWORDS_REGEX, `<span class="keyword">$1</span>`)
+    .replace(/\n/g, "<br>");
+}
+
+textarea.onscroll = () => {
+  highlight.scrollTop = textarea.scrollTop;
+};
+
 window.onload = () => {
   if(!canvas){
     return;
@@ -199,10 +260,17 @@ window.onload = () => {
   }
 
   textarea.onkeyup = (e) => {
-    source = (e.currentTarget as HTMLTextAreaElement).value;
+    textarea.value = (e.currentTarget as HTMLTextAreaElement).value.trim();
+
+    // don't preform unnecessary updates if source hasn't changed
+    if(textarea.value === source){
+      return;
+    }
+
     parseSource();
 
     updateMesh(gl);
+    runHighlighter();
     localStorage.setItem("bzw", source);
   };
 
@@ -251,7 +319,7 @@ window.onload = () => {
   canvas.addEventListener("wheel", (e): void => {
     const delta = (e as WheelEvent).deltaY;
     viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
-    viewMatrix[14] = viewMatrix[14] > -1 ? -1 : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
+    viewMatrix[14] = viewMatrix[14] > -30 ? -30 : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
   });
 
   let THETA = 45, PHI = 20, oldTime = 0;
