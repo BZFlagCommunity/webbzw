@@ -164,15 +164,25 @@ textarea.value = source;
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
 
+enum MapObjectType{
+  NONE = "",
+  BOX = "box",
+  PYRAMID = "pyramid",
+  BASE = "base"
+}
+
+interface IMapObject{
+  type: MapObjectType;
+  position: number[];
+  shift: number[];
+  scale: number[];
+  rotation: number;
+  color?: number[];
+}
+
 const map: {
   worldSize: number,
-  objects: {
-    type: "box" | "pyramid" | "base",
-    position: number[],
-    scale: number[],
-    rotation: number,
-    color: number[]
-  }[]
+  objects: IMapObject[]
 } = {
   worldSize: 400,
   objects: []
@@ -324,7 +334,7 @@ const parseSource = (): void => {
       current = "world";
     }else if(line === "box" || line === "pyramid" || line === "base"){
       current = line;
-      map.objects.push({type: current as "box" | "pyramid" | "base", scale: [.5, .5, 1], position: [0, 0, 0], rotation: 0, color: [1, 1, 1, 1]});
+      map.objects.push({type: current as MapObjectType, scale: [.5, .5, 1], position: [0, 0, 0], shift: [0, 0, 0], rotation: 0});
     }else{
       const parts = line.split(" ");
       switch(current){
@@ -344,9 +354,7 @@ const parseSource = (): void => {
           }else if(parts[0] === "position"){
             map.objects[map.objects.length - 1].position = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])] || [0, 0, 0];
           }else if(parts[0] === "shift"){
-            map.objects[map.objects.length - 1].position[0] -= parseFloat(parts[1]) || 0;
-            map.objects[map.objects.length - 1].position[1] -= parseFloat(parts[2]) || 0;
-            map.objects[map.objects.length - 1].position[2] -= parseFloat(parts[3]) || 0;
+            map.objects[map.objects.length - 1].shift = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])] || [0, 0, 0];
           }else if(parts[0] === "rotation"){
             map.objects[map.objects.length - 1].rotation = parseFloat(parts[1]) || 0;
           }else if(parts[0] === "color"){
@@ -394,7 +402,17 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
     }
   };
 
-  const addBox = (position: number[], scale: number[], rotation = 0, color: number[], type: "box" | "base" = "box"): void => {
+  const addBox = (object: IMapObject): void => {
+    if(object.type !== MapObjectType.BOX && object.type !== MapObjectType.BASE){
+      return;
+    }
+
+    if(!object.color){
+      object.color = [.61, .26, .12, 1];
+    }
+
+    const {scale, position, shift, rotation, color} = object;
+
     // top
     vertices.push(-scale[0], scale[2], -scale[1]);
     vertices.push(-scale[0], scale[2],  scale[1]);
@@ -437,31 +455,33 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
     vertices.push(scale[0], 0       , -scale[1]);
     pushIndices();
 
-    rotation *= Math.PI / 180;
+    const _rotation = rotation * Math.PI / 180;
 
     // apply rotation
     for(let i = vertices.length - 72; i < vertices.length; i += 3){
-      const rot = rotY([vertices[i], vertices[i + 1], vertices[i + 2]], rotation);
+      const rot = rotY([vertices[i], vertices[i + 1], vertices[i + 2]], _rotation);
       vertices[i] = rot[0];
       vertices[i + 1] = rot[1];
       vertices[i + 2] = rot[2];
     }
 
-    // apply position
+    // apply position + shift
     for(let i = vertices.length - 72; i < vertices.length; i += 3){
-      vertices[i] -= position[0];
+      vertices[i] -= position[0] + shift[0];
     }
     for(let i = vertices.length - 71; i < vertices.length; i += 3){
-      vertices[i] += position[2];
+      vertices[i] += position[2] + shift[2];
     }
     for(let i = vertices.length - 70; i < vertices.length; i += 3){
-      vertices[i] += position[1];
+      vertices[i] += position[1] + shift[1];
     }
 
-    if(type === "box"){
+    if(object.type === MapObjectType.BOX){
+      pushColors(4, color[0], color[1], color[2], color[3]);
+      pushColors(4, color[0] * .7, color[1] * .7, color[2] * .7, color[3]);
+      pushColors(8, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
       pushColors(8, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
-      pushColors(16, color[0] * .61, color[1] * .26, color[2] * .12, color[3]);
-    }else if(type === "base"){
+    }else if(object.type === MapObjectType.BASE){
       let baseColor = [1, 1, 0];
       switch(color[0]){
         case 1:
@@ -477,12 +497,25 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
           baseColor = [.8, 0, 1];
           break;
       }
-      pushColors(8, baseColor[0] * 2, baseColor[1] * 2, baseColor[2] * 2);
-      pushColors(16, baseColor[0] * .61, baseColor[1] * .26, baseColor[2] * .12);
+
+      pushColors(4, baseColor[0], baseColor[1], baseColor[2], color[3]);
+      pushColors(4, baseColor[0] * .7, baseColor[1] * .7, baseColor[2] * .7, color[3]);
+      pushColors(8, baseColor[0] * .9, baseColor[1] * .9, baseColor[2] * .9, color[3]);
+      pushColors(8, baseColor[0] * .8, baseColor[1] * .8, baseColor[2] * .8, color[3]);
     }
   };
 
-  const addPyramid = (position: number[], scale: number[], rotation = 0, color: number[]): void => {
+  const addPyramid = (object: IMapObject): void => {
+    if(object.type !== MapObjectType.PYRAMID){
+      return;
+    }
+
+    if(!object.color){
+      object.color = [.1, .3, 1, 1];
+    }
+
+    const {scale, position, shift, rotation, color} = object;
+
     // bottom
     vertices.push( scale[0], 0, -scale[1]);
     vertices.push( scale[0], 0,  scale[1]);
@@ -524,16 +557,18 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
 
     // apply position
     for(let i = vertices.length - 48; i < vertices.length; i += 3){
-      vertices[i] += position[0];
+      vertices[i] += position[0] + shift[0];
     }
     for(let i = vertices.length - 47; i < vertices.length; i += 3){
-      vertices[i] += position[2];
+      vertices[i] += position[2] + shift[2];
     }
     for(let i = vertices.length - 46; i < vertices.length; i += 3){
-      vertices[i] += position[1];
+      vertices[i] += position[1] + shift[1];
     }
 
-    pushColors(16, color[0] * .1, color[1] * .3, color[2] * 1, color[3]);
+    pushColors(4, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
+    pushColors(6, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
+    pushColors(6, color[0], color[1], color[2], color[3]);
   };
 
   // ground
@@ -546,12 +581,12 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
 
   for(const object of map.objects){
     switch(object.type){
-      case "box":
-      case "base":
-        addBox(object.position, object.scale, object.rotation, object.color, object.type);
+      case MapObjectType.BOX:
+      case MapObjectType.BASE:
+        addBox(object);
         break;
-      case "pyramid":
-        addPyramid(object.position, object.scale, object.rotation, object.color);
+      case MapObjectType.PYRAMID:
+        addPyramid(object);
         break;
       default:
         break;
