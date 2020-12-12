@@ -1,0 +1,113 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700&family=Source+Code+Pro&display=swap");
+
+*{
+  color: #FFF;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root{
+  font-size: 18px;
+  scroll-behavior: smooth;
+
+  --border-color: #222;
+
+  /* syntax highlighter theme */
+  --highlight-comment: #AAA;
+  --highlight-number: #F93;
+  --highlight-symbol: #3AF;
+  --highlight-headers: #F55;
+  --highlight-keyword: #A8F;
+}
+
+body{
+  height: 100vh;
+  margin: 0;
+  background-color: var(--border-color);
+  font-family: Montserrat, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+h1{
+  margin: 0;
+}
+
+header{
+  padding: .2rem 1rem;
+}
+
+main{
+  flex: 1;
+  display: flex;
+}
+
+main > *{
+  flex: 1;
+}
+
+.editor{
+  display: flex;
+  position: relative;
+  border-right: 1px solid var(--border-color);
+}
+
+.editor > *{
+  padding: .2rem .5rem;
+  font-size: .8rem;
+  font-family: "Source Code Pro", monospace;
+  flex: 1;
+}
+
+textarea{
+  background-color: #000;
+  color: transparent;
+  caret-color: #FFF;
+  resize: none;
+  border: none;
+  border-radius: 0;
+  outline: none;
+}
+
+textarea::selection{
+  background-color: rgba(255, 255 ,255, .2);
+}
+
+.highlight{
+  margin: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  cursor: text;
+  overflow: auto;
+}
+
+.highlight .comment{
+  color: var(--highlight-comment);
+}
+
+.highlight .number{
+  color: var(--highlight-number);
+}
+
+.highlight .symbol{
+  color: var(--highlight-symbol);
+}
+
+.highlight .header{
+  color: var(--highlight-headers);
+}
+
+.highlight .keyword{
+  color: var(--highlight-keyword);
+}
+
+@media only screen and (max-width: 768px){
+  main{
+    flex-direction: column;
+  }
+}

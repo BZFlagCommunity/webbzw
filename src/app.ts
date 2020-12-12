@@ -1,153 +1,5 @@
-//#region MATH
-
-const getProjection = (angle: number, a: number, zMin: number, zMax: number): number[] => {
-  const ang = Math.tan((angle * .5) * Math.PI / 180);
-  return [
-    0.5/ang, 0, 0, 0,
-    0, 0.5*a/ang, 0, 0,
-    0, 0, -(zMax+zMin)/(zMax-zMin), -1,
-    0, 0, (-2*zMax*zMin)/(zMax-zMin), 0
-  ];
-};
-
-const multiplyMatrices = (a: number[], b: number[]): number[] => {
-  const result = [];
-
-  const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
-    a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
-    a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
-    a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
-
-  let b0  = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
-  result[0] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-  result[1] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-  result[2] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-  result[3] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
-
-  b0 = b[4]; b1 = b[5]; b2 = b[6]; b3 = b[7];
-  result[4] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-  result[5] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-  result[6] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-  result[7] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
-
-  b0 = b[8]; b1 = b[9]; b2 = b[10]; b3 = b[11];
-  result[8] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-  result[9] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-  result[10] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-  result[11] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
-
-  b0 = b[12]; b1 = b[13]; b2 = b[14]; b3 = b[15];
-  result[12] = b0*a00 + b1*a10 + b2*a20 + b3*a30;
-  result[13] = b0*a01 + b1*a11 + b2*a21 + b3*a31;
-  result[14] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
-  result[15] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
-
-  return result;
-};
-
-const multiplyArrayOfMatrices = (matrices: number[][]): number[] => {
-  let inputMatrix = matrices[0];
-
-  for(let i = 1; i < matrices.length; i++){
-    inputMatrix = multiplyMatrices(inputMatrix, matrices[i]);
-  }
-
-  return inputMatrix;
-};
-
-const rotateXMatrix = (a: number): number[] => {
-  a *= Math.PI / 180;
-  return [
-       1,       0,        0,     0,
-       0,  Math.cos(a),  -Math.sin(a),     0,
-       0,  Math.sin(a),   Math.cos(a),     0,
-       0,       0,        0,     1
-  ];
-};
-
-const rotateYMatrix = (a: number): number[] => {
-  a *= Math.PI / 180;
-  return [
-     Math.cos(a),   0, Math.sin(a),   0,
-          0,   1,      0,   0,
-    -Math.sin(a),   0, Math.cos(a),   0,
-          0,   0,      0,   1
-  ];
-};
-
-const rotY = (a: number[], angle: number): number[] => {
-  const s = Math.sin(angle);
-  const c = Math.cos(angle);
-
-  let x = 0, z = 0;
-  z = a[2] * c - a[0] * s;
-  x = a[2] * s + a[0] * c;
-
-  return [x, a[1], z];
-};
-
-//#endregion
-
-//#region GL
-
-const VERTEX_SHADER = `
-attribute vec3 position;
-attribute vec4 color;
-
-varying lowp vec4 vColor;
-
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
-
-void main(void){
-  gl_Position = proj * view * model * vec4(position, 1.0);
-  vColor = color;
-}
-`;
-
-const FRAGMENT_SHADER =`
-varying lowp vec4 vColor;
-
-void main(void){
-  if(vColor.a < .05){
-    discard;
-  }
-
-  gl_FragColor = vColor;
-}
-`;
-
-const createShader = (gl: WebGLRenderingContext, vertCode: string, fragCode: string): WebGLProgram | null => {
-  const vertShader = gl.createShader(gl.VERTEX_SHADER);
-  if(!vertShader){
-    return null;
-  }
-
-  gl.shaderSource(vertShader, vertCode);
-  gl.compileShader(vertShader);
-
-  const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-  if(!fragShader){
-    return null;
-  }
-
-  gl.shaderSource(fragShader, fragCode);
-  gl.compileShader(fragShader);
-
-  const shader = gl.createProgram();
-  if(!shader){
-    return null;
-  }
-
-  gl.attachShader(shader, vertShader);
-  gl.attachShader(shader, fragShader);
-  gl.linkProgram(shader);
-
-  return shader;
-};
-
-//#endregion
+import {getProjection, multiplyMatrices, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix, rotY} from "./math.ts";
+import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
@@ -240,8 +92,9 @@ const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(${HIGHLIGHT_KEYWORDS.join("|")})`,
 const highlightSpan = (type: string): string => `<span class="${type}">$1</span>`;
 
 function runHighlighter(): void{
-  if(editor.children.item(1)){
-    editor.children.item(1).remove();
+  const highlighter = editor.children.item(1);
+  if(highlighter){
+    highlighter.remove();
   }
 
   const elem = document.createElement("pre");
@@ -256,10 +109,14 @@ function runHighlighter(): void{
     .replace(/\n/gi, "<br>");
 
   editor.appendChild(elem);
+  elem.scrollTop = textarea.scrollTop;
 }
 
 textarea.onscroll = () => {
-  editor.children.item(1).scrollTop = textarea.scrollTop;
+  const highlighter = editor.children.item(1);
+  if(highlighter){
+    highlighter.scrollTop = textarea.scrollTop;
+  }
 };
 
 window.onload = () => {
@@ -272,8 +129,8 @@ window.onload = () => {
     return;
   }
 
-  textarea.onkeyup = (e) => {
-    textarea.value = (e.currentTarget as HTMLTextAreaElement).value.trim();
+  textarea.onkeyup = (e: Event) => {
+    textarea.value = (e.currentTarget as HTMLTextAreaElement).value;
 
     // don't preform unnecessary updates if source hasn't changed
     if(textarea.value === source){
@@ -674,15 +531,15 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
   gl.deleteBuffer(cbo);
   gl.deleteBuffer(ebo);
 
-  vbo = gl.createBuffer();
+  vbo = gl.createBuffer() as WebGLBuffer;
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-  cbo = gl.createBuffer();
+  cbo = gl.createBuffer() as WebGLBuffer;
   gl.bindBuffer(gl.ARRAY_BUFFER, cbo);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
-  ebo = gl.createBuffer();
+  ebo = gl.createBuffer() as WebGLBuffer;
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 
