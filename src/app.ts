@@ -124,7 +124,7 @@ window.onload = () => {
     return;
   }
 
-  const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
+  const gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")) as WebGLRenderingContext;
   if(!gl){
     return;
   }
