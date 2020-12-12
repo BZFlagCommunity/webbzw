@@ -274,7 +274,7 @@ window.onload = () => {
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.CULL_FACE);
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(.2, .6, .9, 1);
+  gl.clearColor(0, 0, 0, 1);
 
   const render = (time: number) => {
     if(oldTime === 0){

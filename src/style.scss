@@ -1,10 +1,28 @@
 @import url("https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap");
 
+@mixin mobile{
+  @media only screen and (max-width: 768px){
+    @content;
+  }
+}
+
+$border-color: #222;
+
+*{
+  color: #FFF;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root{
+  font-size: 18px;
+  scroll-behavior: smooth;
+}
+
 body{
   height: 100vh;
   margin: 0;
-  padding: 0;
-  color: #333;
+  background-color: $border-color;
   font-family: Montserrat, sans-serif;
   display: flex;
   flex-direction: column;
@@ -13,12 +31,19 @@ body{
 
 h1{
   margin: 0;
-  color: #333;
+}
+
+header{
+  padding: .2rem 1rem;
 }
 
 main{
   flex: 1;
   display: flex;
+
+  @include mobile{
+    flex-direction: column;
+  }
 
   & > *{
     flex: 1;
@@ -26,8 +51,11 @@ main{
 }
 
 textarea{
-  background-color: #FAFAFA;
+  padding: .2rem .5rem;
+  background-color: #000;
   resize: none;
   border: none;
+  border-right: 1px solid $border-color;
+  border-radius: 0;
   outline: none;
 }
