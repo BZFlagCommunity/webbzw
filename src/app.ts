@@ -222,7 +222,7 @@ const HIGHLIGHT_HEADERS = [
   "lod",
   "end"
 ];
-const HIGHLIGHT_HEADERS_REGEX = new RegExp(`^(${HIGHLIGHT_HEADERS.join("|")})`, "gm");
+const HIGHLIGHT_HEADERS_REGEX = new RegExp(`(${HIGHLIGHT_HEADERS.join("|")})`, "gmi");
 
 const HIGHLIGHT_KEYWORDS = [
   "position",
@@ -231,9 +231,11 @@ const HIGHLIGHT_KEYWORDS = [
   "rotation",
   "color",
   "name",
-  "flagHeight"
+  "flagHeight",
+  "from",
+  "to"
 ];
-const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(^\\s*${HIGHLIGHT_KEYWORDS.join("|")})`, "gm");
+const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(${HIGHLIGHT_KEYWORDS.join("|")})`, "gmi");
 
 const highlightSpan = (type: string): string => `<span class="${type}">$1</span>`;
 
@@ -246,12 +248,12 @@ function runHighlighter(): void{
   elem.classList.add("highlight");
 
   elem.innerHTML = textarea.value
-    .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
-    .replace(/(#.*?$)/gm, highlightSpan("comment"))
-    .replace(/([0-9]+)/g, highlightSpan("number"))
+    .replace(/([-\.*/"=]+?)/gi, highlightSpan("symbol"))
+    .replace(/(#.*?$)/gmi, highlightSpan("comment"))
+    .replace(/([0-9]+)/gi, highlightSpan("number"))
     .replace(HIGHLIGHT_HEADERS_REGEX, highlightSpan("header"))
     .replace(HIGHLIGHT_KEYWORDS_REGEX, highlightSpan("keyword"))
-    .replace(/\n/g, "<br>");
+    .replace(/\n/gi, "<br>");
 
   editor.appendChild(elem);
 }
