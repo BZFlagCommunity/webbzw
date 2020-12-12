@@ -235,13 +235,15 @@ const HIGHLIGHT_KEYWORDS = [
 ];
 const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(^\\s*${HIGHLIGHT_KEYWORDS.join("|")})`, "gm");
 
-function runHighlighter(){
+const highlightSpan = (type: string): string => `<span class="${type}">$1</span>`;
+
+function runHighlighter(): void{
   highlight.innerHTML = textarea.value
-    .replace(/([-\.*/"=]+)/g, `<span class="symbol">$1</span>`)
-    .replace(/(#.*$)/gm, `<span class="comment">$1</span>`)
-    .replace(/([0-9]+)/g, `<span class="number">$1</span>`)
-    .replace(HIGHLIGHT_HEADERS_REGEX, `<span class="header">$1</span>`)
-    .replace(HIGHLIGHT_KEYWORDS_REGEX, `<span class="keyword">$1</span>`)
+    .replace(/([-\.*/"=]+)/g, highlightSpan("symbol"))
+    .replace(/(#.*$)/gm, highlightSpan("comment"))
+    .replace(/([0-9]+)/g, highlightSpan("number"))
+    .replace(HIGHLIGHT_HEADERS_REGEX, highlightSpan("header"))
+    .replace(HIGHLIGHT_KEYWORDS_REGEX, highlightSpan("keyword"))
     .replace(/\n/g, "<br>");
 }
 
