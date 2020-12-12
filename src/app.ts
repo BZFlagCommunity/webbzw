@@ -150,7 +150,7 @@ const createShader = (gl: WebGLRenderingContext, vertCode: string, fragCode: str
 //#endregion
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
-const highlight = document.querySelector(".editor .highlight") as HTMLDivElement;
+const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas");
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 
@@ -238,17 +238,26 @@ const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(^\\s*${HIGHLIGHT_KEYWORDS.join("|"
 const highlightSpan = (type: string): string => `<span class="${type}">$1</span>`;
 
 function runHighlighter(): void{
-  highlight.innerHTML = textarea.value
-    .replace(/([-\.*/"=]+)/g, highlightSpan("symbol"))
-    .replace(/(#.*$)/gm, highlightSpan("comment"))
+  if(editor.children.item(1)){
+    editor.children.item(1).remove();
+  }
+
+  const elem = document.createElement("pre");
+  elem.classList.add("highlight");
+
+  elem.innerHTML = textarea.value
+    .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
+    .replace(/(#.*?$)/gm, highlightSpan("comment"))
     .replace(/([0-9]+)/g, highlightSpan("number"))
     .replace(HIGHLIGHT_HEADERS_REGEX, highlightSpan("header"))
     .replace(HIGHLIGHT_KEYWORDS_REGEX, highlightSpan("keyword"))
     .replace(/\n/g, "<br>");
+
+  editor.appendChild(elem);
 }
 
 textarea.onscroll = () => {
-  highlight.scrollTop = textarea.scrollTop;
+  editor.children.item(1).scrollTop = textarea.scrollTop;
 };
 
 window.onload = () => {
@@ -268,6 +277,7 @@ window.onload = () => {
     if(textarea.value === source){
       return;
     }
+    source = textarea.value;
 
     parseSource();
 
