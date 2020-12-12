@@ -402,6 +402,35 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
     }
   };
 
+  const applyRotPosShift = (object: IMapObject) => {
+    const vertexCount = object.type === MapObjectType.BOX || object.type === MapObjectType.BASE ? 72 : object.type === MapObjectType.PYRAMID ? 48 : 0;
+    if(vertexCount === 0){
+      console.error("this should not happen");
+      return;
+    }
+
+    const _rotation = object.rotation * Math.PI / 180;
+
+    // apply rotation
+    for(let i = vertices.length - vertexCount; i < vertices.length; i += 3){
+      const rot = rotY([vertices[i], vertices[i + 1], vertices[i + 2]], _rotation);
+      vertices[i] = rot[0];
+      vertices[i + 1] = rot[1];
+      vertices[i + 2] = rot[2];
+    }
+
+    // apply position + shift
+    for(let i = vertices.length - vertexCount; i < vertices.length; i += 3){
+      vertices[i] -= object.position[0] + object.shift[0];
+    }
+    for(let i = vertices.length - (vertexCount - 1); i < vertices.length; i += 3){
+      vertices[i] += object.position[2] + object.shift[2];
+    }
+    for(let i = vertices.length - (vertexCount - 2); i < vertices.length; i += 3){
+      vertices[i] += object.position[1] + object.shift[1];
+    }
+  };
+
   const addBox = (object: IMapObject): void => {
     if(object.type !== MapObjectType.BOX && object.type !== MapObjectType.BASE){
       return;
@@ -456,25 +485,6 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
     pushIndices();
 
     const _rotation = rotation * Math.PI / 180;
-
-    // apply rotation
-    for(let i = vertices.length - 72; i < vertices.length; i += 3){
-      const rot = rotY([vertices[i], vertices[i + 1], vertices[i + 2]], _rotation);
-      vertices[i] = rot[0];
-      vertices[i + 1] = rot[1];
-      vertices[i + 2] = rot[2];
-    }
-
-    // apply position + shift
-    for(let i = vertices.length - 72; i < vertices.length; i += 3){
-      vertices[i] -= position[0] + shift[0];
-    }
-    for(let i = vertices.length - 71; i < vertices.length; i += 3){
-      vertices[i] += position[2] + shift[2];
-    }
-    for(let i = vertices.length - 70; i < vertices.length; i += 3){
-      vertices[i] += position[1] + shift[1];
-    }
 
     if(object.type === MapObjectType.BOX){
       pushColors(4, color[0], color[1], color[2], color[3]);
@@ -547,25 +557,6 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
     vertices.push(scale[0], 0       , scale[1]);
     pushIndices2();
 
-    // apply rotation
-    for(let i = vertices.length - 48; i < vertices.length; i += 3){
-      const rot = rotY([vertices[i], vertices[i + 1], vertices[i + 2]], rotation);
-      vertices[i] = rot[0];
-      vertices[i + 1] = rot[1];
-      vertices[i + 2] = rot[2];
-    }
-
-    // apply position
-    for(let i = vertices.length - 48; i < vertices.length; i += 3){
-      vertices[i] += position[0] + shift[0];
-    }
-    for(let i = vertices.length - 47; i < vertices.length; i += 3){
-      vertices[i] += position[2] + shift[2];
-    }
-    for(let i = vertices.length - 46; i < vertices.length; i += 3){
-      vertices[i] += position[1] + shift[1];
-    }
-
     pushColors(4, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
     pushColors(6, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
     pushColors(6, color[0], color[1], color[2], color[3]);
@@ -579,7 +570,7 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
   pushIndices();
   pushColors(4, .3, .75, .3);
 
-  for(const object of map.objects){
+  objectLoop: for(const object of map.objects){
     switch(object.type){
       case MapObjectType.BOX:
       case MapObjectType.BASE:
@@ -589,8 +580,10 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
         addPyramid(object);
         break;
       default:
-        break;
+        continue objectLoop;
     }
+
+    applyRotPosShift(object);
   }
 
   elementCount = indices.length;
