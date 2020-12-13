@@ -1,5 +1,4 @@
 import {rotY} from "../math.ts";
-import {Base} from "./base.ts";
 
 export interface IMesh{
   vertices: number[];
