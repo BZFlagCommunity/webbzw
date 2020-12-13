@@ -1,4 +1,4 @@
-import {getProjection, multiplyMatrices, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix, rotY} from "./math.ts";
+import {getProjection, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix} from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight} from "./highlight.ts";
 import {MapObject, IMesh, Box, Base, Pyramid} from "./bzw/mod.ts";
