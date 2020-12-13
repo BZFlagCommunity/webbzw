@@ -1,7 +1,7 @@
 import {getProjection, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix} from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight} from "./highlight.ts";
-import {MapObject, IMesh, Box, Base, Pyramid} from "./bzw/mod.ts";
+import {MapObject, IMesh, Box, Base, Pyramid, World} from "./bzw/mod.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
@@ -19,23 +19,6 @@ setTimeout(() => highlight(editor));
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
-
-class Ground extends MapObject{
-  VERTEX_COUNT = 12;
-
-  color = [.3, .75, .3, 1];
-
-  buildMesh(mesh: IMesh): void{
-    const {color} = this;
-
-    mesh.vertices.push( map.worldSize, 0,  map.worldSize);
-    mesh.vertices.push( map.worldSize, 0, -map.worldSize);
-    mesh.vertices.push(-map.worldSize, 0, -map.worldSize);
-    mesh.vertices.push(-map.worldSize, 0,  map.worldSize);
-    this.pushIndices(mesh);
-    this.pushColors(mesh, 4, color[0], color[1], color[2]);
-  }
-}
 
 const map: {
   worldSize: number,
@@ -242,7 +225,10 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
     indicesCount: 0
   };
 
-  map.objects.push(new Ground());
+  const world = new World();
+  world.scale = [map.worldSize, map.worldSize, 1];
+  map.objects.push(world);
+
   for(const object of map.objects){
     object.buildMesh(mesh);
   }
