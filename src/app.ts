@@ -23,9 +23,9 @@ let elementCount = 0;
 class Ground extends MapObject{
   VERTEX_COUNT = 12;
 
-  buildMesh(mesh: IMesh): void{
-    this.color = [.3, .75, .3, 1];
+  color = [.3, .75, .3, 1];
 
+  buildMesh(mesh: IMesh): void{
     const {color} = this;
 
     mesh.vertices.push( map.worldSize, 0,  map.worldSize);
@@ -224,24 +224,7 @@ const parseSource = (): void => {
         case "box":
         case "pyramid":
         case "base":
-          if(parts[0] === "size"){
-            map.objects[map.objects.length - 1].scale = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])] || [.5, .5, 1];
-            if(parseFloat(parts[3]) === 0){
-              map.objects[map.objects.length - 1].scale[2] = .01;
-            }
-          }else if(parts[0] === "position"){
-            map.objects[map.objects.length - 1].position = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])] || [0, 0, 0];
-          }else if(parts[0] === "shift"){
-            map.objects[map.objects.length - 1].shift = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])] || [0, 0, 0];
-          }else if(parts[0] === "rotation"){
-            map.objects[map.objects.length - 1].rotation = parseFloat(parts[1]) || 0;
-          }else if(parts[0] === "color"){
-            if(current === "base"){
-              map.objects[map.objects.length - 1].color = [parseFloat(parts[1]), parseFloat(parts[1]), parseFloat(parts[1]), 1] || [1, 1, 1, 1];
-            }else{
-              map.objects[map.objects.length - 1].color = [parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3]), parseFloat(parts[4])] || [1, 1, 1, 1];
-            }
-          }
+          map.objects[map.objects.length - 1].parseLine(line);
           break;
         default:
           break;

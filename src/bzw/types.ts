@@ -1,4 +1,5 @@
 import {rotY} from "../math.ts";
+import {Base} from "./base.ts";
 
 export interface IMesh{
   vertices: number[];
@@ -17,6 +18,25 @@ export abstract class MapObject{
   readonly VERTEX_COUNT: number = 0;
 
   abstract buildMesh(mesh: IMesh): void;
+
+  parseLine(line: string): void{
+    const parts = line.split(" ");
+
+    if(parts[0] === "size"){
+      this.scale = [parseFloat(parts[1]) || .5, parseFloat(parts[2]) || .5, parseFloat(parts[3]) || 1];
+      if(parseFloat(parts[3]) === 0){
+        this.scale[2] = .01;
+      }
+    }else if(parts[0] === "position"){
+      this.position = [parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0, parseFloat(parts[3]) || 0];
+    }else if(parts[0] === "shift"){
+      this.shift = [parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0, parseFloat(parts[3]) || 0];
+    }else if(parts[0] === "rotation"){
+      this.rotation = parseFloat(parts[1]) || 0;
+    }else if(parts[0] === "color"){
+      this.color = [parseFloat(parts[1]) || 1, parseFloat(parts[2]) || 1, parseFloat(parts[3]) || 1, parseFloat(parts[4]) || 1];
+    }
+  }
 
   protected pushIndices(mesh: IMesh): void{
     mesh.indices.push(mesh.indicesCount);
