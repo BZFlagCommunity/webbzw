@@ -1,5 +1,7 @@
 import {getProjection, multiplyMatrices, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix, rotY} from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
+import {highlight} from "./highlight.ts";
+import {MapObject, IMesh, Box, Base, Pyramid} from "./bzw/mod.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
@@ -13,104 +15,35 @@ const MOUSE_SPEED = 75;
 
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
 textarea.value = source;
-setTimeout(runHighlighter);
+setTimeout(() => highlight(editor));
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
 
-enum MapObjectType{
-  NONE = "",
-  BOX = "box",
-  PYRAMID = "pyramid",
-  BASE = "base"
-}
+class Ground extends MapObject{
+  VERTEX_COUNT = 12;
 
-interface IMapObject{
-  type: MapObjectType;
-  position: number[];
-  shift: number[];
-  scale: number[];
-  rotation: number;
-  color?: number[];
+  buildMesh(mesh: IMesh): void{
+    this.color = [.3, .75, .3, 1];
+
+    const {color} = this;
+
+    mesh.vertices.push( map.worldSize, 0,  map.worldSize);
+    mesh.vertices.push( map.worldSize, 0, -map.worldSize);
+    mesh.vertices.push(-map.worldSize, 0, -map.worldSize);
+    mesh.vertices.push(-map.worldSize, 0,  map.worldSize);
+    this.pushIndices(mesh);
+    this.pushColors(mesh, 4, color[0], color[1], color[2]);
+  }
 }
 
 const map: {
   worldSize: number,
-  objects: IMapObject[]
+  objects: MapObject[]
 } = {
   worldSize: 400,
   objects: []
 };
-
-const HIGHLIGHT_HEADERS = [
-  "world",
-  "options",
-  "waterLevel",
-  "dynamicColor",
-  "textureMatrix",
-  "material",
-  "transform",
-  "physics",
-  "arc",
-  "base",
-  "box",
-  "cone",
-  "define",
-  "group",
-  "link",
-  "mesh",
-  "meshbox",
-  "meshpyr",
-  "pyramid",
-  "sphere",
-  "teleporter",
-  "tetra",
-  "weapon",
-  "zone",
-  "face",
-  "endface",
-  "enddef",
-  "drawInfo",
-  "lod",
-  "end"
-];
-const HIGHLIGHT_HEADERS_REGEX = new RegExp(`(${HIGHLIGHT_HEADERS.join("|")})`, "gmi");
-
-const HIGHLIGHT_KEYWORDS = [
-  "position",
-  "size",
-  "shift",
-  "rotation",
-  "color",
-  "name",
-  "flagHeight",
-  "from",
-  "to"
-];
-const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(${HIGHLIGHT_KEYWORDS.join("|")})`, "gmi");
-
-const highlightSpan = (type: string): string => `<span class="${type}">$1</span>`;
-
-function runHighlighter(): void{
-  const highlighter = editor.children.item(1);
-  if(highlighter){
-    highlighter.remove();
-  }
-
-  const elem = document.createElement("pre");
-  elem.classList.add("highlight");
-
-  elem.innerHTML = textarea.value
-    .replace(/([-\.*/"=]+?)/gi, highlightSpan("symbol"))
-    .replace(/(#.*?$)/gmi, highlightSpan("comment"))
-    .replace(/([0-9]+)/gi, highlightSpan("number"))
-    .replace(HIGHLIGHT_HEADERS_REGEX, highlightSpan("header"))
-    .replace(HIGHLIGHT_KEYWORDS_REGEX, highlightSpan("keyword"))
-    .replace(/\n/gi, "<br>");
-
-  editor.appendChild(elem);
-  elem.scrollTop = textarea.scrollTop;
-}
 
 textarea.onscroll = () => {
   const highlighter = editor.children.item(1);
@@ -141,7 +74,7 @@ window.onload = () => {
     parseSource();
 
     updateMesh(gl);
-    runHighlighter();
+    highlight(editor);
     localStorage.setItem("bzw", source);
   };
 
@@ -271,9 +204,15 @@ const parseSource = (): void => {
       current = "";
     }else if(line === "world"){
       current = "world";
-    }else if(line === "box" || line === "pyramid" || line === "base"){
+    }else if(line === "box"){
       current = line;
-      map.objects.push({type: current as MapObjectType, scale: [.5, .5, 1], position: [0, 0, 0], shift: [0, 0, 0], rotation: 0});
+      map.objects.push(new Box());
+    }else if(line === "pyramid"){
+      current = line;
+      map.objects.push(new Pyramid());
+    }else if(line === "base"){
+      current = line;
+      map.objects.push(new Base());
     }else{
       const parts = line.split(" ");
       switch(current){
@@ -313,219 +252,19 @@ const parseSource = (): void => {
 
 const updateMesh = (gl: WebGLRenderingContext): void => {
   console.log("updating mesh");
-  const vertices: number[] = [];
-  const colors: number[] = [];
-  const indices: number[] = [];
-  let indicesCount = 0;
-
-  const pushIndices = (): void => {
-    indices.push(indicesCount);
-    indices.push(indicesCount + 1);
-    indices.push(indicesCount + 2);
-    indices.push(indicesCount + 2);
-    indices.push(indicesCount + 3);
-    indices.push(indicesCount);
-    indicesCount += 4;
+  const mesh: IMesh = {
+    vertices: [],
+    indices: [],
+    colors: [],
+    indicesCount: 0
   };
 
-  const pushIndices2 = (): void => {
-    indices.push(indicesCount);
-    indices.push(indicesCount + 1);
-    indices.push(indicesCount + 2);
-    indicesCount += 3;
-  };
-
-  const pushColors = (count = 1, r = 0, g = 0, b = 0, a = 1): void => {
-    for(let i = 0; i < count; i++){
-      colors.push(r, g, b, a);
-    }
-  };
-
-  const applyRotPosShift = (object: IMapObject) => {
-    const vertexCount = object.type === MapObjectType.BOX || object.type === MapObjectType.BASE ? 72 : object.type === MapObjectType.PYRAMID ? 48 : 0;
-    if(vertexCount === 0){
-      console.error("this should not happen");
-      return;
-    }
-
-    const _rotation = object.rotation * Math.PI / 180;
-
-    // apply rotation
-    for(let i = vertices.length - vertexCount; i < vertices.length; i += 3){
-      const rot = rotY([vertices[i], vertices[i + 1], vertices[i + 2]], _rotation);
-      vertices[i] = rot[0];
-      vertices[i + 1] = rot[1];
-      vertices[i + 2] = rot[2];
-    }
-
-    // apply position + shift
-    for(let i = vertices.length - vertexCount; i < vertices.length; i += 3){
-      vertices[i] -= object.position[0] + object.shift[0];
-    }
-    for(let i = vertices.length - (vertexCount - 1); i < vertices.length; i += 3){
-      vertices[i] += object.position[2] + object.shift[2];
-    }
-    for(let i = vertices.length - (vertexCount - 2); i < vertices.length; i += 3){
-      vertices[i] += object.position[1] + object.shift[1];
-    }
-  };
-
-  const addBox = (object: IMapObject): void => {
-    if(object.type !== MapObjectType.BOX && object.type !== MapObjectType.BASE){
-      return;
-    }
-
-    if(!object.color){
-      object.color = [.61, .26, .12, 1];
-    }
-
-    const {scale, position, shift, rotation, color} = object;
-
-    // top
-    vertices.push(-scale[0], scale[2], -scale[1]);
-    vertices.push(-scale[0], scale[2],  scale[1]);
-    vertices.push( scale[0], scale[2],  scale[1]);
-    vertices.push( scale[0], scale[2], -scale[1]);
-    pushIndices();
-
-    // bottom
-    vertices.push( scale[0], 0, -scale[1]);
-    vertices.push( scale[0], 0,  scale[1]);
-    vertices.push(-scale[0], 0,  scale[1]);
-    vertices.push(-scale[0], 0, -scale[1]);
-    pushIndices();
-
-    // back
-    vertices.push( scale[0], 0       , -scale[1]);
-    vertices.push(-scale[0], 0       , -scale[1]);
-    vertices.push(-scale[0], scale[2], -scale[1]);
-    vertices.push( scale[0], scale[2], -scale[1]);
-    pushIndices();
-
-    // front
-    vertices.push( scale[0], scale[2], scale[1]);
-    vertices.push(-scale[0], scale[2], scale[1]);
-    vertices.push(-scale[0], 0       , scale[1]);
-    vertices.push( scale[0], 0       , scale[1]);
-    pushIndices();
-
-    // left
-    vertices.push(-scale[0], 0       , -scale[1]);
-    vertices.push(-scale[0], 0       ,  scale[1]);
-    vertices.push(-scale[0], scale[2],  scale[1]);
-    vertices.push(-scale[0], scale[2], -scale[1]);
-    pushIndices();
-
-    // right
-    vertices.push(scale[0], scale[2], -scale[1]);
-    vertices.push(scale[0], scale[2],  scale[1]);
-    vertices.push(scale[0], 0       ,  scale[1]);
-    vertices.push(scale[0], 0       , -scale[1]);
-    pushIndices();
-
-    const _rotation = rotation * Math.PI / 180;
-
-    if(object.type === MapObjectType.BOX){
-      pushColors(4, color[0], color[1], color[2], color[3]);
-      pushColors(4, color[0] * .7, color[1] * .7, color[2] * .7, color[3]);
-      pushColors(8, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
-      pushColors(8, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
-    }else if(object.type === MapObjectType.BASE){
-      let baseColor = [1, 1, 0];
-      switch(color[0]){
-        case 1:
-          baseColor = [1, 0, 0];
-          break;
-        case 2:
-          baseColor = [0, 1, 0];
-          break;
-        case 3:
-          baseColor = [0, 0, 1];
-          break;
-        case 4:
-          baseColor = [.8, 0, 1];
-          break;
-      }
-
-      pushColors(4, baseColor[0], baseColor[1], baseColor[2], color[3]);
-      pushColors(4, baseColor[0] * .7, baseColor[1] * .7, baseColor[2] * .7, color[3]);
-      pushColors(8, baseColor[0] * .9, baseColor[1] * .9, baseColor[2] * .9, color[3]);
-      pushColors(8, baseColor[0] * .8, baseColor[1] * .8, baseColor[2] * .8, color[3]);
-    }
-  };
-
-  const addPyramid = (object: IMapObject): void => {
-    if(object.type !== MapObjectType.PYRAMID){
-      return;
-    }
-
-    if(!object.color){
-      object.color = [.1, .3, 1, 1];
-    }
-
-    const {scale, position, shift, rotation, color} = object;
-
-    // bottom
-    vertices.push( scale[0], 0, -scale[1]);
-    vertices.push( scale[0], 0,  scale[1]);
-    vertices.push(-scale[0], 0,  scale[1]);
-    vertices.push(-scale[0], 0, -scale[1]);
-    pushIndices();
-
-    // front
-    vertices.push( scale[0], 0       , scale[1]);
-    vertices.push( 0       , scale[2], 0);
-    vertices.push(-scale[0], 0       , scale[1]);
-    pushIndices2();
-
-    // back
-    vertices.push(-scale[0], 0       , -scale[1]);
-    vertices.push( 0       , scale[2],  0);
-    vertices.push( scale[0], 0       , -scale[1]);
-    pushIndices2();
-
-    // left
-    vertices.push(-scale[0], 0       , scale[1]);
-    vertices.push( 0       , scale[2], 0);
-    vertices.push(-scale[0], 0       , -scale[1]);
-    pushIndices2();
-
-    // right
-    vertices.push(scale[0], 0       , -scale[1]);
-    vertices.push(0       , scale[2], 0);
-    vertices.push(scale[0], 0       , scale[1]);
-    pushIndices2();
-
-    pushColors(4, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
-    pushColors(6, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
-    pushColors(6, color[0], color[1], color[2], color[3]);
-  };
-
-  // ground
-  vertices.push( map.worldSize, 0,  map.worldSize);
-  vertices.push( map.worldSize, 0, -map.worldSize);
-  vertices.push(-map.worldSize, 0, -map.worldSize);
-  vertices.push(-map.worldSize, 0,  map.worldSize);
-  pushIndices();
-  pushColors(4, .3, .75, .3);
-
-  objectLoop: for(const object of map.objects){
-    switch(object.type){
-      case MapObjectType.BOX:
-      case MapObjectType.BASE:
-        addBox(object);
-        break;
-      case MapObjectType.PYRAMID:
-        addPyramid(object);
-        break;
-      default:
-        continue objectLoop;
-    }
-
-    applyRotPosShift(object);
+  map.objects.push(new Ground());
+  for(const object of map.objects){
+    object.buildMesh(mesh);
   }
 
-  elementCount = indices.length;
+  elementCount = mesh.indices.length;
 
   gl.deleteBuffer(vbo);
   gl.deleteBuffer(cbo);
@@ -533,15 +272,15 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
 
   vbo = gl.createBuffer() as WebGLBuffer;
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mesh.vertices), gl.STATIC_DRAW);
 
   cbo = gl.createBuffer() as WebGLBuffer;
   gl.bindBuffer(gl.ARRAY_BUFFER, cbo);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mesh.colors), gl.STATIC_DRAW);
 
   ebo = gl.createBuffer() as WebGLBuffer;
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl.STATIC_DRAW);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
   gl.enableVertexAttribArray(0);
