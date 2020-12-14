@@ -3,3 +3,4 @@ export * from "./world.ts";
 export * from "./box.ts";
 export * from "./base.ts";
 export * from "./pyramid.ts";
+export * from "./zone.ts";

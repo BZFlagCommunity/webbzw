@@ -1,7 +1,7 @@
 import {getProjection, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix} from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight} from "./highlight.ts";
-import {MapObject, IMesh, Box, Base, Pyramid, World} from "./bzw/mod.ts";
+import {MapObject, IMesh, Box, Base, Pyramid, World, Zone} from "./bzw/mod.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
@@ -165,7 +165,8 @@ window.onload = () => {
   gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
 
   gl.bindVertexArray(null);
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  gl.deleteBuffer(axisVbo);
+  gl.deleteBuffer(axisCbo);
 
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND);
@@ -202,10 +203,6 @@ window.onload = () => {
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-    gl.bindBuffer(gl.ARRAY_BUFFER, cbo);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
 
     gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
 
@@ -249,12 +246,16 @@ const parseSource = (): void => {
     }else if(line === "base"){
       current = line;
       map.objects.push(new Base());
+    }else if(line === "zone"){
+      current = line;
+      map.objects.push(new Zone());
     }else{
       switch(current){
         case "world":
         case "box":
         case "pyramid":
         case "base":
+        case "zone":
           map.objects[map.objects.length - 1].parseLine(line);
 
           if(current === "world" && line.startsWith("size")){
@@ -277,6 +278,7 @@ const updateMesh = (gl: WebGL2RenderingContext ): void => {
     indicesCount: 0
   };
 
+  map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1);
   for(const object of map.objects){
     object.buildMesh(mesh);
   }

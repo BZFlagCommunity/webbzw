@@ -6,14 +6,12 @@ const WALL_HEIGHT = 6.15; // 3 * _tankHeight (2.05)
 export class World extends MapObject{
   VERTEX_COUNT = 60;
 
+  color = [.3, .75, .3, 1];
+
   size: number = 400;
   noWalls: boolean = false;
 
   buildMesh(mesh: IMesh): void{
-    if(!this.color){
-      this.color = [.3, .75, .3, 1];
-    }
-
     const {size, color} = this;
 
     mesh.vertices.push( size, 0,  size);
