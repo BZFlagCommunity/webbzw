@@ -41,7 +41,9 @@ const HIGHLIGHT_KEYWORDS = [
   "name",
   "flagHeight",
   "from",
-  "to"
+  "to",
+  "noWalls",
+  "freeCtfSpawns"
 ];
 const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(${HIGHLIGHT_KEYWORDS.join("|")})`, "gmi");
 

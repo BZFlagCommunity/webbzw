@@ -109,7 +109,7 @@ window.onload = () => {
     viewMatrix[14] = viewMatrix[14] > -30 ? -30 : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
   });
 
-  let THETA = 45, PHI = 20, oldTime = 0;
+  let THETA = 0, PHI = 30, oldTime = 0;
 
   const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
   if(!shader){
@@ -186,7 +186,8 @@ const parseSource = (): void => {
     if(line === "end"){
       current = "";
     }else if(line === "world"){
-      current = "world";
+      current = line;
+      map.objects.push(new World());
     }else if(line === "box"){
       current = line;
       map.objects.push(new Box());
@@ -197,17 +198,16 @@ const parseSource = (): void => {
       current = line;
       map.objects.push(new Base());
     }else{
-      const parts = line.split(" ");
       switch(current){
         case "world":
-          if(parts[0] === "size"){
-            map.worldSize = parseFloat(line.split(" ")[1]) || 100;
-          }
-          break;
         case "box":
         case "pyramid":
         case "base":
           map.objects[map.objects.length - 1].parseLine(line);
+
+          if(current === "world" && line.startsWith("size")){
+            map.worldSize = (map.objects[map.objects.length - 1] as World).size;
+          }
           break;
         default:
           break;
@@ -224,10 +224,6 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
     colors: [],
     indicesCount: 0
   };
-
-  const world = new World();
-  world.scale = [map.worldSize, map.worldSize, 1];
-  map.objects.push(world);
 
   for(const object of map.objects){
     object.buildMesh(mesh);
