@@ -40,8 +40,9 @@ window.onload = () => {
     return;
   }
 
-  const gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")) as WebGLRenderingContext;
+  const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
   if(!gl){
+    alert("WebGL 2.0 not available");
     return;
   }
 
@@ -111,24 +112,65 @@ window.onload = () => {
 
   let THETA = 0, PHI = 30, oldTime = 0;
 
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
   const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
   if(!shader){
     return;
   }
   gl.useProgram(shader);
 
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-
-  gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(60, canvas.width/canvas.height, .01, map.worldSize * 6));
   const vMatrix = gl.getUniformLocation(shader, "view");
   const mMatrix = gl.getUniformLocation(shader, "model");
+
+  const AXIS_LINE_LENGTH = 100;
+  const axisVertices = [
+    // x
+     0,                0, 0,
+    -AXIS_LINE_LENGTH, 0, 0,
+    // y
+     0, 0,                0,
+     0, AXIS_LINE_LENGTH, 0,
+    // z
+     0, 0, 0,
+     0, 0, AXIS_LINE_LENGTH,
+  ];
+  const axisColors = [
+    // x
+    1, 0, 0, 1, 1, 0, 0, 1,
+    // y
+    0, 1, 0, 1, 0, 1, 0, 1,
+    // z
+    0, 0, 1, 1, 0, 0, 1, 1
+  ];
+
+  var axisVao = gl.createVertexArray();
+  gl.bindVertexArray(axisVao);
+
+  const axisVbo = gl.createBuffer() as WebGLBuffer;
+  gl.bindBuffer(gl.ARRAY_BUFFER, axisVbo);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisVertices), gl.STATIC_DRAW);
+
+  const axisCbo = gl.createBuffer() as WebGLBuffer;
+  gl.bindBuffer(gl.ARRAY_BUFFER, axisCbo);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisColors), gl.STATIC_DRAW);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, axisVbo);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, axisCbo);
+  gl.enableVertexAttribArray(1);
+  gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+
+  gl.bindVertexArray(null);
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.CULL_FACE);
-  gl.viewport(0, 0, canvas.width, canvas.height);
   gl.clearColor(0, 0, 0, 1);
 
   const render = (time: number) => {
@@ -155,6 +197,8 @@ window.onload = () => {
     ]);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(60, canvas.width/canvas.height, .01, map.worldSize * 6));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
@@ -164,6 +208,12 @@ window.onload = () => {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
 
     gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
+
+    gl.bindVertexArray(axisVao);
+
+    gl.drawArrays(gl.LINES, 0, 6);
+
+    gl.bindVertexArray(null);
 
     requestAnimationFrame(render);
   };
@@ -216,7 +266,7 @@ const parseSource = (): void => {
   }
 };
 
-const updateMesh = (gl: WebGLRenderingContext): void => {
+const updateMesh = (gl: WebGL2RenderingContext ): void => {
   console.log("updating mesh");
   const mesh: IMesh = {
     vertices: [],
@@ -254,6 +304,8 @@ const updateMesh = (gl: WebGLRenderingContext): void => {
   gl.bindBuffer(gl.ARRAY_BUFFER, cbo);
   gl.enableVertexAttribArray(1);
   gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
 };
 
 const getCoord = (e: any, coord: "X" | "Y"): number => {
