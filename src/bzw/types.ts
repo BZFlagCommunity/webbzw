@@ -1,23 +1,37 @@
 import {rotY} from "../math.ts";
 
+/** Contains all of the required information for the world mesh */
 export interface IMesh{
+  /** Vertices */
   vertices: number[];
+  /** Indices */
   indices: number[];
+  /** Colors */
   colors: number[];
+  /** Number of indices */
   indicesCount: number;
 }
 
+/** Basic definition of a map object - should contain properties that are across "all" objects */
 export abstract class MapObject{
+  /** Position */
   position: number[] = [0, 0, 0];
+  /** Shift from position */
   shift: number[] = [0, 0 , 0];
+  /** Scale */
   scale: number[] = [0, 0, 0];
+  /** Rotation (Z axis) */
   rotation: number = 0;
+  /** Color */
   color?: number[];
 
+  /** Number of vertices */
   readonly VERTEX_COUNT: number = 0;
 
+  /** Build the object's mesh and append it to `mesh` */
   abstract buildMesh(mesh: IMesh): void;
 
+  /** Parse a line in the object's definition */
   parseLine(line: string): void{
     const parts = line.split(" ");
 
@@ -37,6 +51,7 @@ export abstract class MapObject{
     }
   }
 
+  /** Add indices */
   protected pushIndices(mesh: IMesh): void{
     mesh.indices.push(mesh.indicesCount);
     mesh.indices.push(mesh.indicesCount + 1);
@@ -47,6 +62,10 @@ export abstract class MapObject{
     mesh.indicesCount += 4;
   }
 
+  /**
+   * Add indices 2
+   * FIXME: this should be part of `pushIndices` with a dynamic number
+   */
   protected pushIndices2(mesh: IMesh): void{
     mesh.indices.push(mesh.indicesCount);
     mesh.indices.push(mesh.indicesCount + 1);
@@ -54,12 +73,14 @@ export abstract class MapObject{
     mesh.indicesCount += 3;
   }
 
+  /** Add colors */
   protected pushColors(mesh: IMesh, count = 1, r = 0, g = 0, b = 0, a = 1): void{
     for(let i = 0; i < count; i++){
       mesh.colors.push(r, g, b, a);
     }
   }
 
+  /** Apply this object's `rotation`, `position` and `shift` to `mesh` */
   protected applyRotPosShift(mesh: IMesh): void{
     if(this.VERTEX_COUNT === 0){
       console.error("this should not happen");

@@ -1,5 +1,6 @@
 import {MapObject, IMesh} from "./types.ts";
 
+/** (Team) Base object */
 export class Base extends MapObject{
   VERTEX_COUNT = 72;
 

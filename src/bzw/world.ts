@@ -2,6 +2,7 @@ import {MapObject, IMesh} from "./types.ts";
 
 const WALL_HEIGHT = 10;
 
+/** World object */
 export class World extends MapObject{
   VERTEX_COUNT = 12;
 

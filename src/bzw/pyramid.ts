@@ -1,5 +1,6 @@
 import {MapObject, IMesh} from "./types.ts";
 
+/** Pyramid object */
 export class Pyramid extends MapObject{
   VERTEX_COUNT = 48;
 

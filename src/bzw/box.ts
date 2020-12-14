@@ -1,5 +1,6 @@
 import {MapObject, IMesh} from "./types.ts";
 
+/** Box object */
 export class Box extends MapObject{
   VERTEX_COUNT = 72;
 
