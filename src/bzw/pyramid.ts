@@ -9,37 +9,37 @@ export class Pyramid extends MapObject{
       this.color = [.1, .3, 1, 1];
     }
 
-    const {scale, color} = this;
+    const {size, color} = this;
 
     // bottom
-    mesh.vertices.push( scale[0], 0, -scale[1]);
-    mesh.vertices.push( scale[0], 0,  scale[1]);
-    mesh.vertices.push(-scale[0], 0,  scale[1]);
-    mesh.vertices.push(-scale[0], 0, -scale[1]);
+    mesh.vertices.push( size[0], 0, -size[1]);
+    mesh.vertices.push( size[0], 0,  size[1]);
+    mesh.vertices.push(-size[0], 0,  size[1]);
+    mesh.vertices.push(-size[0], 0, -size[1]);
     this.pushIndices(mesh);
 
     // front
-    mesh.vertices.push( scale[0], 0       , scale[1]);
-    mesh.vertices.push( 0       , scale[2], 0);
-    mesh.vertices.push(-scale[0], 0       , scale[1]);
+    mesh.vertices.push( size[0], 0       , size[1]);
+    mesh.vertices.push( 0       , size[2], 0);
+    mesh.vertices.push(-size[0], 0       , size[1]);
     this.pushIndices2(mesh);
 
     // back
-    mesh.vertices.push(-scale[0], 0       , -scale[1]);
-    mesh.vertices.push( 0       , scale[2],  0);
-    mesh.vertices.push( scale[0], 0       , -scale[1]);
+    mesh.vertices.push(-size[0], 0       , -size[1]);
+    mesh.vertices.push( 0       , size[2],  0);
+    mesh.vertices.push( size[0], 0       , -size[1]);
     this.pushIndices2(mesh);
 
     // left
-    mesh.vertices.push(-scale[0], 0       , scale[1]);
-    mesh.vertices.push( 0       , scale[2], 0);
-    mesh.vertices.push(-scale[0], 0       , -scale[1]);
+    mesh.vertices.push(-size[0], 0       , size[1]);
+    mesh.vertices.push( 0       , size[2], 0);
+    mesh.vertices.push(-size[0], 0       , -size[1]);
     this.pushIndices2(mesh);
 
     // right
-    mesh.vertices.push(scale[0], 0       , -scale[1]);
-    mesh.vertices.push(0       , scale[2], 0);
-    mesh.vertices.push(scale[0], 0       , scale[1]);
+    mesh.vertices.push(size[0], 0       , -size[1]);
+    mesh.vertices.push(0       , size[2], 0);
+    mesh.vertices.push(size[0], 0       , size[1]);
     this.pushIndices2(mesh);
 
     this.applyRotPosShift(mesh);

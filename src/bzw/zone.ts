@@ -7,48 +7,48 @@ export class Zone extends MapObject{
   buildMesh(mesh: IMesh): void{
     this.color = [1, 1, 0, .25];
 
-    const {scale, color} = this;
+    const {size, color} = this;
 
     // top
-    mesh.vertices.push(-scale[0], scale[2], -scale[1]);
-    mesh.vertices.push(-scale[0], scale[2],  scale[1]);
-    mesh.vertices.push( scale[0], scale[2],  scale[1]);
-    mesh.vertices.push( scale[0], scale[2], -scale[1]);
+    mesh.vertices.push(-size[0], size[2], -size[1]);
+    mesh.vertices.push(-size[0], size[2],  size[1]);
+    mesh.vertices.push( size[0], size[2],  size[1]);
+    mesh.vertices.push( size[0], size[2], -size[1]);
     this.pushIndices(mesh);
 
     // bottom
-    mesh.vertices.push( scale[0], 0, -scale[1]);
-    mesh.vertices.push( scale[0], 0,  scale[1]);
-    mesh.vertices.push(-scale[0], 0,  scale[1]);
-    mesh.vertices.push(-scale[0], 0, -scale[1]);
+    mesh.vertices.push( size[0], 0, -size[1]);
+    mesh.vertices.push( size[0], 0,  size[1]);
+    mesh.vertices.push(-size[0], 0,  size[1]);
+    mesh.vertices.push(-size[0], 0, -size[1]);
     this.pushIndices(mesh);
 
     // back
-    mesh.vertices.push( scale[0], 0       , -scale[1]);
-    mesh.vertices.push(-scale[0], 0       , -scale[1]);
-    mesh.vertices.push(-scale[0], scale[2], -scale[1]);
-    mesh.vertices.push( scale[0], scale[2], -scale[1]);
+    mesh.vertices.push( size[0], 0       , -size[1]);
+    mesh.vertices.push(-size[0], 0       , -size[1]);
+    mesh.vertices.push(-size[0], size[2], -size[1]);
+    mesh.vertices.push( size[0], size[2], -size[1]);
     this.pushIndices(mesh);
 
     // front
-    mesh.vertices.push( scale[0], scale[2], scale[1]);
-    mesh.vertices.push(-scale[0], scale[2], scale[1]);
-    mesh.vertices.push(-scale[0], 0       , scale[1]);
-    mesh.vertices.push( scale[0], 0       , scale[1]);
+    mesh.vertices.push( size[0], size[2], size[1]);
+    mesh.vertices.push(-size[0], size[2], size[1]);
+    mesh.vertices.push(-size[0], 0       , size[1]);
+    mesh.vertices.push( size[0], 0       , size[1]);
     this.pushIndices(mesh);
 
     // left
-    mesh.vertices.push(-scale[0], 0       , -scale[1]);
-    mesh.vertices.push(-scale[0], 0       ,  scale[1]);
-    mesh.vertices.push(-scale[0], scale[2],  scale[1]);
-    mesh.vertices.push(-scale[0], scale[2], -scale[1]);
+    mesh.vertices.push(-size[0], 0       , -size[1]);
+    mesh.vertices.push(-size[0], 0       ,  size[1]);
+    mesh.vertices.push(-size[0], size[2],  size[1]);
+    mesh.vertices.push(-size[0], size[2], -size[1]);
     this.pushIndices(mesh);
 
     // right
-    mesh.vertices.push(scale[0], scale[2], -scale[1]);
-    mesh.vertices.push(scale[0], scale[2],  scale[1]);
-    mesh.vertices.push(scale[0], 0       ,  scale[1]);
-    mesh.vertices.push(scale[0], 0       , -scale[1]);
+    mesh.vertices.push(size[0], size[2], -size[1]);
+    mesh.vertices.push(size[0], size[2],  size[1]);
+    mesh.vertices.push(size[0], 0       ,  size[1]);
+    mesh.vertices.push(size[0], 0       , -size[1]);
     this.pushIndices(mesh);
 
     this.applyRotPosShift(mesh);
@@ -65,7 +65,7 @@ export class Zone extends MapObject{
     const parts = line.split(" ");
 
     if(parts[0] === "size"){
-      this.scale = [parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0, parseFloat(parts[3]) || 0];
+      this.size = [parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0, parseFloat(parts[3]) || 0];
     }
   }
 }

@@ -259,7 +259,7 @@ const parseSource = (): void => {
           map.objects[map.objects.length - 1].parseLine(line);
 
           if(current === "world" && line.startsWith("size")){
-            map.worldSize = (map.objects[map.objects.length - 1] as World).size;
+            map.worldSize = (map.objects[map.objects.length - 1] as World).size[0];
           }
           break;
         default:

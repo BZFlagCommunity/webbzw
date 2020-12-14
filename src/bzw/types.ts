@@ -18,8 +18,8 @@ export abstract class MapObject{
   position: number[] = [0, 0, 0];
   /** Shift from position */
   shift: number[] = [0, 0 , 0];
-  /** Scale */
-  scale: number[] = [0, 0, 0];
+  /** Size */
+  size: number[] = [0, 0, 0];
   /** Rotation (Z axis) */
   rotation: number = 0;
   /** Color */
@@ -36,9 +36,9 @@ export abstract class MapObject{
     const parts = line.split(" ");
 
     if(parts[0] === "size"){
-      this.scale = [parseFloat(parts[1]) || .5, parseFloat(parts[2]) || .5, parseFloat(parts[3]) || 1];
+      this.size = [parseFloat(parts[1]) || .5, parseFloat(parts[2]) || .5, parseFloat(parts[3]) || 1];
       if(parseFloat(parts[3]) === 0){
-        this.scale[2] = .01;
+        this.size[2] = .01;
       }
     }else if(parts[0] === "position"){
       this.position = [parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0, parseFloat(parts[3]) || 0];
