@@ -209,11 +209,13 @@ window.onload = () => {
 
     gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
 
+    gl.disable(gl.DEPTH_TEST);
+
     gl.bindVertexArray(axisVao);
-
     gl.drawArrays(gl.LINES, 0, 6);
-
     gl.bindVertexArray(null);
+
+    gl.enable(gl.DEPTH_TEST);
 
     requestAnimationFrame(render);
   };
