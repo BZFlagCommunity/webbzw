@@ -4,7 +4,7 @@ const WALL_HEIGHT = 10;
 
 /** World object */
 export class World extends MapObject{
-  VERTEX_COUNT = 12;
+  VERTEX_COUNT = 60;
 
   buildMesh(mesh: IMesh): void{
     this.color = [.3, .75, .3, 1];
