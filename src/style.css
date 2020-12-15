@@ -8,8 +8,8 @@
 
 :root{
   font-size: 18px;
-  scroll-behavior: smooth;
 
+  --background-color: #121212;
   --border-color: #222;
 
   /* syntax highlighter theme */
@@ -23,7 +23,7 @@
 body{
   height: 100vh;
   margin: 0;
-  background-color: var(--border-color);
+  background-color: var(--background-color);
   font-family: Montserrat, sans-serif;
   display: flex;
   flex-direction: column;
@@ -38,8 +38,13 @@ input[type=file]{
   display: none;
 }
 
+input[type=checkbox]{
+  cursor: pointer;
+}
+
 header{
   padding: .1rem 1rem;
+  background-color: var(--border-color);
   display: flex;
   flex-direction: column;
 }
@@ -61,6 +66,7 @@ label{
   font-size: .9rem;
   font-weight: 600;
   cursor: pointer;
+  user-select: none;
 }
 
 label[for=bzw-file]{
@@ -83,10 +89,12 @@ label[for=bzw-file]:hover{
   font-size: .8rem;
   font-family: "Source Code Pro", monospace;
   flex: 1;
+  white-space: nowrap;
+  overflow: auto;
 }
 
 textarea{
-  background-color: #000;
+  background-color: var(--background-color);
   color: transparent;
   caret-color: #FFF;
   resize: none;
@@ -107,8 +115,7 @@ textarea::selection{
   left: 0;
   right: 0;
   pointer-events: none;
-  cursor: text;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .highlight .comment{

@@ -1,21 +1,33 @@
 import {getProjection, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix} from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
-import {highlight} from "./highlight.ts";
+import {highlight, deleteHighlightElement} from "./highlight.ts";
 import {MapObject, IMesh, Box, Base, Pyramid, World, Zone} from "./bzw/mod.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas");
 
+// settings
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
+const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTMLInputElement;
+
+syntaxHighlighting.addEventListener("change", (e: Event) => {
+  if(syntaxHighlighting.checked){
+    textarea.style.color = "initial";
+    highlight(editor);
+  }else{
+    textarea.style.color = "inherit";
+    deleteHighlightElement(editor);
+  }
+});
 
 const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
 if(!gl){
   alert("WebGL 2.0 not available");
 }
 
-const textareaChanged = () => {
+const _textareaChanged = (): void => {
   // don't preform unnecessary updates if source hasn't changed
   if(textarea.value === source){
     return;
@@ -25,8 +37,19 @@ const textareaChanged = () => {
   parseSource();
 
   updateMesh(gl);
-  highlight(editor);
+  if(syntaxHighlighting.checked){
+    highlight(editor);
+  }
   localStorage.setItem("bzw", source);
+};
+
+let timeoutId = 0;
+const textareaChanged = (): void => {
+  if(timeoutId){
+    clearTimeout(timeoutId);
+  }
+
+  timeoutId = setTimeout(() => _textareaChanged(), 200);
 };
 
 document.querySelector("#bzw-file").addEventListener("change", (e: Event) => {
@@ -58,7 +81,9 @@ const MOUSE_SPEED = 75;
 
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
 textarea.value = source;
-setTimeout(() => highlight(editor));
+if(syntaxHighlighting.checked){
+  setTimeout(() => highlight(editor));
+}
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
@@ -75,10 +100,11 @@ textarea.onscroll = () => {
   const highlighter = editor.children.item(1);
   if(highlighter){
     highlighter.scrollTop = textarea.scrollTop;
+    highlighter.scrollLeft = textarea.scrollLeft;
   }
 };
 
-textarea.onkeyup = (e: Event) => {
+textarea.oninput = (e: Event) => {
   textarea.value = (e.currentTarget as HTMLTextAreaElement).value;
   textareaChanged();
 };
@@ -198,7 +224,7 @@ window.onload = () => {
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.CULL_FACE);
-  gl.clearColor(0, 0, 0, 1);
+  gl.clearColor(0, 0, 0, 0);
 
   const render = (time: number) => {
     if(oldTime === 0){
