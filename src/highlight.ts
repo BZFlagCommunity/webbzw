@@ -71,6 +71,7 @@ export const highlight = (editor: HTMLElement): void => {
   elem.innerHTML = textarea.value
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
+    .replace(/ /g, "&nbsp;")
     .replace(/([-\.*/"=]+?)/gi, highlightSpan("symbol"))
     .replace(/(#.*?$)/gmi, highlightSpan("comment"))
     .replace(/([0-9]+)/gi, highlightSpan("number"))
