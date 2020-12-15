@@ -6,7 +6,9 @@ import {MapObject, IMesh, Box, Base, Pyramid, World, Zone} from "./bzw/mod.ts";
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas");
+
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
+const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
 
 const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
 if(!gl){
@@ -230,13 +232,15 @@ window.onload = () => {
 
     gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
 
-    gl.disable(gl.DEPTH_TEST);
+    if(showAxis.checked){
+      gl.disable(gl.DEPTH_TEST);
 
-    gl.bindVertexArray(axisVao);
-    gl.drawArrays(gl.LINES, 0, 6);
-    gl.bindVertexArray(null);
+      gl.bindVertexArray(axisVao);
+      gl.drawArrays(gl.LINES, 0, 6);
+      gl.bindVertexArray(null);
 
-    gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.DEPTH_TEST);
+    }
 
     requestAnimationFrame(render);
   };
