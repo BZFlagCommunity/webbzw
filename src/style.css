@@ -39,7 +39,9 @@ input[type=file]{
 }
 
 header{
-  padding: .2rem 1rem;
+  padding: .1rem 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 main{
