@@ -109,6 +109,30 @@ textarea.oninput = (e: Event) => {
   textareaChanged();
 };
 
+// custom keyboard shotcuts
+textarea.onkeydown = (e: KeyboardEvent) => {
+  // Ctrl+/ (toggle comment)
+  if(e.keyCode === 191 && e.ctrlKey){
+    e.preventDefault();
+
+    let selectionStart = textarea.selectionStart;
+    const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
+    const lines = textarea.value.split("\n");
+
+    if(lines[currentLineNumber].startsWith("#")){ // remove comment
+      lines[currentLineNumber] = lines[currentLineNumber].substr(1);
+      selectionStart--;
+    }else{ // add comment
+      lines[currentLineNumber] = "#" + lines[currentLineNumber];
+      selectionStart++;
+    }
+
+    textarea.value = lines.join("\n");
+    textareaChanged();
+    textarea.selectionEnd = selectionStart;
+  }
+};
+
 window.onload = () => {
   if(!canvas){
     return;
