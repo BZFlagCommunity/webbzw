@@ -72,12 +72,12 @@ export const highlight = (editor: HTMLElement): void => {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/ /g, "&nbsp;")
-    .replace(/([-\.*/"=]+?)/gi, highlightSpan("symbol"))
-    .replace(/(#.*?$)/gmi, highlightSpan("comment"))
-    .replace(/([0-9]+)/gi, highlightSpan("number"))
+    .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
+    .replace(/(#.*?$)/gm, highlightSpan("comment"))
+    .replace(/([0-9]+)/g, highlightSpan("number"))
     .replace(HIGHLIGHT_HEADERS_REGEX, highlightSpan("header"))
     .replace(HIGHLIGHT_KEYWORDS_REGEX, highlightSpan("keyword"))
-    .replace(/\n/gi, "<br>");
+    .replace(/\n/g, "<br>");
 
   editor.appendChild(elem);
   elem.scrollTop = textarea.scrollTop;
