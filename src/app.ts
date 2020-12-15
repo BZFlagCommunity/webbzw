@@ -302,6 +302,11 @@ const updateMesh = (gl: WebGL2RenderingContext ): void => {
     indicesCount: 0
   };
 
+  if(map.objects.filter((object) => object instanceof World).length === 0){
+    map.objects.push(new World());
+    map.worldSize = map.objects[map.objects.length - 1].size[0];
+  }
+
   map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1);
   for(const object of map.objects){
     object.buildMesh(mesh);
