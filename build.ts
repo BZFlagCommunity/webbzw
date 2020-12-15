@@ -4,12 +4,7 @@ import {renderToString} from "https://deno.land/x/dejs@0.9.3/mod.ts";
 import ws from "https://deno.land/x/deno_ws@0.1.4/mod.ts";
 
 const build = async (): Promise<string> => {
-  const [diagnostics, jsSource] = await Deno.bundle("src/app.ts", undefined, {
-    baseUrl: "./src",
-    target: "es5",
-    module: "es2015",
-    lib: ["es2016", "dom", "es5"]
-  });
+  const [diagnostics, jsSource] = await Deno.bundle("src/app.ts", undefined, JSON.parse(await Deno.readTextFile("tsconfig.json")).compilerOptions);
 
   if(diagnostics){
     console.log(diagnostics);
@@ -29,8 +24,6 @@ const build = async (): Promise<string> => {
     css: await Deno.readTextFile("./src/style.css"),
     js: jsSource
   });
-
-  console.log("compiled");
 }
 
 if(Deno.args[0] === "serve"){

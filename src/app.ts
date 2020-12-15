@@ -8,6 +8,47 @@ const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas");
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 
+const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
+if(!gl){
+  alert("WebGL 2.0 not available");
+}
+
+const textareaChanged = () => {
+  // don't preform unnecessary updates if source hasn't changed
+  if(textarea.value === source){
+    return;
+  }
+  source = textarea.value;
+
+  parseSource();
+
+  updateMesh(gl);
+  highlight(editor);
+  localStorage.setItem("bzw", source);
+};
+
+document.querySelector("#bzw-file").addEventListener("change", (e: Event) => {
+  const file = (e.currentTarget as HTMLInputElement).files[0];
+  if(!file){
+    alert("No file selected!");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.addEventListener("load", (e) => {
+    const text = e.target?.result;
+    textarea.value = text as string;
+    textareaChanged();
+  });
+
+  reader.addEventListener("error", () => {
+    alert("Error: failed to read file");
+  });
+
+  reader.readAsText(file);
+});
+
 const viewMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-300,1];
 const modelMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
 
@@ -35,32 +76,15 @@ textarea.onscroll = () => {
   }
 };
 
+textarea.onkeyup = (e: Event) => {
+  textarea.value = (e.currentTarget as HTMLTextAreaElement).value;
+  textareaChanged();
+};
+
 window.onload = () => {
   if(!canvas){
     return;
   }
-
-  const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
-  if(!gl){
-    alert("WebGL 2.0 not available");
-    return;
-  }
-
-  textarea.onkeyup = (e: Event) => {
-    textarea.value = (e.currentTarget as HTMLTextAreaElement).value;
-
-    // don't preform unnecessary updates if source hasn't changed
-    if(textarea.value === source){
-      return;
-    }
-    source = textarea.value;
-
-    parseSource();
-
-    updateMesh(gl);
-    highlight(editor);
-    localStorage.setItem("bzw", source);
-  };
 
   let drag = false;
   let oldX = 0, oldY = 0;

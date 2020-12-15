@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700&family=Source+Code+Pro&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,600,700&family=Source+Code+Pro&display=swap");
 
 *{
   color: #FFF;
@@ -34,6 +34,10 @@ h1{
   margin: 0;
 }
 
+input[type=file]{
+  display: none;
+}
+
 header{
   padding: .2rem 1rem;
 }
@@ -45,6 +49,25 @@ main{
 
 main > *{
   flex: 1;
+}
+
+header label:not(:last-child){
+  margin-right: 1rem;
+}
+
+label{
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+label[for=bzw-file]{
+  padding: .2rem .5rem;
+  background-color: #07F;
+}
+
+label[for=bzw-file]:hover{
+  background-color: #28F;
 }
 
 .editor{
