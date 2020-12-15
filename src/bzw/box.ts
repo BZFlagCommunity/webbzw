@@ -5,8 +5,10 @@ export class Box extends MapObject{
   VERTEX_COUNT = 72;
 
   buildMesh(mesh: IMesh): void{
+    let defaultColor = false;
     if(!this.color){
       this.color = [.61, .26, .12, 1];
+      defaultColor = true;
     }
 
     const {size, color} = this;
@@ -55,9 +57,13 @@ export class Box extends MapObject{
 
     this.applyRotPosShift(mesh);
 
-    this.pushColors(mesh, 4, color[0], color[1], color[2], color[3]);
-    this.pushColors(mesh, 4, color[0] * .7, color[1] * .7, color[2] * .7, color[3]);
-    this.pushColors(mesh, 8, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
-    this.pushColors(mesh, 8, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
+    if(!defaultColor){
+      this.pushColors(mesh, 4, color[0], color[1], color[2], color[3]); // top
+      this.pushColors(mesh, 4, color[0] * .7, color[1] * .7, color[2] * .7, color[3]); // bottom
+    }else{
+      this.pushColors(mesh, 8, .75, .75, .75, color[3]); // top-bottom
+    }
+    this.pushColors(mesh, 8, color[0] * .9, color[1] * .9, color[2] * .9, color[3]); // front-back
+    this.pushColors(mesh, 8, color[0] * .8, color[1] * .8, color[2] * .8, color[3]); // left-right
   }
 }
