@@ -7,12 +7,10 @@ export const deleteHighlightElement = (editor: HTMLElement): void => {
   }
 };
 
-export const highlight = (editor: HTMLElement): void => {
+export const highlight = (editor: HTMLElement, textarea: HTMLTextAreaElement): void => {
   console.time("delete old element");
   deleteHighlightElement(editor);
   console.timeEnd("delete old element");
-
-  const textarea = editor.querySelector("textarea") as HTMLTextAreaElement;
 
   console.time("create new element");
   const elem = document.createElement("pre");

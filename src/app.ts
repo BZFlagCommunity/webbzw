@@ -6,6 +6,7 @@ import {MapObject, IMesh, Box, Base, Pyramid, World, Zone} from "./bzw/mod.ts";
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas");
+const bzwFile = document.querySelector("#bzw-file");
 
 // settings
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
@@ -15,7 +16,7 @@ const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTM
 syntaxHighlighting.addEventListener("change", (e: Event) => {
   if(syntaxHighlighting.checked){
     textarea.classList.remove("show");
-    highlight(editor);
+    highlight(editor, textarea);
   }else{
     textarea.classList.add("show");
     deleteHighlightElement(editor);
@@ -38,7 +39,7 @@ const _textareaChanged = (): void => {
 
   updateMesh(gl);
   if(syntaxHighlighting.checked){
-    highlight(editor);
+    highlight(editor, textarea);
   }
   localStorage.setItem("bzw", source);
 };
@@ -52,7 +53,7 @@ const textareaChanged = (): void => {
   timeoutId = setTimeout(() => _textareaChanged(), 50);
 };
 
-document.querySelector("#bzw-file").addEventListener("change", (e: Event) => {
+bzwFile.addEventListener("change", (e: Event) => {
   const file = (e.currentTarget as HTMLInputElement).files[0];
   if(!file){
     alert("No file selected!");
@@ -82,7 +83,7 @@ const MOUSE_SPEED = 75;
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
 textarea.value = source;
 if(syntaxHighlighting.checked){
-  setTimeout(() => highlight(editor));
+  setTimeout(() => highlight(editor, textarea));
 }
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
@@ -138,7 +139,7 @@ window.onkeydown = (e: KeyboardEvent) => {
   // Ctrl+O (open file)
   if(e.keyCode === 79 && e.ctrlKey){
     e.preventDefault();
-    document.querySelector("#bzw-file").click();
+    bzwFile.click();
   }
 };
 
