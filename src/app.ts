@@ -109,7 +109,7 @@ textarea.oninput = (e: Event) => {
   textareaChanged();
 };
 
-// custom keyboard shotcuts
+// custom keyboard shotcuts (editor)
 textarea.onkeydown = (e: KeyboardEvent) => {
   // Ctrl+/ (toggle comment)
   if(e.keyCode === 191 && e.ctrlKey){
@@ -130,6 +130,15 @@ textarea.onkeydown = (e: KeyboardEvent) => {
     textarea.value = lines.join("\n");
     textareaChanged();
     textarea.selectionEnd = selectionStart;
+  }
+};
+
+// custom keyboard shortcuts (global)
+window.onkeydown = (e: KeyboardEvent) => {
+  // Ctrl+O (open file)
+  if(e.keyCode === 79 && e.ctrlKey){
+    e.preventDefault();
+    document.querySelector("#bzw-file").click();
   }
 };
 
