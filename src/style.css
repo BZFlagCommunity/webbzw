@@ -89,7 +89,6 @@ label[for=bzw-file]:hover{
   font-size: .8rem;
   font-family: "Source Code Pro", monospace;
   flex: 1;
-  white-space: nowrap;
   overflow: auto;
 }
 
@@ -101,10 +100,15 @@ textarea{
   border: none;
   border-radius: 0;
   outline: none;
+  white-space: nowrap;
 }
 
 textarea::selection{
   background-color: rgba(255, 255 ,255, .2);
+}
+
+textarea.show{
+  color: #FFF;
 }
 
 .highlight{

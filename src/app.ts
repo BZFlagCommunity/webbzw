@@ -14,10 +14,10 @@ const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTM
 
 syntaxHighlighting.addEventListener("change", (e: Event) => {
   if(syntaxHighlighting.checked){
-    textarea.style.color = "initial";
+    textarea.classList.remove("show");
     highlight(editor);
   }else{
-    textarea.style.color = "inherit";
+    textarea.classList.add("show");
     deleteHighlightElement(editor);
   }
 });
@@ -49,7 +49,7 @@ const textareaChanged = (): void => {
     clearTimeout(timeoutId);
   }
 
-  timeoutId = setTimeout(() => _textareaChanged(), 200);
+  timeoutId = setTimeout(() => _textareaChanged(), 50);
 };
 
 document.querySelector("#bzw-file").addEventListener("change", (e: Event) => {

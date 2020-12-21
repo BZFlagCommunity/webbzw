@@ -24,7 +24,7 @@ export const highlight = (editor: HTMLElement): void => {
   console.timeEnd("create new element");
 
   console.time("build html");
-  const html = highlightHtml(textarea.value);
+  const html = highlightHtml(textarea.value) + "\n";
   console.timeEnd("build html");
 
   console.time("set html");

@@ -53,11 +53,9 @@ export const highlightHtml = (text: string): string =>
   text
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/ /g, "&nbsp;")
     .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
     .replace(/(#.*?$)/gm, highlightSpan("comment"))
     .replace(/([0-9]+)/g, highlightSpan("number"))
     .replace(HIGHLIGHT_HEADERS_REGEX, highlightSpan("header"))
     .replace(HIGHLIGHT_KEYWORDS_REGEX, highlightSpan("keyword"))
-    .replace(/\n/g, "<br>")
 ;
