@@ -411,6 +411,13 @@ const rotY = (a, angle)=>{
         z
     ];
 };
+const parseNum = (str, fallback = 0)=>{
+    const value = parseFloat(str);
+    if (isNaN(value)) {
+        return fallback;
+    }
+    return value;
+};
 class MapObject {
     position = [
         0,
@@ -433,33 +440,33 @@ class MapObject {
         const parts = line.split(" ");
         if (parts[0] === "size") {
             this.size = [
-                parseFloat(parts[1]) || 0.5,
-                parseFloat(parts[2]) || 0.5,
-                parseFloat(parts[3]) || 1
+                parseNum(parts[1], 0.5),
+                parseNum(parts[2], 0.5),
+                parseNum(parts[3], 1)
             ];
             if (parseFloat(parts[3]) === 0) {
                 this.size[2] = 0.01;
             }
         } else if (parts[0] === "position") {
             this.position = [
-                parseFloat(parts[1]) || 0,
-                parseFloat(parts[2]) || 0,
-                parseFloat(parts[3]) || 0
+                parseNum(parts[1]),
+                parseNum(parts[2]),
+                parseNum(parts[3])
             ];
         } else if (parts[0] === "shift") {
             this.shift = [
-                parseFloat(parts[1]) || 0,
-                parseFloat(parts[2]) || 0,
-                parseFloat(parts[3]) || 0
+                parseNum(parts[1]),
+                parseNum(parts[2]),
+                parseNum(parts[3])
             ];
         } else if (parts[0] === "rotation") {
-            this.rotation = parseFloat(parts[1]) || 0;
+            this.rotation = parseNum(parts[1]);
         } else if (parts[0] === "color") {
             this.color = [
-                parseFloat(parts[1]) || 1,
-                parseFloat(parts[2]) || 1,
-                parseFloat(parts[3]) || 1,
-                parseFloat(parts[4]) || 1
+                parseNum(parts[1], 1),
+                parseNum(parts[2], 1),
+                parseNum(parts[3], 1),
+                parseNum(parts[4], 1)
             ];
         }
     }
@@ -1092,7 +1099,7 @@ window.onload = ()=>{
         ]);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(60, canvas.width / canvas.height, 0.01, map.worldSize * 6));
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, canvas.width / canvas.height, 0.01, map.worldSize * 6));
         gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
         gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
         gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
@@ -1164,7 +1171,7 @@ const updateMesh = (gl1)=>{
         map.objects.push(new World());
         map.worldSize = map.objects[map.objects.length - 1].size[0];
     }
-    map.objects = map.objects.sort((a, b)=>(a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1
+    map.objects = map.objects.sort((a, b)=>(a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? -1 : 1
     );
     for (const object of map.objects){
         object.buildMesh(mesh);
