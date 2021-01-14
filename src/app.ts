@@ -5,8 +5,8 @@ import {MapObject, IMesh, Box, Base, Pyramid, World, Zone} from "./bzw/mod.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
-const canvas = document.querySelector("canvas");
-const bzwFile = document.querySelector("#bzw-file");
+const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+const bzwFile = document.querySelector("#bzw-file") as HTMLInputElement;
 
 // settings
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
@@ -53,8 +53,8 @@ const textareaChanged = (): void => {
   timeoutId = setTimeout(() => _textareaChanged(), 50);
 };
 
-bzwFile.addEventListener("change", (e: Event) => {
-  const file = (e.currentTarget as HTMLInputElement).files[0];
+bzwFile.addEventListener("change", () => {
+  const file = bzwFile.files ? bzwFile.files[0] : undefined;
   if(!file){
     alert("No file selected!");
     return;
