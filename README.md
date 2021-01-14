@@ -21,7 +21,7 @@ The list of supported map features can be found in issue [#2](https://github.com
 
 `deno run --unstable --allow-read --allow-write build.ts`
 
-Or to run the live server with hot reloading: `deno run --unstable --allow-read --allow-net build.ts serve`
+Or to run the live server with hot reloading: `deno run --unstable --allow-read --allow-write --allow-net build.ts serve`
 
 ## Contributing
 

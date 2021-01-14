@@ -1,6 +1,6 @@
 import {getProjection, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix} from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
-import {highlight, deleteHighlightElement} from "./highlight.ts";
+import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import {MapObject, IMesh, Box, Base, Pyramid, World, Zone} from "./bzw/mod.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
@@ -13,7 +13,7 @@ const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
 const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTMLInputElement;
 
-syntaxHighlighting.addEventListener("change", (e: Event) => {
+syntaxHighlighting.addEventListener("change", () => {
   if(syntaxHighlighting.checked){
     textarea.classList.remove("show");
     highlight(editor, textarea);

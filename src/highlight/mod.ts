@@ -1,4 +1,4 @@
-import {highlightHtml} from "./highlight/core.ts";
+import {highlightHtml} from "./core.ts";
 
 export const deleteHighlightElement = (editor: HTMLElement): void => {
   const highlighter = editor.children.item(1);
