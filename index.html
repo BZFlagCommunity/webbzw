@@ -814,7 +814,7 @@ const bzwFile = document.querySelector("#bzw-file");
 const autoRotate = document.querySelector("#auto-rotate");
 const showAxis = document.querySelector("#show-axis");
 const syntaxHighlighting = document.querySelector("#syntax-highlighting");
-syntaxHighlighting.addEventListener("change", (e)=>{
+syntaxHighlighting.addEventListener("change", ()=>{
     if (syntaxHighlighting.checked) {
         textarea.classList.remove("show");
         highlight(editor, textarea);
