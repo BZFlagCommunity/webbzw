@@ -1,7 +1,7 @@
 import {getProjection, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix} from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
-import {MapObject, IMesh, Box, Base, Pyramid, World, Zone} from "./bzw/mod.ts";
+import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone} from "./bzw/mod.ts";
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
@@ -328,9 +328,15 @@ const parseSource = (): void => {
     }else if(line === "box"){
       current = line;
       map.objects.push(new Box());
+    }else if(line === "meshbox"){
+      current = line;
+      map.objects.push(new MeshBox());
     }else if(line === "pyramid"){
       current = line;
       map.objects.push(new Pyramid());
+    }else if(line === "meshpyr"){
+      current = line;
+      map.objects.push(new MeshPyramid());
     }else if(line === "base"){
       current = line;
       map.objects.push(new Base());
@@ -341,7 +347,9 @@ const parseSource = (): void => {
       switch(current){
         case "world":
         case "box":
+        case "meshbox":
         case "pyramid":
+        case "meshpyr":
         case "base":
         case "zone":
           map.objects[map.objects.length - 1].parseLine(line);
