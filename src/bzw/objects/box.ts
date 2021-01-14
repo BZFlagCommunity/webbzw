@@ -1,4 +1,4 @@
-import {MapObject, IMesh} from "./types.ts";
+import {MapObject, IMesh} from "../types.ts";
 
 /** Box object */
 export class Box extends MapObject{

@@ -1,12 +1,14 @@
-import {MapObject, IMesh} from "./types.ts";
+import {MapObject, IMesh} from "../types.ts";
 
-/** (Team) Base object */
-export class Base extends MapObject{
+/** Mesh Box object */
+export class MeshBox extends MapObject{
   VERTEX_COUNT = 72;
 
   buildMesh(mesh: IMesh): void{
+    let defaultColor = false;
     if(!this.color){
-      this.color = [1, 1, 1, 1];
+      this.color = [.61, .26, .12, 1];
+      defaultColor = true;
     }
 
     const {size, color} = this;
@@ -55,25 +57,13 @@ export class Base extends MapObject{
 
     this.applyRotPosShift(mesh);
 
-    let baseColor = [1, 1, 0];
-    switch(color[0]){
-      case 1:
-        baseColor = [1, 0, 0];
-        break;
-      case 2:
-        baseColor = [0, 1, 0];
-        break;
-      case 3:
-        baseColor = [0, 0, 1];
-        break;
-      case 4:
-        baseColor = [.8, 0, 1];
-        break;
+    if(!defaultColor){
+      this.pushColors(mesh, 4, color[0], color[1], color[2], color[3]); // top
+      this.pushColors(mesh, 4, color[0] * .7, color[1] * .7, color[2] * .7, color[3]); // bottom
+    }else{
+      this.pushColors(mesh, 8, .75, .75, .75, color[3]); // top-bottom
     }
-
-    this.pushColors(mesh, 4, baseColor[0], baseColor[1], baseColor[2], color[3]);
-    this.pushColors(mesh, 4, baseColor[0] * .7, baseColor[1] * .7, baseColor[2] * .7, color[3]);
-    this.pushColors(mesh, 8, baseColor[0] * .9, baseColor[1] * .9, baseColor[2] * .9, color[3]);
-    this.pushColors(mesh, 8, baseColor[0] * .8, baseColor[1] * .8, baseColor[2] * .8, color[3]);
+    this.pushColors(mesh, 8, color[0] * .9, color[1] * .9, color[2] * .9, color[3]); // front-back
+    this.pushColors(mesh, 8, color[0] * .8, color[1] * .8, color[2] * .8, color[3]); // left-right
   }
 }

@@ -1,7 +1,7 @@
-import {MapObject, IMesh} from "./types.ts";
+import {MapObject, IMesh} from "../types.ts";
 
-/** Mesh Pyramid object */
-export class MeshPyramid extends MapObject{
+/** Pyramid object */
+export class Pyramid extends MapObject{
   VERTEX_COUNT = 48;
 
   buildMesh(mesh: IMesh): void{

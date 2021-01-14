@@ -1,4 +1,4 @@
-import {MapObject, IMesh} from "./types.ts";
+import {MapObject, IMesh} from "../types.ts";
 
 const WALL_HEIGHT = 6.15; // 3 * _tankHeight (2.05)
 

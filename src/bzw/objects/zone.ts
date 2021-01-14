@@ -1,4 +1,4 @@
-import {MapObject, IMesh} from "./types.ts";
+import {MapObject, IMesh} from "../types.ts";
 
 /** World object */
 export class Zone extends MapObject{
