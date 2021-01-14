@@ -1,6 +1,7 @@
 # webbzw
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/533b953c-6111-4e55-ac1c-10e61433477d/deploy-status)](https://bzw.netlify.app)
+[![CD](https://github.com/BZFlagCommunity/webbzw/workflows/CD/badge.svg)](https://bzw.thenoah.dev)
+![CI](https://github.com/BZFlagCommunity/webbzw/workflows/CI/badge.svg)
 
 Preview BZW files on the web.
 
