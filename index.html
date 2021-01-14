@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22256%22 height=%22256%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23000000%22></rect><path d=%22M9.46 72.40L9.46 27.60L20.08 27.60Q25.52 27.60 28.02 30.13Q30.51 32.66 30.51 37.90L30.51 37.90L30.51 39.70Q30.51 43.15 29.39 45.33Q28.27 47.50 25.97 48.46L25.97 48.46L25.97 48.59Q31.22 50.38 31.22 57.94L31.22 57.94L31.22 61.78Q31.22 66.96 28.50 69.68Q25.78 72.40 20.53 72.40L20.53 72.40L9.46 72.40ZM16.50 45.84L19.25 45.84Q21.36 45.84 22.42 44.75Q23.47 43.66 23.47 41.10L23.47 41.10L23.47 38.61Q23.47 36.18 22.61 35.09Q21.74 34.00 19.89 34.00L19.89 34.00L16.50 34.00L16.50 45.84ZM16.50 66L20.53 66Q22.38 66 23.28 65.01Q24.18 64.02 24.18 61.58L24.18 61.58L24.18 57.68Q24.18 54.61 23.12 53.42Q22.06 52.24 19.63 52.24L19.63 52.24L16.50 52.24L16.50 66ZM33.90 72.40L33.90 66.13L46.96 34.00L34.54 34.00L34.54 27.60L54.51 27.60L54.51 33.87L41.46 66L54.51 66L54.51 72.40L33.90 72.40ZM61.36 72.40L56.82 27.60L63.60 27.60L66.74 62.03L66.86 62.03L70.19 27.60L77.87 27.60L81.20 62.03L81.33 62.03L84.46 27.60L90.54 27.60L86 72.40L77.23 72.40L74.03 42.19L73.90 42.19L70.70 72.40L61.36 72.40Z%22 fill=%22%23fff%22></path></svg>">
+  <title>Web BZW</title>
+  <style>@import url("https://fonts.googleapis.com/css?family=Montserrat:400,600,700&family=Source+Code+Pro&display=swap");
+
+*{
+  color: #FFF;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root{
+  font-size: 18px;
+
+  --background-color: #121212;
+  --border-color: #222;
+
+  /* syntax highlighter theme */
+  --highlight-comment: #AAA;
+  --highlight-number: #F93;
+  --highlight-symbol: #3AF;
+  --highlight-headers: #F55;
+  --highlight-keyword: #A8F;
+}
+
+body{
+  height: 100vh;
+  margin: 0;
+  background-color: var(--background-color);
+  font-family: Montserrat, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+h1{
+  margin: 0;
+}
+
+input[type=file]{
+  display: none;
+}
+
+input[type=checkbox]{
+  cursor: pointer;
+}
+
+header{
+  padding: .1rem 1rem;
+  background-color: var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+main{
+  flex: 1;
+  display: flex;
+}
+
+main > *{
+  flex: 1;
+}
+
+header label:not(:last-child){
+  margin-right: 1rem;
+}
+
+label{
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+label[for=bzw-file]{
+  padding: .2rem .5rem;
+  background-color: #07F;
+}
+
+label[for=bzw-file]:hover{
+  background-color: #28F;
+}
+
+.editor{
+  display: flex;
+  position: relative;
+  border-right: 1px solid var(--border-color);
+}
+
+.editor > *{
+  padding: .2rem .5rem;
+  font-size: .8rem;
+  font-family: "Source Code Pro", monospace;
+  flex: 1;
+  overflow: auto;
+}
+
+textarea{
+  background-color: var(--background-color);
+  color: transparent;
+  caret-color: #FFF;
+  resize: none;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  white-space: nowrap;
+}
+
+textarea::selection{
+  background-color: rgba(255, 255 ,255, .2);
+}
+
+textarea.show{
+  color: #FFF;
+}
+
+.highlight{
+  margin: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.highlight .comment{
+  color: var(--highlight-comment);
+}
+
+.highlight .number{
+  color: var(--highlight-number);
+}
+
+.highlight .symbol{
+  color: var(--highlight-symbol);
+}
+
+.highlight .header{
+  color: var(--highlight-headers);
+}
+
+.highlight .keyword{
+  color: var(--highlight-keyword);
+}
+
+@media only screen and (max-width: 768px){
+  main{
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Web BZW</h1>
+    <div>
+      <label for="bzw-file">Open Map</label>
+      <input type="checkbox" id="auto-rotate">
+      <label for="auto-rotate">Auto rotate</label>
+      <input type="checkbox" id="show-axis" checked>
+      <label for="show-axis">Show Axis</label>
+      <input type="checkbox" id="syntax-highlighting" checked>
+      <label for="syntax-highlighting">Syntax Highlighting</label>
+    </div>
+    <input type="file" id="bzw-file" accept=".bzw">
+  </header>
+  <main>
+    <div class="editor">
+      <textarea placeholder="bzw source" spellcheck="false"></textarea>
+    </div>
+    <canvas></canvas>
+  </main>
+  <script>const VERTEX_SHADER = `#version 300 es\nlayout(location = 0) in vec3 position;\nlayout(location = 1) in vec4 color;\n\nout vec4 vColor;\n\nuniform mat4 proj;\nuniform mat4 view;\nuniform mat4 model;\n\nvoid main(void){\n  vColor = color;\n\n  gl_Position = proj * view * model * vec4(position, 1.0);\n}`;
+const FRAGMENT_SHADER = `#version 300 es\nprecision highp float;\n\nin vec4 vColor;\n\nout vec4 finalColor;\n\nvoid main(void){\n  if(vColor.a < .05){\n    discard;\n  }\n\n  finalColor = vColor;\n}`;
+const createShader = (gl, vertCode, fragCode)=>{
+    const vertShader = gl.createShader(gl.VERTEX_SHADER);
+    if (!vertShader) {
+        return null;
+    }
+    gl.shaderSource(vertShader, vertCode);
+    gl.compileShader(vertShader);
+    if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
+        console.error("Error compiling vertex shader: ", gl.getShaderInfoLog(vertShader));
+        gl.deleteShader(vertShader);
+        return null;
+    }
+    const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+    if (!fragShader) {
+        return null;
+    }
+    gl.shaderSource(fragShader, fragCode);
+    gl.compileShader(fragShader);
+    if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
+        console.error("Error compiling fragment shader: ", gl.getShaderInfoLog(fragShader));
+        gl.deleteShader(fragShader);
+        return null;
+    }
+    const shader = gl.createProgram();
+    if (!shader) {
+        return null;
+    }
+    gl.attachShader(shader, vertShader);
+    gl.attachShader(shader, fragShader);
+    gl.linkProgram(shader);
+    return shader;
+};
+const HIGHLIGHT_HEADERS = [
+    "world",
+    "options",
+    "waterLevel",
+    "dynamicColor",
+    "textureMatrix",
+    "material",
+    "transform",
+    "physics",
+    "arc",
+    "base",
+    "box",
+    "cone",
+    "define",
+    "group",
+    "link",
+    "mesh",
+    "meshbox",
+    "meshpyr",
+    "pyramid",
+    "sphere",
+    "teleporter",
+    "tetra",
+    "weapon",
+    "zone",
+    "face",
+    "endface",
+    "enddef",
+    "drawInfo",
+    "lod",
+    "end"
+];
+const HIGHLIGHT_HEADERS_REGEX = new RegExp(`(${HIGHLIGHT_HEADERS.join("|")})`, "gmi");
+const HIGHLIGHT_KEYWORDS = [
+    "position",
+    "size",
+    "shift",
+    "rotation",
+    "color",
+    "name",
+    "flagHeight",
+    "from",
+    "to",
+    "noWalls",
+    "freeCtfSpawns"
+];
+const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`(${HIGHLIGHT_KEYWORDS.join("|")})`, "gmi");
+const highlightSpan = (type)=>`<span class="${type}">$1</span>`
+;
+const highlightHtml = (text)=>text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([-\.*/"=]+?)/g, highlightSpan("symbol")).replace(/(#.*?$)/gm, highlightSpan("comment")).replace(/([0-9]+)/g, highlightSpan("number")).replace(HIGHLIGHT_HEADERS_REGEX, highlightSpan("header")).replace(HIGHLIGHT_KEYWORDS_REGEX, highlightSpan("keyword"))
+;
+const deleteHighlightElement = (editor)=>{
+    const highlighter = editor.children.item(1);
+    if (highlighter) {
+        highlighter.remove();
+    }
+};
+const highlight = (editor, textarea)=>{
+    console.time("delete old element");
+    deleteHighlightElement(editor);
+    console.timeEnd("delete old element");
+    console.time("create new element");
+    const elem = document.createElement("pre");
+    if (!elem) {
+        console.error("highlight element could not be created");
+        return;
+    }
+    elem.classList.add("highlight");
+    console.timeEnd("create new element");
+    console.time("build html");
+    const html = highlightHtml(textarea.value) + "\n";
+    console.timeEnd("build html");
+    console.time("set html");
+    elem.innerHTML = html;
+    console.timeEnd("set html");
+    console.time("add element to dom");
+    editor.appendChild(elem);
+    console.timeEnd("add element to dom");
+    console.time("set element scroll");
+    elem.scrollTop = textarea.scrollTop;
+    elem.scrollLeft = textarea.scrollLeft;
+    console.timeEnd("set element scroll");
+};
+const getProjection = (angle, a, zMin, zMax)=>{
+    const ang = Math.tan(angle * 0.5 * Math.PI / 180);
+    return [
+        0.5 / ang,
+        0,
+        0,
+        0,
+        0,
+        0.5 * a / ang,
+        0,
+        0,
+        0,
+        0,
+        -(zMax + zMin) / (zMax - zMin),
+        -1,
+        0,
+        0,
+        -2 * zMax * zMin / (zMax - zMin),
+        0
+    ];
+};
+const multiplyMatrices = (a, b)=>{
+    const result = [];
+    const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+    let b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
+    result[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    b0 = b[4];
+    b1 = b[5];
+    b2 = b[6];
+    b3 = b[7];
+    result[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    b0 = b[8];
+    b1 = b[9];
+    b2 = b[10];
+    b3 = b[11];
+    result[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    b0 = b[12];
+    b1 = b[13];
+    b2 = b[14];
+    b3 = b[15];
+    result[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    return result;
+};
+const multiplyArrayOfMatrices = (matrices)=>{
+    let inputMatrix = matrices[0];
+    for(let i = 1; i < matrices.length; i++){
+        inputMatrix = multiplyMatrices(inputMatrix, matrices[i]);
+    }
+    return inputMatrix;
+};
+const rotateXMatrix = (a)=>{
+    a *= Math.PI / 180;
+    return [
+        1,
+        0,
+        0,
+        0,
+        0,
+        Math.cos(a),
+        -Math.sin(a),
+        0,
+        0,
+        Math.sin(a),
+        Math.cos(a),
+        0,
+        0,
+        0,
+        0,
+        1
+    ];
+};
+const rotateYMatrix = (a)=>{
+    a *= Math.PI / 180;
+    return [
+        Math.cos(a),
+        0,
+        Math.sin(a),
+        0,
+        0,
+        1,
+        0,
+        0,
+        -Math.sin(a),
+        0,
+        Math.cos(a),
+        0,
+        0,
+        0,
+        0,
+        1
+    ];
+};
+const rotY = (a, angle)=>{
+    const s = Math.sin(angle);
+    const c = Math.cos(angle);
+    let x = 0, z = 0;
+    z = a[2] * c - a[0] * s;
+    x = a[2] * s + a[0] * c;
+    return [
+        x,
+        a[1],
+        z
+    ];
+};
+class MapObject {
+    position = [
+        0,
+        0,
+        0
+    ];
+    shift = [
+        0,
+        0,
+        0
+    ];
+    size = [
+        0,
+        0,
+        0
+    ];
+    rotation = 0;
+    VERTEX_COUNT = 0;
+    parseLine(line) {
+        const parts = line.split(" ");
+        if (parts[0] === "size") {
+            this.size = [
+                parseFloat(parts[1]) || 0.5,
+                parseFloat(parts[2]) || 0.5,
+                parseFloat(parts[3]) || 1
+            ];
+            if (parseFloat(parts[3]) === 0) {
+                this.size[2] = 0.01;
+            }
+        } else if (parts[0] === "position") {
+            this.position = [
+                parseFloat(parts[1]) || 0,
+                parseFloat(parts[2]) || 0,
+                parseFloat(parts[3]) || 0
+            ];
+        } else if (parts[0] === "shift") {
+            this.shift = [
+                parseFloat(parts[1]) || 0,
+                parseFloat(parts[2]) || 0,
+                parseFloat(parts[3]) || 0
+            ];
+        } else if (parts[0] === "rotation") {
+            this.rotation = parseFloat(parts[1]) || 0;
+        } else if (parts[0] === "color") {
+            this.color = [
+                parseFloat(parts[1]) || 1,
+                parseFloat(parts[2]) || 1,
+                parseFloat(parts[3]) || 1,
+                parseFloat(parts[4]) || 1
+            ];
+        }
+    }
+    pushIndices(mesh) {
+        mesh.indices.push(mesh.indicesCount);
+        mesh.indices.push(mesh.indicesCount + 1);
+        mesh.indices.push(mesh.indicesCount + 2);
+        mesh.indices.push(mesh.indicesCount + 2);
+        mesh.indices.push(mesh.indicesCount + 3);
+        mesh.indices.push(mesh.indicesCount);
+        mesh.indicesCount += 4;
+    }
+    pushIndices2(mesh) {
+        mesh.indices.push(mesh.indicesCount);
+        mesh.indices.push(mesh.indicesCount + 1);
+        mesh.indices.push(mesh.indicesCount + 2);
+        mesh.indicesCount += 3;
+    }
+    pushColors(mesh, count = 1, r = 0, g = 0, b = 0, a = 1) {
+        for(let i = 0; i < count; i++){
+            mesh.colors.push(r, g, b, a);
+        }
+    }
+    applyRotPosShift(mesh) {
+        if (this.VERTEX_COUNT === 0) {
+            console.error("this should not happen");
+            return;
+        }
+        const _rotation = this.rotation * Math.PI / 180;
+        for(let i = mesh.vertices.length - this.VERTEX_COUNT; i < mesh.vertices.length; i += 3){
+            const rot = rotY([
+                mesh.vertices[i],
+                mesh.vertices[i + 1],
+                mesh.vertices[i + 2]
+            ], _rotation);
+            mesh.vertices[i] = rot[0];
+            mesh.vertices[i + 1] = rot[1];
+            mesh.vertices[i + 2] = rot[2];
+        }
+        for(let i1 = mesh.vertices.length - this.VERTEX_COUNT; i1 < mesh.vertices.length; i1 += 3){
+            mesh.vertices[i1] -= this.position[0] + this.shift[0];
+        }
+        for(let i2 = mesh.vertices.length - (this.VERTEX_COUNT - 1); i2 < mesh.vertices.length; i2 += 3){
+            mesh.vertices[i2] += this.position[2] + this.shift[2];
+        }
+        for(let i3 = mesh.vertices.length - (this.VERTEX_COUNT - 2); i3 < mesh.vertices.length; i3 += 3){
+            mesh.vertices[i3] += this.position[1] + this.shift[1];
+        }
+    }
+}
+class World extends MapObject {
+    VERTEX_COUNT = 60;
+    size = [
+        400,
+        400,
+        0
+    ];
+    color = [
+        0.3,
+        0.75,
+        0.3,
+        1
+    ];
+    noWalls = false;
+    buildMesh(mesh) {
+        const { size , color  } = this;
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        this.pushIndices(mesh);
+        this.pushColors(mesh, 4, color[0], color[1], color[2]);
+        if (!this.noWalls) {
+            mesh.vertices.push(-size[0], 6.15, -size[1]);
+            mesh.vertices.push(-size[0], 0, -size[1]);
+            mesh.vertices.push(size[0], 0, -size[1]);
+            mesh.vertices.push(size[0], 6.15, -size[1]);
+            this.pushIndices(mesh);
+            this.pushColors(mesh, 4, 0.5, 0.5, 0.5);
+            mesh.vertices.push(size[0], 0, size[1]);
+            mesh.vertices.push(-size[0], 0, size[1]);
+            mesh.vertices.push(-size[0], 6.15, size[1]);
+            mesh.vertices.push(size[0], 6.15, size[1]);
+            this.pushIndices(mesh);
+            this.pushColors(mesh, 4, 0.5, 0.5, 0.5);
+            mesh.vertices.push(-size[0], 6.15, size[1]);
+            mesh.vertices.push(-size[0], 0, size[1]);
+            mesh.vertices.push(-size[0], 0, -size[1]);
+            mesh.vertices.push(-size[0], 6.15, -size[1]);
+            this.pushIndices(mesh);
+            this.pushColors(mesh, 4, 0.5, 0.5, 0.5);
+            mesh.vertices.push(size[0], 0, -size[1]);
+            mesh.vertices.push(size[0], 0, size[1]);
+            mesh.vertices.push(size[0], 6.15, size[1]);
+            mesh.vertices.push(size[0], 6.15, -size[1]);
+            this.pushIndices(mesh);
+            this.pushColors(mesh, 4, 0.5, 0.5, 0.5);
+        }
+    }
+    parseLine(line) {
+        super.parseLine(line);
+        const parts = line.split(" ");
+        if (parts[0] === "size") {
+            this.size = [
+                parseFloat(parts[1]) || 400,
+                parseFloat(parts[1]) || 400,
+                0
+            ];
+        } else if (parts[0] === "noWalls") {
+            this.noWalls = true;
+        }
+    }
+}
+class Box extends MapObject {
+    VERTEX_COUNT = 72;
+    buildMesh(mesh) {
+        let defaultColor = false;
+        if (!this.color) {
+            this.color = [
+                0.61,
+                0.26,
+                0.12,
+                1
+            ];
+            defaultColor = true;
+        }
+        const { size , color  } = this;
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        this.applyRotPosShift(mesh);
+        if (!defaultColor) {
+            this.pushColors(mesh, 4, color[0], color[1], color[2], color[3]);
+            this.pushColors(mesh, 4, color[0] * 0.7, color[1] * 0.7, color[2] * 0.7, color[3]);
+        } else {
+            this.pushColors(mesh, 8, 0.75, 0.75, 0.75, color[3]);
+        }
+        this.pushColors(mesh, 8, color[0] * 0.9, color[1] * 0.9, color[2] * 0.9, color[3]);
+        this.pushColors(mesh, 8, color[0] * 0.8, color[1] * 0.8, color[2] * 0.8, color[3]);
+    }
+}
+class Base extends MapObject {
+    VERTEX_COUNT = 72;
+    buildMesh(mesh) {
+        if (!this.color) {
+            this.color = [
+                1,
+                1,
+                1,
+                1
+            ];
+        }
+        const { size , color  } = this;
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        this.applyRotPosShift(mesh);
+        let baseColor = [
+            1,
+            1,
+            0
+        ];
+        switch(color[0]){
+            case 1:
+                baseColor = [
+                    1,
+                    0,
+                    0
+                ];
+                break;
+            case 2:
+                baseColor = [
+                    0,
+                    1,
+                    0
+                ];
+                break;
+            case 3:
+                baseColor = [
+                    0,
+                    0,
+                    1
+                ];
+                break;
+            case 4:
+                baseColor = [
+                    0.8,
+                    0,
+                    1
+                ];
+                break;
+        }
+        this.pushColors(mesh, 4, baseColor[0], baseColor[1], baseColor[2], color[3]);
+        this.pushColors(mesh, 4, baseColor[0] * 0.7, baseColor[1] * 0.7, baseColor[2] * 0.7, color[3]);
+        this.pushColors(mesh, 8, baseColor[0] * 0.9, baseColor[1] * 0.9, baseColor[2] * 0.9, color[3]);
+        this.pushColors(mesh, 8, baseColor[0] * 0.8, baseColor[1] * 0.8, baseColor[2] * 0.8, color[3]);
+    }
+}
+class Pyramid extends MapObject {
+    VERTEX_COUNT = 48;
+    buildMesh(mesh) {
+        if (!this.color) {
+            this.color = [
+                0.1,
+                0.3,
+                1,
+                1
+            ];
+        }
+        const { size , color  } = this;
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        this.pushIndices2(mesh);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        this.pushIndices2(mesh);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices2(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(size[0], 0, size[1]);
+        this.pushIndices2(mesh);
+        this.applyRotPosShift(mesh);
+        this.pushColors(mesh, 4, color[0] * 0.8, color[1] * 0.8, color[2] * 0.8, color[3]);
+        this.pushColors(mesh, 6, color[0] * 0.9, color[1] * 0.9, color[2] * 0.9, color[3]);
+        this.pushColors(mesh, 6, color[0], color[1], color[2], color[3]);
+    }
+}
+class Zone extends MapObject {
+    VERTEX_COUNT = 72;
+    buildMesh(mesh) {
+        this.color = [
+            1,
+            1,
+            0,
+            0.25
+        ];
+        const { size , color  } = this;
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        this.applyRotPosShift(mesh);
+        this.pushColors(mesh, 4, color[0], color[1], color[2], color[3]);
+        this.pushColors(mesh, 4, color[0] * 0.7, color[1] * 0.7, color[2] * 0.7, color[3]);
+        this.pushColors(mesh, 8, color[0] * 0.9, color[1] * 0.9, color[2] * 0.9, color[3]);
+        this.pushColors(mesh, 8, color[0] * 0.8, color[1] * 0.8, color[2] * 0.8, color[3]);
+    }
+    parseLine(line) {
+        super.parseLine(line);
+        const parts = line.split(" ");
+        if (parts[0] === "size") {
+            this.size = [
+                parseFloat(parts[1]) || 0,
+                parseFloat(parts[2]) || 0,
+                parseFloat(parts[3]) || 0
+            ];
+        }
+    }
+}
+const textarea = document.querySelector(".editor textarea");
+const editor = document.querySelector(".editor");
+const canvas = document.querySelector("canvas");
+const bzwFile = document.querySelector("#bzw-file");
+const autoRotate = document.querySelector("#auto-rotate");
+const showAxis = document.querySelector("#show-axis");
+const syntaxHighlighting = document.querySelector("#syntax-highlighting");
+syntaxHighlighting.addEventListener("change", (e)=>{
+    if (syntaxHighlighting.checked) {
+        textarea.classList.remove("show");
+        highlight(editor, textarea);
+    } else {
+        textarea.classList.add("show");
+        deleteHighlightElement(editor);
+    }
+});
+const gl = canvas.getContext("webgl2");
+if (!gl) {
+    alert("WebGL 2.0 not available");
+}
+const _textareaChanged = ()=>{
+    if (textarea.value === source) {
+        return;
+    }
+    source = textarea.value;
+    parseSource();
+    updateMesh(gl);
+    if (syntaxHighlighting.checked) {
+        highlight(editor, textarea);
+    }
+    localStorage.setItem("bzw", source);
+};
+let timeoutId = 0;
+const textareaChanged = ()=>{
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(()=>_textareaChanged()
+    , 50);
+};
+bzwFile.addEventListener("change", ()=>{
+    const file = bzwFile.files ? bzwFile.files[0] : undefined;
+    if (!file) {
+        alert("No file selected!");
+        return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener("load", (e)=>{
+        const text = e.target?.result;
+        textarea.value = text;
+        textareaChanged();
+    });
+    reader.addEventListener("error", ()=>{
+        alert("Error: failed to read file");
+    });
+    reader.readAsText(file);
+});
+const viewMatrix = [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    -300,
+    1
+];
+const modelMatrix = [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1
+];
+let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
+textarea.value = source;
+if (syntaxHighlighting.checked) {
+    setTimeout(()=>highlight(editor, textarea)
+    );
+}
+let vbo, cbo, ebo;
+let elementCount = 0;
+const map = {
+    worldSize: 400,
+    objects: []
+};
+textarea.onscroll = ()=>{
+    const highlighter = editor.children.item(1);
+    if (highlighter) {
+        highlighter.scrollTop = textarea.scrollTop;
+        highlighter.scrollLeft = textarea.scrollLeft;
+    }
+};
+textarea.oninput = (e)=>{
+    textarea.value = e.currentTarget.value;
+    textareaChanged();
+};
+textarea.onkeydown = (e)=>{
+    if (e.keyCode === 191 && e.ctrlKey) {
+        e.preventDefault();
+        let selectionStart = textarea.selectionStart;
+        const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
+        const lines = textarea.value.split("\n");
+        if (lines[currentLineNumber].startsWith("#")) {
+            lines[currentLineNumber] = lines[currentLineNumber].substr(1);
+            selectionStart--;
+        } else {
+            lines[currentLineNumber] = "#" + lines[currentLineNumber];
+            selectionStart++;
+        }
+        textarea.value = lines.join("\n");
+        textareaChanged();
+        textarea.selectionEnd = selectionStart;
+    }
+};
+window.onkeydown = (e)=>{
+    if (e.keyCode === 79 && e.ctrlKey) {
+        e.preventDefault();
+        bzwFile.click();
+    }
+};
+window.onload = ()=>{
+    if (!canvas) {
+        return;
+    }
+    let drag = false;
+    let oldX = 0, oldY = 0;
+    let dX = 0, dY = 0;
+    const mouseDown = (e)=>{
+        drag = true;
+        oldX = getCoord(e, "X");
+        oldY = getCoord(e, "Y");
+        e.preventDefault();
+        return false;
+    };
+    const mouseUp = ()=>{
+        drag = false;
+    };
+    const mouseMove = (e)=>{
+        if (!drag) {
+            return false;
+        }
+        const x = getCoord(e, "X");
+        const y = getCoord(e, "Y");
+        dX = (x - oldX) * 75 * Math.PI / canvas.width;
+        dY = (y - oldY) * 75 * Math.PI / canvas.height;
+        THETA += dX;
+        PHI += dY;
+        oldX = x;
+        oldY = y;
+        e.preventDefault();
+    };
+    canvas.addEventListener("mousedown", mouseDown, false);
+    canvas.addEventListener("mouseup", mouseUp, false);
+    canvas.addEventListener("mouseout", mouseUp, false);
+    canvas.addEventListener("mousemove", mouseMove, false);
+    canvas.addEventListener("touchstart", mouseDown, false);
+    canvas.addEventListener("touchend", mouseUp, false);
+    canvas.addEventListener("touchmove", mouseMove, false);
+    canvas.addEventListener("wheel", (e)=>{
+        const delta = e.deltaY;
+        viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
+        viewMatrix[14] = viewMatrix[14] > -30 ? -30 : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
+    });
+    let THETA = 0, PHI = 30, oldTime = 0;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
+    if (!shader) {
+        return;
+    }
+    gl.useProgram(shader);
+    const vMatrix = gl.getUniformLocation(shader, "view");
+    const mMatrix = gl.getUniformLocation(shader, "model");
+    const AXIS_LINE_LENGTH = 100;
+    const axisVertices = [
+        0,
+        0,
+        0,
+        -100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100, 
+    ];
+    const axisColors = [
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        1
+    ];
+    var axisVao = gl.createVertexArray();
+    gl.bindVertexArray(axisVao);
+    const axisVbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, axisVbo);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisVertices), gl.STATIC_DRAW);
+    const axisCbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, axisCbo);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisColors), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, axisVbo);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, axisCbo);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+    gl.deleteBuffer(axisVbo);
+    gl.deleteBuffer(axisCbo);
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.CULL_FACE);
+    gl.clearColor(0, 0, 0, 0);
+    const render = (time)=>{
+        if (oldTime === 0) {
+            oldTime = time;
+        }
+        const dt = time - oldTime;
+        oldTime = time;
+        if (!drag && autoRotate.checked) {
+            THETA += 0.015 * dt;
+        }
+        if (PHI > 90) {
+            PHI = 90;
+        } else if (PHI < -90) {
+            PHI = -90;
+        }
+        const finalModelMatrix = multiplyArrayOfMatrices([
+            rotateXMatrix(-PHI),
+            rotateYMatrix(-THETA),
+            modelMatrix, 
+        ]);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(60, canvas.width / canvas.height, 0.01, map.worldSize * 6));
+        gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
+        gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
+        gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
+        if (showAxis.checked) {
+            gl.disable(gl.DEPTH_TEST);
+            gl.bindVertexArray(axisVao);
+            gl.drawArrays(gl.LINES, 0, 6);
+            gl.bindVertexArray(null);
+            gl.enable(gl.DEPTH_TEST);
+        }
+        requestAnimationFrame(render);
+    };
+    parseSource();
+    updateMesh(gl);
+    requestAnimationFrame(render);
+};
+const parseSource = ()=>{
+    let current = "";
+    map.objects = [];
+    for (let line of source.split("\n")){
+        line = line.trim().replace(/ +(?= )/g, "");
+        if (line[0] === "#") {
+            continue;
+        }
+        if (line === "end") {
+            current = "";
+        } else if (line === "world") {
+            current = line;
+            map.objects.push(new World());
+        } else if (line === "box") {
+            current = line;
+            map.objects.push(new Box());
+        } else if (line === "pyramid") {
+            current = line;
+            map.objects.push(new Pyramid());
+        } else if (line === "base") {
+            current = line;
+            map.objects.push(new Base());
+        } else if (line === "zone") {
+            current = line;
+            map.objects.push(new Zone());
+        } else {
+            switch(current){
+                case "world":
+                case "box":
+                case "pyramid":
+                case "base":
+                case "zone":
+                    map.objects[map.objects.length - 1].parseLine(line);
+                    if (current === "world" && line.startsWith("size")) {
+                        map.worldSize = map.objects[map.objects.length - 1].size[0];
+                    }
+                    break;
+                default: break;
+            }
+        }
+    }
+};
+const updateMesh = (gl1)=>{
+    console.log("updating mesh");
+    const mesh = {
+        vertices: [],
+        indices: [],
+        colors: [],
+        indicesCount: 0
+    };
+    if (map.objects.filter((object)=>object instanceof World
+    ).length === 0) {
+        map.objects.push(new World());
+        map.worldSize = map.objects[map.objects.length - 1].size[0];
+    }
+    map.objects = map.objects.sort((a, b)=>(a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1
+    );
+    for (const object of map.objects){
+        object.buildMesh(mesh);
+    }
+    elementCount = mesh.indices.length;
+    gl1.deleteBuffer(vbo);
+    gl1.deleteBuffer(cbo);
+    gl1.deleteBuffer(ebo);
+    vbo = gl1.createBuffer();
+    gl1.bindBuffer(gl1.ARRAY_BUFFER, vbo);
+    gl1.bufferData(gl1.ARRAY_BUFFER, new Float32Array(mesh.vertices), gl1.STATIC_DRAW);
+    cbo = gl1.createBuffer();
+    gl1.bindBuffer(gl1.ARRAY_BUFFER, cbo);
+    gl1.bufferData(gl1.ARRAY_BUFFER, new Float32Array(mesh.colors), gl1.STATIC_DRAW);
+    ebo = gl1.createBuffer();
+    gl1.bindBuffer(gl1.ELEMENT_ARRAY_BUFFER, ebo);
+    gl1.bufferData(gl1.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl1.STATIC_DRAW);
+    gl1.bindBuffer(gl1.ARRAY_BUFFER, vbo);
+    gl1.enableVertexAttribArray(0);
+    gl1.vertexAttribPointer(0, 3, gl1.FLOAT, false, 12, 0);
+    gl1.bindBuffer(gl1.ARRAY_BUFFER, cbo);
+    gl1.enableVertexAttribArray(1);
+    gl1.vertexAttribPointer(1, 4, gl1.FLOAT, false, 16, 0);
+    gl1.bindBuffer(gl1.ARRAY_BUFFER, null);
+};
+const getCoord = (e, coord)=>{
+    return e.touches ? e.touches[0][`page${coord}`] : e[`page${coord}`];
+};
+</script>
+</body>
+</html>
