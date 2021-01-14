@@ -226,9 +226,9 @@ const HIGHLIGHT_HEADERS = [
     "define",
     "group",
     "link",
-    "mesh",
     "meshbox",
     "meshpyr",
+    "mesh",
     "pyramid",
     "sphere",
     "teleporter",
@@ -635,6 +635,61 @@ class Box extends MapObject {
         this.pushColors(mesh, 8, color[0] * 0.8, color[1] * 0.8, color[2] * 0.8, color[3]);
     }
 }
+class MeshBox extends MapObject {
+    VERTEX_COUNT = 72;
+    buildMesh(mesh) {
+        let defaultColor = false;
+        if (!this.color) {
+            this.color = [
+                0.61,
+                0.26,
+                0.12,
+                1
+            ];
+            defaultColor = true;
+        }
+        const { size , color  } = this;
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], size[2], size[1]);
+        mesh.vertices.push(-size[0], size[2], -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], size[2], -size[1]);
+        mesh.vertices.push(size[0], size[2], size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        this.applyRotPosShift(mesh);
+        if (!defaultColor) {
+            this.pushColors(mesh, 4, color[0], color[1], color[2], color[3]);
+            this.pushColors(mesh, 4, color[0] * 0.7, color[1] * 0.7, color[2] * 0.7, color[3]);
+        } else {
+            this.pushColors(mesh, 8, 0.75, 0.75, 0.75, color[3]);
+        }
+        this.pushColors(mesh, 8, color[0] * 0.9, color[1] * 0.9, color[2] * 0.9, color[3]);
+        this.pushColors(mesh, 8, color[0] * 0.8, color[1] * 0.8, color[2] * 0.8, color[3]);
+    }
+}
 class Base extends MapObject {
     VERTEX_COUNT = 72;
     buildMesh(mesh) {
@@ -720,6 +775,45 @@ class Base extends MapObject {
     }
 }
 class Pyramid extends MapObject {
+    VERTEX_COUNT = 48;
+    buildMesh(mesh) {
+        if (!this.color) {
+            this.color = [
+                0.1,
+                0.3,
+                1,
+                1
+            ];
+        }
+        const { size , color  } = this;
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices(mesh);
+        mesh.vertices.push(size[0], 0, size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        this.pushIndices2(mesh);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        this.pushIndices2(mesh);
+        mesh.vertices.push(-size[0], 0, size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(-size[0], 0, -size[1]);
+        this.pushIndices2(mesh);
+        mesh.vertices.push(size[0], 0, -size[1]);
+        mesh.vertices.push(0, size[2], 0);
+        mesh.vertices.push(size[0], 0, size[1]);
+        this.pushIndices2(mesh);
+        this.applyRotPosShift(mesh);
+        this.pushColors(mesh, 4, color[0] * 0.8, color[1] * 0.8, color[2] * 0.8, color[3]);
+        this.pushColors(mesh, 6, color[0] * 0.9, color[1] * 0.9, color[2] * 0.9, color[3]);
+        this.pushColors(mesh, 6, color[0], color[1], color[2], color[3]);
+    }
+}
+class MeshPyramid extends MapObject {
     VERTEX_COUNT = 48;
     buildMesh(mesh) {
         if (!this.color) {
@@ -1132,9 +1226,15 @@ const parseSource = ()=>{
         } else if (line === "box") {
             current = line;
             map.objects.push(new Box());
+        } else if (line === "meshbox") {
+            current = line;
+            map.objects.push(new MeshBox());
         } else if (line === "pyramid") {
             current = line;
             map.objects.push(new Pyramid());
+        } else if (line === "meshpyr") {
+            current = line;
+            map.objects.push(new MeshPyramid());
         } else if (line === "base") {
             current = line;
             map.objects.push(new Base());
@@ -1145,7 +1245,9 @@ const parseSource = ()=>{
             switch(current){
                 case "world":
                 case "box":
+                case "meshbox":
                 case "pyramid":
+                case "meshpyr":
                 case "base":
                 case "zone":
                     map.objects[map.objects.length - 1].parseLine(line);
