@@ -12,6 +12,15 @@ export interface IMesh{
   indicesCount: number;
 }
 
+const parseNum = (str: string, fallback: number = 0): number => {
+  const value = parseFloat(str);
+  if(isNaN(value)){
+    return fallback;
+  }
+
+  return value;
+};
+
 /** Basic definition of a map object - should contain properties that are across "all" objects */
 export abstract class MapObject{
   /** Position */
@@ -36,18 +45,18 @@ export abstract class MapObject{
     const parts = line.split(" ");
 
     if(parts[0] === "size"){
-      this.size = [parseFloat(parts[1]) || .5, parseFloat(parts[2]) || .5, parseFloat(parts[3]) || 1];
+      this.size = [parseNum(parts[1], .5), parseNum(parts[2], .5), parseNum(parts[3], 1)];
       if(parseFloat(parts[3]) === 0){
         this.size[2] = .01;
       }
     }else if(parts[0] === "position"){
-      this.position = [parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0, parseFloat(parts[3]) || 0];
+      this.position = [parseNum(parts[1]), parseNum(parts[2]), parseNum(parts[3])];
     }else if(parts[0] === "shift"){
-      this.shift = [parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0, parseFloat(parts[3]) || 0];
+      this.shift = [parseNum(parts[1]), parseNum(parts[2]), parseNum(parts[3])]
     }else if(parts[0] === "rotation"){
-      this.rotation = parseFloat(parts[1]) || 0;
+      this.rotation = parseNum(parts[1]);
     }else if(parts[0] === "color"){
-      this.color = [parseFloat(parts[1]) || 1, parseFloat(parts[2]) || 1, parseFloat(parts[3]) || 1, parseFloat(parts[4]) || 1];
+      this.color = [parseNum(parts[1], 1), parseNum(parts[2], 1), parseNum(parts[3], 1), parseNum(parts[4], 1)];
     }
   }
 

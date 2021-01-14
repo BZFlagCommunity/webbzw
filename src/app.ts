@@ -285,7 +285,7 @@ window.onload = () => {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(60, canvas.width/canvas.height, .01, map.worldSize * 6));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, canvas.width/canvas.height, .01, map.worldSize * 6));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
@@ -357,7 +357,7 @@ const parseSource = (): void => {
   }
 };
 
-const updateMesh = (gl: WebGL2RenderingContext ): void => {
+const updateMesh = (gl: WebGL2RenderingContext): void => {
   console.log("updating mesh");
   const mesh: IMesh = {
     vertices: [],
@@ -371,7 +371,7 @@ const updateMesh = (gl: WebGL2RenderingContext ): void => {
     map.worldSize = map.objects[map.objects.length - 1].size[0];
   }
 
-  map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1);
+  map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? -1 : 1); // sort by alpha
   for(const object of map.objects){
     object.buildMesh(mesh);
   }
