@@ -71,9 +71,9 @@ export class Base extends MapObject{
         break;
     }
 
-    this.pushColors(mesh, 4, baseColor[0], baseColor[1], baseColor[2], color[3]);
-    this.pushColors(mesh, 4, baseColor[0] * .7, baseColor[1] * .7, baseColor[2] * .7, color[3]);
-    this.pushColors(mesh, 8, baseColor[0] * .9, baseColor[1] * .9, baseColor[2] * .9, color[3]);
-    this.pushColors(mesh, 8, baseColor[0] * .8, baseColor[1] * .8, baseColor[2] * .8, color[3]);
+    this.pushColors(mesh, 4, baseColor[0], baseColor[1], baseColor[2], color[3]); // top
+    this.pushColors(mesh, 4, baseColor[0] * .7, baseColor[1] * .7, baseColor[2] * .7, color[3]); // bottom
+    this.pushColors(mesh, 8, baseColor[0] * .9, baseColor[1] * .9, baseColor[2] * .9, color[3]); // front-back
+    this.pushColors(mesh, 8, baseColor[0] * .8, baseColor[1] * .8, baseColor[2] * .8, color[3]); // left-right
   }
 }
