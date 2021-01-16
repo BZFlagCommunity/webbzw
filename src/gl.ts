@@ -29,7 +29,7 @@ void main(void){
   finalColor = vColor;
 }`;
 
-export const createShader = (gl: WebGL2RenderingContext , vertCode: string, fragCode: string): WebGLProgram | null => {
+export function createShader(gl: WebGL2RenderingContext , vertCode: string, fragCode: string): WebGLProgram | null{
   const vertShader = gl.createShader(gl.VERTEX_SHADER);
   if(!vertShader){
     return null;
@@ -68,4 +68,4 @@ export const createShader = (gl: WebGL2RenderingContext , vertCode: string, frag
   gl.linkProgram(shader);
 
   return shader;
-};
+}

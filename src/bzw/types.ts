@@ -1,4 +1,4 @@
-import {rotY} from "../math.ts";
+import * as math from "../math.ts";
 
 /** Contains all of the required information for the world mesh */
 export interface IMesh{
@@ -12,14 +12,15 @@ export interface IMesh{
   indicesCount: number;
 }
 
-const parseNum = (str: string, fallback: number = 0): number => {
+/** Smartly parse `string` into `number` */
+function parseNum(str: string, fallback: number = 0): number{
   const value = parseFloat(str);
   if(isNaN(value)){
     return fallback;
   }
 
   return value;
-};
+}
 
 /** Basic definition of a map object - should contain properties that are across "all" objects */
 export abstract class MapObject{
@@ -100,7 +101,7 @@ export abstract class MapObject{
 
     // apply rotation
     for(let i = mesh.vertices.length - this.VERTEX_COUNT; i < mesh.vertices.length; i += 3){
-      const rot = rotY([mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]], _rotation);
+      const rot = math.rotY([mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]], _rotation);
       mesh.vertices[i] = rot[0];
       mesh.vertices[i + 1] = rot[1];
       mesh.vertices[i + 2] = rot[2];

@@ -1,4 +1,4 @@
-import {getProjection, multiplyArrayOfMatrices, rotateXMatrix, rotateYMatrix} from "./math.ts";
+import * as math from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone} from "./bzw/mod.ts";
@@ -40,7 +40,13 @@ const map: {
   objects: []
 };
 
-const handleFile = (files: FileList | undefined) => {
+/** Smartly get coordinate for input */
+function getCoord(e: any, coord: "X" | "Y"): number{
+  return e.touches ? e.touches[0][`page${coord}`] : e[`page${coord}`];
+}
+
+/** Handle a file being uploaded */
+function handleFile(files: FileList | undefined){
   const file = files ? files[0] : undefined;
   if(!file){
     alert("No file selected!");
@@ -60,19 +66,10 @@ const handleFile = (files: FileList | undefined) => {
   });
 
   reader.readAsText(file);
-};
+}
 
-syntaxHighlighting.addEventListener("change", () => {
-  if(syntaxHighlighting.checked){
-    textarea.classList.remove("show");
-    highlight(editor, textarea);
-  }else{
-    textarea.classList.add("show");
-    deleteHighlightElement(editor);
-  }
-});
-
-const _textareaChanged = (): void => {
+/** Raw handler for textarea being changed */
+function _textareaChanged(){
   // don't preform unnecessary updates if source hasn't changed
   if(textarea.value === source){
     return;
@@ -86,16 +83,27 @@ const _textareaChanged = (): void => {
     highlight(editor, textarea);
   }
   localStorage.setItem("bzw", source);
-};
+}
 
 let timeoutId = 0;
-const textareaChanged = (): void => {
+/** Smart handler for textarea being changed */
+function textareaChanged(){
   if(timeoutId){
     clearTimeout(timeoutId);
   }
 
   timeoutId = setTimeout(() => _textareaChanged(), 50);
-};
+}
+
+syntaxHighlighting.addEventListener("change", () => {
+  if(syntaxHighlighting.checked){
+    textarea.classList.remove("show");
+    highlight(editor, textarea);
+  }else{
+    textarea.classList.add("show");
+    deleteHighlightElement(editor);
+  }
+});
 
 bzwFile.addEventListener("change", () => {
   handleFile(bzwFile.files);
@@ -300,15 +308,15 @@ window.onload = () => {
       PHI = -90;
     }
 
-    const finalModelMatrix = multiplyArrayOfMatrices([
-      rotateXMatrix(-PHI),
-      rotateYMatrix(-THETA),
+    const finalModelMatrix = math.multiplyArrayOfMatrices([
+      math.rotateXMatrix(-PHI),
+      math.rotateYMatrix(-THETA),
       modelMatrix,
     ]);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, canvas.width/canvas.height, .01, map.worldSize * 6));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, canvas.width/canvas.height, .01, map.worldSize * 6));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
@@ -333,7 +341,8 @@ window.onload = () => {
   requestAnimationFrame(render);
 };
 
-const parseSource = (): void => {
+/** Parse world source */
+function parseSource(){
   let current = "";
   map.objects = [];
 
@@ -386,9 +395,10 @@ const parseSource = (): void => {
       }
     }
   }
-};
+}
 
-const updateMesh = (gl: WebGL2RenderingContext): void => {
+/** Update world mesh */
+function updateMesh(gl: WebGL2RenderingContext){
   console.log("updating mesh");
   const mesh: IMesh = {
     vertices: [],
@@ -434,8 +444,4 @@ const updateMesh = (gl: WebGL2RenderingContext): void => {
   gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
-};
-
-const getCoord = (e: any, coord: "X" | "Y"): number => {
-  return e.touches ? e.touches[0][`page${coord}`] : e[`page${coord}`];
-};
+}

@@ -1,14 +1,16 @@
-export const getProjection = (angle: number, a: number, zMin: number, zMax: number): number[] => {
+/** Get projection matrix */
+export function getProjection(angle: number, aspectRatio: number, zMin: number, zMax: number): number[]{
   const ang = Math.tan((angle * .5) * Math.PI / 180);
   return [
     0.5/ang, 0, 0, 0,
-    0, 0.5*a/ang, 0, 0,
+    0, 0.5*aspectRatio/ang, 0, 0,
     0, 0, -(zMax+zMin)/(zMax-zMin), -1,
     0, 0, (-2*zMax*zMin)/(zMax-zMin), 0
   ];
-};
+}
 
-export const multiplyMatrices = (a: number[], b: number[]): number[] => {
+/** Multiply two matrices together */
+export function multiplyMatrices(a: number[], b: number[]): number[]{
   const result = [];
 
   const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
@@ -41,9 +43,10 @@ export const multiplyMatrices = (a: number[], b: number[]): number[] => {
   result[15] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
 
   return result;
-};
+}
 
-export const multiplyArrayOfMatrices = (matrices: number[][]): number[] => {
+/** Multiply array of matrices together */
+export function multiplyArrayOfMatrices(matrices: number[][]): number[]{
   let inputMatrix = matrices[0];
 
   for(let i = 1; i < matrices.length; i++){
@@ -51,35 +54,38 @@ export const multiplyArrayOfMatrices = (matrices: number[][]): number[] => {
   }
 
   return inputMatrix;
-};
+}
 
-export const rotateXMatrix = (a: number): number[] => {
-  a *= Math.PI / 180;
+/** X rotation matrix */
+export function rotateXMatrix(angle: number): number[]{
+  angle *= Math.PI / 180;
   return [
-       1,       0,        0,     0,
-       0,  Math.cos(a),  -Math.sin(a),     0,
-       0,  Math.sin(a),   Math.cos(a),     0,
-       0,       0,        0,     1
+    1,       0,        0,     0,
+    0,  Math.cos(angle),  -Math.sin(angle),     0,
+    0,  Math.sin(angle),   Math.cos(angle),     0,
+    0,       0,        0,     1
   ];
-};
+}
 
-export const rotateYMatrix = (a: number): number[] => {
-  a *= Math.PI / 180;
+/** Y rotation matrix */
+export function rotateYMatrix(angle: number): number[]{
+  angle *= Math.PI / 180;
   return [
-     Math.cos(a),   0, Math.sin(a),   0,
-          0,   1,      0,   0,
-    -Math.sin(a),   0, Math.cos(a),   0,
-          0,   0,      0,   1
+     Math.cos(angle), 0, Math.sin(angle), 0,
+     0,               1, 0,               0,
+    -Math.sin(angle), 0, Math.cos(angle), 0,
+     0,               0, 0,               1
   ];
-};
+}
 
-export const rotY = (a: number[], angle: number): number[] => {
+/** Rotate `position` around Y axis by `angle` */
+export function rotY(position: number[], angle: number): number[]{
   const s = Math.sin(angle);
   const c = Math.cos(angle);
 
   let x = 0, z = 0;
-  z = a[2] * c - a[0] * s;
-  x = a[2] * s + a[0] * c;
+  z = position[2] * c - position[0] * s;
+  x = position[2] * s + position[0] * c;
 
-  return [x, a[1], z];
-};
+  return [x, position[1], z];
+}
