@@ -18,6 +18,50 @@ const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
 const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTMLInputElement;
 
+const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
+if(!gl){
+  alert("WebGL 2.0 not available");
+}
+
+let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
+textarea.value = source;
+if(syntaxHighlighting.checked){
+  setTimeout(() => highlight(editor, textarea));
+}
+
+let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
+let elementCount = 0;
+
+const map: {
+  worldSize: number,
+  objects: MapObject[]
+} = {
+  worldSize: 400,
+  objects: []
+};
+
+const handleFile = (files: FileList | undefined) => {
+  const file = files ? files[0] : undefined;
+  if(!file){
+    alert("No file selected!");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.addEventListener("load", (e) => {
+    const text = e.target?.result;
+    textarea.value = text as string;
+    textareaChanged();
+  });
+
+  reader.addEventListener("error", () => {
+    alert("Error: failed to read file");
+  });
+
+  reader.readAsText(file);
+};
+
 syntaxHighlighting.addEventListener("change", () => {
   if(syntaxHighlighting.checked){
     textarea.classList.remove("show");
@@ -27,11 +71,6 @@ syntaxHighlighting.addEventListener("change", () => {
     deleteHighlightElement(editor);
   }
 });
-
-const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
-if(!gl){
-  alert("WebGL 2.0 not available");
-}
 
 const _textareaChanged = (): void => {
   // don't preform unnecessary updates if source hasn't changed
@@ -59,43 +98,8 @@ const textareaChanged = (): void => {
 };
 
 bzwFile.addEventListener("change", () => {
-  const file = bzwFile.files ? bzwFile.files[0] : undefined;
-  if(!file){
-    alert("No file selected!");
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.addEventListener("load", (e) => {
-    const text = e.target?.result;
-    textarea.value = text as string;
-    textareaChanged();
-  });
-
-  reader.addEventListener("error", () => {
-    alert("Error: failed to read file");
-  });
-
-  reader.readAsText(file);
+  handleFile(bzwFile.files);
 });
-
-let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
-textarea.value = source;
-if(syntaxHighlighting.checked){
-  setTimeout(() => highlight(editor, textarea));
-}
-
-let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
-let elementCount = 0;
-
-const map: {
-  worldSize: number,
-  objects: MapObject[]
-} = {
-  worldSize: 400,
-  objects: []
-};
 
 textarea.onscroll = () => {
   const highlighter = editor.children.item(1);
@@ -133,6 +137,23 @@ textarea.onkeydown = (e: KeyboardEvent) => {
     textarea.selectionEnd = selectionStart;
   }
 };
+
+window.addEventListener("dragenter", (e: DragEvent) => {
+  e.stopPropagation();
+  e.preventDefault();
+});
+
+window.addEventListener("dragover", (e: DragEvent) => {
+  e.stopPropagation();
+  e.preventDefault();
+});
+
+window.addEventListener("drop", (e: DragEvent) => {
+  e.stopPropagation();
+  e.preventDefault();
+
+  handleFile(e.dataTransfer.files);
+});
 
 // custom keyboard shortcuts (global)
 window.onkeydown = (e: KeyboardEvent) => {
