@@ -989,6 +989,39 @@ const bzwFile = document.querySelector("#bzw-file");
 const autoRotate = document.querySelector("#auto-rotate");
 const showAxis = document.querySelector("#show-axis");
 const syntaxHighlighting = document.querySelector("#syntax-highlighting");
+const gl = canvas1.getContext("webgl2");
+if (!gl) {
+    alert("WebGL 2.0 not available");
+}
+let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
+textarea.value = source;
+if (syntaxHighlighting.checked) {
+    setTimeout(()=>highlight(editor, textarea)
+    );
+}
+let vbo, cbo, ebo;
+let elementCount = 0;
+const map = {
+    worldSize: 400,
+    objects: []
+};
+const handleFile = (files)=>{
+    const file = files ? files[0] : undefined;
+    if (!file) {
+        alert("No file selected!");
+        return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener("load", (e)=>{
+        const text = e.target?.result;
+        textarea.value = text;
+        textareaChanged();
+    });
+    reader.addEventListener("error", ()=>{
+        alert("Error: failed to read file");
+    });
+    reader.readAsText(file);
+};
 syntaxHighlighting.addEventListener("change", ()=>{
     if (syntaxHighlighting.checked) {
         textarea.classList.remove("show");
@@ -998,10 +1031,6 @@ syntaxHighlighting.addEventListener("change", ()=>{
         deleteHighlightElement(editor);
     }
 });
-const gl = canvas1.getContext("webgl2");
-if (!gl) {
-    alert("WebGL 2.0 not available");
-}
 const _textareaChanged = ()=>{
     if (textarea.value === source) {
         return;
@@ -1023,34 +1052,8 @@ const textareaChanged = ()=>{
     , 50);
 };
 bzwFile.addEventListener("change", ()=>{
-    const file = bzwFile.files ? bzwFile.files[0] : undefined;
-    if (!file) {
-        alert("No file selected!");
-        return;
-    }
-    const reader = new FileReader();
-    reader.addEventListener("load", (e)=>{
-        const text = e.target?.result;
-        textarea.value = text;
-        textareaChanged();
-    });
-    reader.addEventListener("error", ()=>{
-        alert("Error: failed to read file");
-    });
-    reader.readAsText(file);
+    handleFile(bzwFile.files);
 });
-let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
-textarea.value = source;
-if (syntaxHighlighting.checked) {
-    setTimeout(()=>highlight(editor, textarea)
-    );
-}
-let vbo, cbo, ebo;
-let elementCount = 0;
-const map = {
-    worldSize: 400,
-    objects: []
-};
 textarea.onscroll = ()=>{
     const highlighter = editor.children.item(1);
     if (highlighter) {
@@ -1080,6 +1083,19 @@ textarea.onkeydown = (e)=>{
         textarea.selectionEnd = selectionStart;
     }
 };
+window.addEventListener("dragenter", (e)=>{
+    e.stopPropagation();
+    e.preventDefault();
+});
+window.addEventListener("dragover", (e)=>{
+    e.stopPropagation();
+    e.preventDefault();
+});
+window.addEventListener("drop", (e)=>{
+    e.stopPropagation();
+    e.preventDefault();
+    handleFile(e.dataTransfer.files);
+});
 window.onkeydown = (e)=>{
     if (e.keyCode === 79 && e.ctrlKey) {
         e.preventDefault();
