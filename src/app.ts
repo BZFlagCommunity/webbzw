@@ -46,7 +46,7 @@ function getCoord(e: any, coord: "X" | "Y"): number{
 }
 
 /** Handle a file being uploaded */
-function handleFile(files: FileList | undefined){
+function handleFile(files: FileList | null | undefined){
   const file = files ? files[0] : undefined;
   if(!file){
     alert("No file selected!");
@@ -160,7 +160,7 @@ window.addEventListener("drop", (e: DragEvent) => {
   e.stopPropagation();
   e.preventDefault();
 
-  handleFile(e.dataTransfer.files);
+  handleFile(e.dataTransfer?.files);
 });
 
 // custom keyboard shortcuts (global)
