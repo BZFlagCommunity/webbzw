@@ -3,11 +3,11 @@ import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone} from "./bzw/mod.ts";
 import "./dom/mod.ts";
+import "./editor/mod.ts";
 
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 75;
 
-const main = document.querySelector("main") as HTMLElement;
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
@@ -132,24 +132,6 @@ textarea.onkeydown = (e: KeyboardEvent) => {
     textareaChanged();
     textarea.selectionEnd = selectionStart;
   }
-};
-
-window.onresize = () => {
-  if(!main){
-    return;
-  }
-  const parentWidth = main.getBoundingClientRect().width;
-  const minWidth = parentWidth / 2;
-  const maxWidth = parentWidth - (parentWidth / 4);
-
-  let newRightWidth = canvas.width;
-  if(newRightWidth < minWidth){
-    newRightWidth = minWidth;
-  }else if(newRightWidth > maxWidth){
-    newRightWidth = maxWidth;
-  }
-
-  canvas.width = newRightWidth;
 };
 
 // custom keyboard shortcuts (global)
