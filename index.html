@@ -918,16 +918,8 @@ class Zone extends MapObject {
         }
     }
 }
-const MAX_ZOOM = -5;
-const main = document.querySelector("main");
-const textarea = document.querySelector(".editor textarea");
-const editor = document.querySelector(".editor");
-const canvas = document.querySelector("canvas");
-const bzwFile = document.querySelector("#bzw-file");
-const autoRotate = document.querySelector("#auto-rotate");
-const showAxis = document.querySelector("#show-axis");
-const syntaxHighlighting = document.querySelector("#syntax-highlighting");
 for (const resizer of document.querySelectorAll(".resizer")){
+    const parent = resizer.parentElement;
     const leftSide = resizer.previousElementSibling;
     const rightSide = resizer.nextElementSibling;
     let x = 0;
@@ -945,11 +937,11 @@ for (const resizer of document.querySelectorAll(".resizer")){
         document.addEventListener("mouseup", mouseUpHandler);
     };
     const mouseMoveHandler = (e)=>{
-        if (!main) {
+        if (!parent) {
             return;
         }
         const dx = e.clientX - x;
-        const parentWidth = main.getBoundingClientRect().width;
+        const parentWidth = parent.getBoundingClientRect().width;
         const minWidth = parentWidth / 2;
         const maxWidth = parentWidth - parentWidth / 4;
         let newRightWidth = rightWidth - dx;
@@ -972,6 +964,15 @@ for (const resizer of document.querySelectorAll(".resizer")){
     };
     resizer.addEventListener("mousedown", mouseDownHandler);
 }
+const MAX_ZOOM = -5;
+const main = document.querySelector("main");
+const textarea = document.querySelector(".editor textarea");
+const editor = document.querySelector(".editor");
+const canvas = document.querySelector("canvas");
+const bzwFile = document.querySelector("#bzw-file");
+const autoRotate = document.querySelector("#auto-rotate");
+const showAxis = document.querySelector("#show-axis");
+const syntaxHighlighting = document.querySelector("#syntax-highlighting");
 syntaxHighlighting.addEventListener("change", ()=>{
     if (syntaxHighlighting.checked) {
         textarea.classList.remove("show");
