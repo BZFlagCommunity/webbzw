@@ -964,11 +964,27 @@ for (const resizer of document.querySelectorAll(".resizer")){
     };
     resizer.addEventListener("mousedown", mouseDownHandler);
 }
+const canvas = document.querySelector("canvas");
+const canvasParent = canvas.parentElement;
+window.addEventListener("resize", ()=>{
+    if (!canvasParent) {
+        return;
+    }
+    const parentWidth = canvasParent.getBoundingClientRect().width;
+    const minWidth = parentWidth / 2;
+    const maxWidth = parentWidth - parentWidth / 4;
+    let newRightWidth = canvas.width;
+    if (newRightWidth < minWidth) {
+        newRightWidth = minWidth;
+    } else if (newRightWidth > maxWidth) {
+        newRightWidth = maxWidth;
+    }
+    canvas.width = newRightWidth;
+});
 const MAX_ZOOM = -5;
-const main = document.querySelector("main");
 const textarea = document.querySelector(".editor textarea");
 const editor = document.querySelector(".editor");
-const canvas = document.querySelector("canvas");
+const canvas1 = document.querySelector("canvas");
 const bzwFile = document.querySelector("#bzw-file");
 const autoRotate = document.querySelector("#auto-rotate");
 const showAxis = document.querySelector("#show-axis");
@@ -982,7 +998,7 @@ syntaxHighlighting.addEventListener("change", ()=>{
         deleteHighlightElement(editor);
     }
 });
-const gl = canvas.getContext("webgl2");
+const gl = canvas1.getContext("webgl2");
 if (!gl) {
     alert("WebGL 2.0 not available");
 }
@@ -1064,21 +1080,6 @@ textarea.onkeydown = (e)=>{
         textarea.selectionEnd = selectionStart;
     }
 };
-window.onresize = ()=>{
-    if (!main) {
-        return;
-    }
-    const parentWidth = main.getBoundingClientRect().width;
-    const minWidth = parentWidth / 2;
-    const maxWidth = parentWidth - parentWidth / 4;
-    let newRightWidth = canvas.width;
-    if (newRightWidth < minWidth) {
-        newRightWidth = minWidth;
-    } else if (newRightWidth > maxWidth) {
-        newRightWidth = maxWidth;
-    }
-    canvas.width = newRightWidth;
-};
 window.onkeydown = (e)=>{
     if (e.keyCode === 79 && e.ctrlKey) {
         e.preventDefault();
@@ -1086,7 +1087,7 @@ window.onkeydown = (e)=>{
     }
 };
 window.onload = ()=>{
-    if (!canvas) {
+    if (!canvas1) {
         return;
     }
     const viewMatrix = [
@@ -1129,8 +1130,8 @@ window.onload = ()=>{
     let oldX = 0, oldY = 0;
     let dX = 0, dY = 0;
     let THETA = 180, PHI = 40, oldTime = 0;
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas1.width = canvas1.offsetWidth;
+    canvas1.height = canvas1.offsetHeight;
     const mouseDown = (e)=>{
         drag = true;
         oldX = getCoord(e, "X");
@@ -1147,22 +1148,22 @@ window.onload = ()=>{
         }
         const x = getCoord(e, "X");
         const y = getCoord(e, "Y");
-        dX = (x - oldX) * 75 * Math.PI / canvas.width;
-        dY = (y - oldY) * 75 * Math.PI / canvas.height;
+        dX = (x - oldX) * 75 * Math.PI / canvas1.width;
+        dY = (y - oldY) * 75 * Math.PI / canvas1.height;
         THETA += dX;
         PHI += dY;
         oldX = x;
         oldY = y;
         e.preventDefault();
     };
-    canvas.addEventListener("mousedown", mouseDown, false);
-    canvas.addEventListener("mouseup", mouseUp, false);
-    canvas.addEventListener("mouseout", mouseUp, false);
-    canvas.addEventListener("mousemove", mouseMove, false);
-    canvas.addEventListener("touchstart", mouseDown, false);
-    canvas.addEventListener("touchend", mouseUp, false);
-    canvas.addEventListener("touchmove", mouseMove, false);
-    canvas.addEventListener("wheel", (e)=>{
+    canvas1.addEventListener("mousedown", mouseDown, false);
+    canvas1.addEventListener("mouseup", mouseUp, false);
+    canvas1.addEventListener("mouseout", mouseUp, false);
+    canvas1.addEventListener("mousemove", mouseMove, false);
+    canvas1.addEventListener("touchstart", mouseDown, false);
+    canvas1.addEventListener("touchend", mouseUp, false);
+    canvas1.addEventListener("touchmove", mouseMove, false);
+    canvas1.addEventListener("wheel", (e)=>{
         const delta = e.deltaY;
         viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
         viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
@@ -1263,8 +1264,8 @@ window.onload = ()=>{
             modelMatrix, 
         ]);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, canvas.width / canvas.height, 0.01, map.worldSize * 6));
+        gl.viewport(0, 0, canvas1.width, canvas1.height);
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, canvas1.width / canvas1.height, 0.01, map.worldSize * 6));
         gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
         gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
         gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
