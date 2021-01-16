@@ -27,7 +27,6 @@ body{
   font-family: Montserrat, sans-serif;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 h1{
@@ -54,8 +53,8 @@ main{
   display: flex;
 }
 
-main > *{
-  flex: 1;
+main > *:not(.resizer){
+  flex: 1 0 0;
 }
 
 header label:not(:last-child){
@@ -109,6 +108,14 @@ textarea::selection{
 
 textarea.show{
   color: #FFF;
+}
+
+.resizer{
+  width: 3px;
+  background-color: #CCF;
+  border: 1px solid var(--background-color);
+  cursor: ew-resize;
+  z-index: 1;
 }
 
 .highlight{

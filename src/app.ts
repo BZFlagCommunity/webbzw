@@ -3,6 +3,9 @@ import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone} from "./bzw/mod.ts";
 
+const MAX_ZOOM = -5;
+const MOUSE_SPEED = 75;
+
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
@@ -12,6 +15,72 @@ const bzwFile = document.querySelector("#bzw-file") as HTMLInputElement;
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
 const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTMLInputElement;
+
+// resizing bars
+for(const resizer of document.querySelectorAll<HTMLElement>(".resizer")){
+  const leftSide = resizer.previousElementSibling as HTMLElement;
+  const rightSide = resizer.nextElementSibling as HTMLCanvasElement;
+
+  // mouse position
+  let x = 0;
+  // let y = 0;
+
+  let rightWidth = 0;
+
+  const mouseDownHandler = (e: MouseEvent) => {
+    x = e.clientX;
+    // y = e.clientY;
+    rightWidth = rightSide.width;
+
+    resizer.style.cursor = "col-resize";
+    document.body.style.cursor = "col-resize";
+
+    leftSide.style.userSelect = "none";
+    leftSide.style.pointerEvents = "none";
+
+    rightSide.style.userSelect = "none";
+    rightSide.style.pointerEvents = "none";
+
+    // attach the listeners to the document
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseMoveHandler = (e: MouseEvent) => {
+    const dx = e.clientX - x;
+    // const dy = e.clientY - y;
+
+    const parentWidth = resizer.parentElement.getBoundingClientRect().width;
+    const minWidth = parentWidth / 2;
+    const maxWidth = parentWidth - (parentWidth / 4);
+
+    let newRightWidth = (rightWidth - dx);
+    if(newRightWidth < minWidth){
+      newRightWidth = minWidth;
+    }else if(newRightWidth > maxWidth){
+      newRightWidth = maxWidth;
+    }
+
+    rightSide.width = newRightWidth;
+  };
+
+  const mouseUpHandler = function() {
+    resizer.style.removeProperty("cursor");
+    document.body.style.removeProperty("cursor");
+
+    leftSide.style.removeProperty("user-select");
+    leftSide.style.removeProperty("pointer-events");
+
+    rightSide.style.removeProperty("user-select");
+    rightSide.style.removeProperty("pointer-events");
+
+    // detached the handlers
+    document.removeEventListener("mousemove", mouseMoveHandler);
+    document.removeEventListener("mouseup", mouseUpHandler);
+  };
+
+  resizer.addEventListener("mousedown", mouseDownHandler);
+}
 
 syntaxHighlighting.addEventListener("change", () => {
   if(syntaxHighlighting.checked){
@@ -75,11 +144,6 @@ bzwFile.addEventListener("change", () => {
   reader.readAsText(file);
 });
 
-const viewMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-300,1];
-const modelMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
-
-const MOUSE_SPEED = 75;
-
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
 textarea.value = source;
 if(syntaxHighlighting.checked){
@@ -134,6 +198,21 @@ textarea.onkeydown = (e: KeyboardEvent) => {
   }
 };
 
+window.onresize = () => {
+  const parentWidth = canvas.parentElement.getBoundingClientRect().width;
+  const minWidth = parentWidth / 2;
+  const maxWidth = parentWidth - (parentWidth / 4);
+
+  let newRightWidth = canvas.width;
+  if(newRightWidth < minWidth){
+    newRightWidth = minWidth;
+  }else if(newRightWidth > maxWidth){
+    newRightWidth = maxWidth;
+  }
+
+  canvas.width = newRightWidth;
+};
+
 // custom keyboard shortcuts (global)
 window.onkeydown = (e: KeyboardEvent) => {
   // Ctrl+O (open file)
@@ -148,9 +227,16 @@ window.onload = () => {
     return;
   }
 
+  const viewMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-map.worldSize,1];
+  const modelMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+
   let drag = false;
   let oldX = 0, oldY = 0;
   let dX = 0, dY = 0;
+  let THETA = 180, PHI = 40, oldTime = 0;
+
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
 
   const mouseDown = (e: any) => {
     drag = true;
@@ -193,13 +279,8 @@ window.onload = () => {
   canvas.addEventListener("wheel", (e): void => {
     const delta = (e as WheelEvent).deltaY;
     viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
-    viewMatrix[14] = viewMatrix[14] > -30 ? -30 : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
+    viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
   });
-
-  let THETA = 0, PHI = 30, oldTime = 0;
-
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
 
   const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
   if(!shader){
