@@ -1097,7 +1097,7 @@ window.addEventListener("dragover", (e)=>{
 window.addEventListener("drop", (e)=>{
     e.stopPropagation();
     e.preventDefault();
-    handleFile(e.dataTransfer.files);
+    handleFile(e.dataTransfer?.files);
 });
 window.onkeydown = (e)=>{
     if (e.keyCode === 79 && e.ctrlKey) {
