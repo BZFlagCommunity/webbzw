@@ -6,6 +6,7 @@ import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone}
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 75;
 
+const main = document.querySelector("main") as HTMLElement;
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
@@ -47,10 +48,14 @@ for(const resizer of document.querySelectorAll<HTMLElement>(".resizer")){
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
+    if(!main){
+      return;
+    }
+
     const dx = e.clientX - x;
     // const dy = e.clientY - y;
 
-    const parentWidth = resizer.parentElement.getBoundingClientRect().width;
+    const parentWidth = main.getBoundingClientRect().width;
     const minWidth = parentWidth / 2;
     const maxWidth = parentWidth - (parentWidth / 4);
 
@@ -199,7 +204,10 @@ textarea.onkeydown = (e: KeyboardEvent) => {
 };
 
 window.onresize = () => {
-  const parentWidth = canvas.parentElement.getBoundingClientRect().width;
+  if(!main){
+    return;
+  }
+  const parentWidth = main.getBoundingClientRect().width;
   const minWidth = parentWidth / 2;
   const maxWidth = parentWidth - (parentWidth / 4);
 

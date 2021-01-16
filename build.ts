@@ -34,6 +34,8 @@ if(Deno.args[0] === "serve"){
   const WS_PORT = 8001;
   const RELOAD_COMMAND = "reload";
 
+  const RELOAD_HTML = `<script>var ssgs=new WebSocket("ws://localhost:${WS_PORT}");ssgs.onmessage=function(event){if(event.data==="${RELOAD_COMMAND}"){window.location.reload()}}</script>`;
+
   const server = serve({port: 8000});
   console.log("dev server running on http://localhost:8000/");
 
@@ -61,10 +63,17 @@ if(Deno.args[0] === "serve"){
     //   continue;
     // }
 
-    req.respond({
-      status: 200,
-      body: await build()+`<script>var ssgs=new WebSocket("ws://localhost:${WS_PORT}");ssgs.onmessage=function(event){if(event.data==="${RELOAD_COMMAND}"){window.location.reload()}}</script>`
-    });
+    try{
+      req.respond({
+        status: 200,
+        body: await build() + RELOAD_HTML
+      });
+    }catch(err){
+      req.respond({
+        status: 500,
+        body: `<!DOCTYPE html><html><body><pre>${err}</pre>${RELOAD_HTML}</body></html>`
+      });
+    }
   }
 }else{
   await Deno.writeTextFile("build/index.html", await build());

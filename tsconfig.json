@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
-    "target": "es5",
+    "target": "es6",
     "module": "es2015",
-    "lib": ["dom", "es2016", "es5"]
+    "lib": ["dom", "DOM.Iterable", "es2015", "es6"]
   },
-  "include": ["src/**"]
+  "include": ["src"]
 }
