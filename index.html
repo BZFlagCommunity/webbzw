@@ -186,7 +186,7 @@ textarea.show{
   </main>
   <script>const VERTEX_SHADER = `#version 300 es\nlayout(location = 0) in vec3 position;\nlayout(location = 1) in vec4 color;\n\nout vec4 vColor;\n\nuniform mat4 proj;\nuniform mat4 view;\nuniform mat4 model;\n\nvoid main(void){\n  vColor = color;\n\n  gl_Position = proj * view * model * vec4(position, 1.0);\n}`;
 const FRAGMENT_SHADER = `#version 300 es\nprecision highp float;\n\nin vec4 vColor;\n\nout vec4 finalColor;\n\nvoid main(void){\n  if(vColor.a < .05){\n    discard;\n  }\n\n  finalColor = vColor;\n}`;
-const createShader = (gl, vertCode, fragCode)=>{
+function createShader(gl, vertCode, fragCode) {
     const vertShader = gl.createShader(gl.VERTEX_SHADER);
     if (!vertShader) {
         return null;
@@ -217,7 +217,7 @@ const createShader = (gl, vertCode, fragCode)=>{
     gl.attachShader(shader, fragShader);
     gl.linkProgram(shader);
     return shader;
-};
+}
 const HIGHLIGHT_HEADERS = [
     "world",
     "options",
@@ -303,7 +303,7 @@ const highlight = (editor, textarea)=>{
     elem.scrollLeft = textarea.scrollLeft;
     console.timeEnd("set element scroll");
 };
-const getProjection = (angle, a, zMin, zMax)=>{
+function getProjection(angle, aspectRatio, zMin, zMax) {
     const ang = Math.tan(angle * 0.5 * Math.PI / 180);
     return [
         0.5 / ang,
@@ -311,7 +311,7 @@ const getProjection = (angle, a, zMin, zMax)=>{
         0,
         0,
         0,
-        0.5 * a / ang,
+        0.5 * aspectRatio / ang,
         0,
         0,
         0,
@@ -323,8 +323,8 @@ const getProjection = (angle, a, zMin, zMax)=>{
         -2 * zMax * zMin / (zMax - zMin),
         0
     ];
-};
-const multiplyMatrices = (a, b)=>{
+}
+function multiplyMatrices(a, b) {
     const result = [];
     const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
     let b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
@@ -357,75 +357,75 @@ const multiplyMatrices = (a, b)=>{
     result[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
     result[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
     return result;
-};
-const multiplyArrayOfMatrices = (matrices)=>{
+}
+function multiplyArrayOfMatrices(matrices) {
     let inputMatrix = matrices[0];
     for(let i = 1; i < matrices.length; i++){
         inputMatrix = multiplyMatrices(inputMatrix, matrices[i]);
     }
     return inputMatrix;
-};
-const rotateXMatrix = (a)=>{
-    a *= Math.PI / 180;
+}
+function rotateXMatrix(angle) {
+    angle *= Math.PI / 180;
     return [
         1,
         0,
         0,
         0,
         0,
-        Math.cos(a),
-        -Math.sin(a),
+        Math.cos(angle),
+        -Math.sin(angle),
         0,
         0,
-        Math.sin(a),
-        Math.cos(a),
+        Math.sin(angle),
+        Math.cos(angle),
         0,
         0,
         0,
         0,
         1
     ];
-};
-const rotateYMatrix = (a)=>{
-    a *= Math.PI / 180;
+}
+function rotateYMatrix(angle) {
+    angle *= Math.PI / 180;
     return [
-        Math.cos(a),
+        Math.cos(angle),
         0,
-        Math.sin(a),
+        Math.sin(angle),
         0,
         0,
         1,
         0,
         0,
-        -Math.sin(a),
+        -Math.sin(angle),
         0,
-        Math.cos(a),
+        Math.cos(angle),
         0,
         0,
         0,
         0,
         1
     ];
-};
-const rotY = (a, angle)=>{
+}
+function rotY(position, angle) {
     const s = Math.sin(angle);
     const c = Math.cos(angle);
     let x = 0, z = 0;
-    z = a[2] * c - a[0] * s;
-    x = a[2] * s + a[0] * c;
+    z = position[2] * c - position[0] * s;
+    x = position[2] * s + position[0] * c;
     return [
         x,
-        a[1],
+        position[1],
         z
     ];
-};
-const parseNum = (str, fallback = 0)=>{
+}
+function parseNum(str, fallback = 0) {
     const value = parseFloat(str);
     if (isNaN(value)) {
         return fallback;
     }
     return value;
-};
+}
 class MapObject {
     position = [
         0,
@@ -1005,7 +1005,10 @@ const map = {
     worldSize: 400,
     objects: []
 };
-const handleFile = (files)=>{
+function getCoord(e, coord) {
+    return e.touches ? e.touches[0][`page${coord}`] : e[`page${coord}`];
+}
+function handleFile(files) {
     const file = files ? files[0] : undefined;
     if (!file) {
         alert("No file selected!");
@@ -1021,17 +1024,8 @@ const handleFile = (files)=>{
         alert("Error: failed to read file");
     });
     reader.readAsText(file);
-};
-syntaxHighlighting.addEventListener("change", ()=>{
-    if (syntaxHighlighting.checked) {
-        textarea.classList.remove("show");
-        highlight(editor, textarea);
-    } else {
-        textarea.classList.add("show");
-        deleteHighlightElement(editor);
-    }
-});
-const _textareaChanged = ()=>{
+}
+function _textareaChanged() {
     if (textarea.value === source) {
         return;
     }
@@ -1042,15 +1036,24 @@ const _textareaChanged = ()=>{
         highlight(editor, textarea);
     }
     localStorage.setItem("bzw", source);
-};
+}
 let timeoutId = 0;
-const textareaChanged = ()=>{
+function textareaChanged() {
     if (timeoutId) {
         clearTimeout(timeoutId);
     }
     timeoutId = setTimeout(()=>_textareaChanged()
     , 50);
-};
+}
+syntaxHighlighting.addEventListener("change", ()=>{
+    if (syntaxHighlighting.checked) {
+        textarea.classList.remove("show");
+        highlight(editor, textarea);
+    } else {
+        textarea.classList.add("show");
+        deleteHighlightElement(editor);
+    }
+});
 bzwFile.addEventListener("change", ()=>{
     handleFile(bzwFile.files);
 });
@@ -1298,7 +1301,7 @@ window.onload = ()=>{
     updateMesh(gl);
     requestAnimationFrame(render);
 };
-const parseSource = ()=>{
+function parseSource() {
     let current = "";
     map.objects = [];
     for (let line of source.split("\n")){
@@ -1347,8 +1350,8 @@ const parseSource = ()=>{
             }
         }
     }
-};
-const updateMesh = (gl1)=>{
+}
+function updateMesh(gl1) {
     console.log("updating mesh");
     const mesh = {
         vertices: [],
@@ -1386,10 +1389,7 @@ const updateMesh = (gl1)=>{
     gl1.enableVertexAttribArray(1);
     gl1.vertexAttribPointer(1, 4, gl1.FLOAT, false, 16, 0);
     gl1.bindBuffer(gl1.ARRAY_BUFFER, null);
-};
-const getCoord = (e, coord)=>{
-    return e.touches ? e.touches[0][`page${coord}`] : e[`page${coord}`];
-};
+}
 </script>
 </body>
 </html>
