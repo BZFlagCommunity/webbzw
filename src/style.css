@@ -10,7 +10,7 @@
   font-size: 18px;
 
   --background-color: #121212;
-  --border-color: #222;
+  --border-color: #1E1E1E;
 
   /* syntax highlighter theme */
   --highlight-comment: #AAA;
@@ -49,13 +49,24 @@ header{
   flex-direction: column;
 }
 
+footer{
+  padding: .25rem .5rem;
+  background-color: var(--border-color);
+  font-size: .8rem;
+  display: flex;
+}
+
+footer > span:not(:last-child){
+  margin-right: 1rem;
+}
+
 main{
   flex: 1;
   display: flex;
 }
 
 main > *:not(.resizer){
-  flex: 1 0 0;
+  flex: 1;
 }
 
 header label:not(:last-child){
@@ -78,21 +89,6 @@ label[for=bzw-file]:hover{
   background-color: #28F;
 }
 
-.editor{
-  display: flex;
-  position: relative;
-  border-right: 1px solid var(--border-color);
-}
-
-.editor > *{
-  padding: .2rem .5rem;
-  font-size: .8rem;
-  font-family: "Source Code Pro", monospace;
-  line-height: 1.1em;
-  flex: 1;
-  overflow: auto;
-}
-
 textarea{
   padding-right: 2rem;
   background-color: var(--background-color);
@@ -111,6 +107,21 @@ textarea::selection{
 
 textarea.show{
   color: #FFF;
+}
+
+.editor{
+  display: flex;
+  position: relative;
+  border-right: 1px solid var(--border-color);
+}
+
+.editor > *{
+  padding: .2rem .5rem;
+  font-size: .8rem;
+  font-family: "Source Code Pro", monospace;
+  line-height: 1.1em;
+  flex: 1;
+  overflow: auto;
 }
 
 .resizer{

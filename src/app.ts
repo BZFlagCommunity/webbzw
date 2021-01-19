@@ -14,6 +14,11 @@ const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 const bzwFile = document.querySelector("#bzw-file") as HTMLInputElement;
 
+const statusBar = {
+  objects: document.querySelector("#objects") as HTMLElement,
+  vertices: document.querySelector("#vertices") as HTMLElement,
+};
+
 // settings
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
@@ -397,6 +402,8 @@ function parseSource(){
       }
     }
   }
+
+  statusBar.objects.innerText = `${map.objects.length} Objects`;
 }
 
 /** Update world mesh */
@@ -446,4 +453,6 @@ function updateMesh(gl: WebGL2RenderingContext){
   gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+  statusBar.vertices.innerText = `${elementCount} Vertices`;
 }
