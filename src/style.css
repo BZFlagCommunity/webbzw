@@ -70,6 +70,19 @@
   --highlight-flag: #C3E88D;
 }
 
+:root[data-theme=one-monokai]{
+  --background-color: #282C34;
+  --border-color: #454C5A;
+
+  --highlight-default: #F8FAFD;
+  --highlight-comment: #676F7D;
+  --highlight-number: #C678DD;
+  --highlight-symbol: #56B6C2;
+  --highlight-headers: #E06C75;
+  --highlight-keyword: #98C379;
+  --highlight-flag: #E5C07B;
+}
+
 body{
   height: 100vh;
   margin: 0;
