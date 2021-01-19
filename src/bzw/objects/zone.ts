@@ -5,7 +5,7 @@ export class Zone extends MapObject{
   VERTEX_COUNT = 72;
 
   buildMesh(mesh: IMesh): void{
-    this.color = [1, 1, 0, .25];
+    this.color = [1, 1, 0, .5];
 
     const {size, color} = this;
 
