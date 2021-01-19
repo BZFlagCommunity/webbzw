@@ -36,6 +36,7 @@ textarea.value = source;
 if(syntaxHighlighting.checked){
   setTimeout(() => highlight(editor, textarea));
 }
+updateLineNumbers();
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
@@ -76,6 +77,12 @@ function handleFile(files: FileList | null | undefined){
   reader.readAsText(file);
 }
 
+/** Update line numbers to match source */
+function updateLineNumbers(){
+  lineNumbersElement.innerHTML = [...Array(source.split("\n").length).keys()].map((i) => i + 1).join("\n");
+  lineNumbersElement.scrollTop = textarea.scrollTop;
+}
+
 /** Raw handler for textarea being changed */
 function _textareaChanged(){
   // don't preform unnecessary updates if source hasn't changed
@@ -88,6 +95,7 @@ function _textareaChanged(){
   }
 
   source = textarea.value;
+  updateLineNumbers();
   parseSource();
   updateMesh(gl);
 

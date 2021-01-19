@@ -1,7 +1,5 @@
 import {highlightHtml} from "./core.ts";
 
-const lineNumbersElement = document.querySelector(".line-numbers") as HTMLElement;
-
 /** Find and delete highlight element */
 export function deleteHighlightElement(editor: HTMLElement): void{
   const highlighter = editor.children.item(1);
@@ -20,8 +18,6 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
   if(reset){
     deleteHighlightElement(editor);
   }
-
-  lineNumbersElement.innerHTML = [...Array(lines.length).keys()].map((i) => i + 1).join("\n");
 
   if(!editor.children.item(1)){
     const elem = document.createElement("pre");
@@ -43,8 +39,6 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
 
     elem.scrollTop = textarea.scrollTop;
     elem.scrollLeft = textarea.scrollLeft;
-
-    lineNumbersElement.scrollTop = textarea.scrollTop;
   }
 
   if(reset){
