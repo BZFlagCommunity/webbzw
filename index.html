@@ -142,16 +142,14 @@ textarea.show{
 }
 
 .line-numbers{
+  margin: 0;
+  color: #777;
   text-align: right;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border-color);
   overflow: hidden;
   user-select: none;
-}
-
-.line-numbers > span{
-  color: #777;
 }
 
 .editor{
@@ -240,7 +238,7 @@ textarea.show{
     <input type="file" id="bzw-file" accept=".bzw">
   </header>
   <main>
-    <div class="line-numbers"></div>
+    <pre class="line-numbers"></pre>
     <div class="editor">
       <textarea placeholder="bzw source" spellcheck="false"></textarea>
     </div>
@@ -444,16 +442,10 @@ function highlight(editor, textarea, source) {
     if (reset) {
         deleteHighlightElement(editor);
     }
-    setTimeout(()=>{
-        while(lineNumbersElement.lastChild){
-            lineNumbersElement.lastChild.remove();
-        }
-        for(let i = 0; i < lines.length; i++){
-            const lineNumberElement = document.createElement("span");
-            lineNumberElement.innerText = `${i + 1}`;
-            lineNumbersElement.appendChild(lineNumberElement);
-        }
-    });
+    lineNumbersElement.innerHTML = [
+        ...Array(lines.length).keys()
+    ].map((i)=>i + 1
+    ).join("\n");
     if (!editor.children.item(1)) {
         const elem = document.createElement("pre");
         if (!elem) {
