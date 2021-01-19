@@ -480,17 +480,16 @@ function highlight(editor, textarea, source) {
         return;
     }
     const selectionStart = textarea.selectionStart;
-    const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
+    const currentLineNumber = (sourceLines === lines.length ? textarea.value : source ?? "").substr(0, selectionStart).split("\n").length - 1;
     const html = highlightHtml(lines[currentLineNumber]);
-    if (sourceLines < lines.length && elem.children[currentLineNumber]) {
+    if (sourceLines < lines.length) {
         const newLine = document.createElement("div");
-        newLine.innerHTML = html;
-        elem.insertBefore(newLine, elem.children[currentLineNumber]);
+        newLine.innerHTML = highlightHtml(lines[currentLineNumber + 1]);
+        elem.insertBefore(newLine, elem.children[currentLineNumber + 1]);
     } else if (sourceLines > lines.length) {
-        elem.removeChild(elem.children[currentLineNumber + 1]);
-    } else {
-        elem.children[currentLineNumber].innerHTML = html;
+        elem.removeChild(elem.children[currentLineNumber]);
     }
+    elem.children[currentLineNumber].innerHTML = html;
 }
 function getProjection(angle, aspectRatio, zMin, zMax) {
     const ang = Math.tan(angle * 0.5 * Math.PI / 180);
