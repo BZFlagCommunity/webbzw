@@ -374,10 +374,13 @@ function highlight(editor, textarea, source) {
         return;
     }
     const elem = editor.children.item(1);
+    if (!elem) {
+        return;
+    }
     const selectionStart = textarea.selectionStart;
     const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
     const html = highlightHtml(lines[currentLineNumber]);
-    if (sourceLines < lines.length) {
+    if (sourceLines < lines.length && elem.children[currentLineNumber]) {
         const newLine = document.createElement("div");
         newLine.innerHTML = html;
         elem.insertBefore(newLine, elem.children[currentLineNumber]);
