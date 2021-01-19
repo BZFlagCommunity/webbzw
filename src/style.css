@@ -56,6 +56,20 @@
   --highlight-flag: #50A14F;
 }
 
+:root[data-theme=palenight]{
+  --background-color:#292D3E;
+  --border-color: #424864;
+  --selection-color: #7580B850;
+
+  --highlight-default: #BFC7D5;
+  --highlight-comment: #697098;
+  --highlight-number: #F78C6C;
+  --highlight-symbol: #82AAFF;
+  --highlight-headers: #FFCB6B;
+  --highlight-keyword: #C792EA;
+  --highlight-flag: #C3E88D;
+}
+
 body{
   height: 100vh;
   margin: 0;
