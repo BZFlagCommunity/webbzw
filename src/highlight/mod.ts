@@ -68,17 +68,17 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
   }
 
   const selectionStart = textarea.selectionStart;
-  const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
+  const currentLineNumber = (sourceLines === lines.length ? textarea.value : source ?? "").substr(0, selectionStart).split("\n").length - 1;
 
   const html = highlightHtml(lines[currentLineNumber]);
 
-  if(sourceLines < lines.length && elem.children[currentLineNumber]){
+  if(sourceLines < lines.length){ // line added
     const newLine = document.createElement("div");
-    newLine.innerHTML = html;
-    elem.insertBefore(newLine, elem.children[currentLineNumber]);
-  }else if(sourceLines > lines.length){
-    elem.removeChild(elem.children[currentLineNumber + 1]);
-  }else{
-    elem.children[currentLineNumber].innerHTML = html;
+    newLine.innerHTML = highlightHtml(lines[currentLineNumber + 1]);
+    elem.insertBefore(newLine, elem.children[currentLineNumber + 1]);
+  }else if(sourceLines > lines.length){ // line deleted
+    elem.removeChild(elem.children[currentLineNumber]);
   }
+
+  elem.children[currentLineNumber].innerHTML = html;
 };
