@@ -135,16 +135,14 @@ textarea.show{
 }
 
 .line-numbers{
+  margin: 0;
+  color: #777;
   text-align: right;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border-color);
   overflow: hidden;
   user-select: none;
-}
-
-.line-numbers > span{
-  color: #777;
 }
 
 .editor{

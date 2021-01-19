@@ -21,18 +21,7 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
     deleteHighlightElement(editor);
   }
 
-  // line numbers - FIXME: this should not be rebuilt every time
-  setTimeout(() => {
-    while(lineNumbersElement.lastChild){
-      lineNumbersElement.lastChild.remove();
-    }
-
-    for(let i = 0; i < lines.length; i++){
-      const lineNumberElement = document.createElement("span");
-      lineNumberElement.innerText = `${i + 1}`;
-      lineNumbersElement.appendChild(lineNumberElement);
-    }
-  });
+  lineNumbersElement.innerHTML = [...Array(lines.length).keys()].map((i) => i + 1).join("\n");
 
   if(!editor.children.item(1)){
     const elem = document.createElement("pre");
