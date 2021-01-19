@@ -6,8 +6,9 @@ const WALL_HEIGHT = 6.15; // 3 * _tankHeight (2.05)
 export class World extends MapObject{
   VERTEX_COUNT = 60;
 
-  size = [400, 400, 0];
-  color = [.3, .75, .3, 0];
+  // FIXME: the types should NOT need to be redeclared
+  size: [number, number, number] = [400, 400, 0];
+  color: [number, number, number, number] = [.3, .75, .3, 0];
 
   noWalls: boolean = false;
 

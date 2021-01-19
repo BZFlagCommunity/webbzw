@@ -25,15 +25,15 @@ function parseNum(str: string, fallback: number = 0): number{
 /** Basic definition of a map object - should contain properties that are across "all" objects */
 export abstract class MapObject{
   /** Position */
-  position: number[] = [0, 0, 0];
+  position: [number, number, number] = [0, 0, 0];
   /** Shift from position */
-  shift: number[] = [0, 0 , 0];
+  shift: [number, number, number] = [0, 0 , 0];
   /** Size */
-  size: number[] = [0, 0, 0];
-  /** Rotation (Z axis) */
+  size: [number, number, number] = [0, 0, 0];
+  /** Rotation (around Z axis) */
   rotation: number = 0;
   /** Color */
-  color?: number[];
+  color?: [number, number, number, number];
 
   /** Number of vertices */
   readonly VERTEX_COUNT: number = 0;
