@@ -24,6 +24,7 @@
   --background-color:hsl(240, 10%, 10%);
   --border-color: hsl(240, 10%, 15%);
   --text-color: #FFF;
+  --selection-color: rgba(255, 255, 255, .2);
 
   --highlight-default: #F0F0F0;
   --highlight-comment: #AAA;
@@ -51,6 +52,7 @@
   --background-color: #FAFAFA;
   --border-color: #FFF;
   --text-color: #000;
+  --selection-color: rgba(0, 0, 0, .2);
 
   --highlight-default: #383A42;
   --highlight-comment: #A0A1A7;
@@ -153,7 +155,7 @@ textarea{
   --scrollbar-size: .5rem;
 
   padding-right: 2rem;
-  background-color: var(--background-color);
+  background: none;
   color: transparent;
   caret-color: var(--highlight-default);
   resize: none;
@@ -161,10 +163,11 @@ textarea{
   border-radius: 0;
   outline: none;
   white-space: nowrap;
+  z-index: 1;
 }
 
 textarea::selection{
-  background-color: rgba(255, 255 ,255, .2);
+  background-color: var(--selection-color);
 }
 
 textarea::-webkit-scrollbar{
