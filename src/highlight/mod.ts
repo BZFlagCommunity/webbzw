@@ -47,6 +47,9 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
   }
 
   const elem = editor.children.item(1) as HTMLElement;
+  if(!elem){
+    return;
+  }
 
   const selectionStart = textarea.selectionStart;
   const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
