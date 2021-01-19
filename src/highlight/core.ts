@@ -1,4 +1,4 @@
-const HIGHLIGHT_HEADERS = [
+const HEADERS = [
   "world",
   "options",
   "waterLevel",
@@ -28,11 +28,11 @@ const HIGHLIGHT_HEADERS = [
   "enddef",
   "drawInfo",
   "lod",
-  "end"
+  "end",
 ];
-const HIGHLIGHT_HEADERS_REGEX = new RegExp(`^([ \t]*)(${HIGHLIGHT_HEADERS.join("|")})`, "gmi");
+const HEADERS_REGEX = new RegExp(`^([ \t]*)(${HEADERS.join("|")})$`, "gm");
 
-const HIGHLIGHT_KEYWORDS = [
+const KEYWORDS = [
   "position",
   "size",
   "shift",
@@ -43,12 +43,69 @@ const HIGHLIGHT_KEYWORDS = [
   "from",
   "to",
   "noWalls",
-  "freeCtfSpawns"
+  "freeCtfSpawns",
+  "zoneflag",
+  "flag",
+  "type",
 ];
-const HIGHLIGHT_KEYWORDS_REGEX = new RegExp(`^([ \t]*)(${HIGHLIGHT_KEYWORDS.join("|")})`, "gmi");
+const KEYWORDS_REGEX = new RegExp(`^([ \t]*)(${KEYWORDS.join("|")})`, "gm");
+
+const FLAGS = [
+  "good",
+  "bad",
+  "R*",
+  "G*",
+  "B*",
+  "P*",
+  "A",
+  "BU",
+  "CS",
+  "CL",
+  "GM",
+  "G",
+  "IB",
+  "ID",
+  "JP",
+  "LG",
+  "L",
+  "MG",
+  "MQ",
+  "N",
+  "OO",
+  "PZ",
+  "QT",
+  "F",
+  "R",
+  "SE",
+  "SH",
+  "SW",
+  "ST",
+  "SR",
+  "SB",
+  "TH",
+  "T",
+  "US",
+  "V",
+  "WG",
+  "BY",
+  "B",
+  "CB",
+  "FO",
+  "JM",
+  "LT",
+  "M",
+  "NJ",
+  "O",
+  "RC",
+  "RO",
+  "RT",
+  "TR",
+  "WA",
+];
+const FLAGS_REGEX = new RegExp(`^([ \t]*(zoneflag|flag|type) )(${FLAGS.join("|").replace(/\*/g, "\\*")})`, "gm");
 
 const highlightSpan = (type: string): string => `<span class="${type}">$1</span>`;
-const highlightWord = (type: string): string => `$1<span class="${type}">$2</span>`;
+const highlightWord = (type: string, first = 1, second = 2): string => `$${first}<span class="${type}">$${second}</span>`;
 
 export const highlightHtml = (text: string): string =>
   text
@@ -57,6 +114,7 @@ export const highlightHtml = (text: string): string =>
     .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
     .replace(/(#.*?$)/gm, highlightSpan("comment"))
     .replace(/([0-9]+)/g, highlightSpan("number"))
-    .replace(HIGHLIGHT_HEADERS_REGEX, highlightWord("header"))
-    .replace(HIGHLIGHT_KEYWORDS_REGEX, highlightWord("keyword"))
+    .replace(HEADERS_REGEX, highlightWord("header"))
+    .replace(KEYWORDS_REGEX, highlightWord("keyword"))
+    .replace(FLAGS_REGEX, highlightWord("flag", undefined, 3))
 ;

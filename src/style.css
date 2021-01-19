@@ -18,6 +18,7 @@
   --highlight-symbol: #3AF;
   --highlight-headers: #F55;
   --highlight-keyword: #A8F;
+  --highlight-flag: #AC8;
 }
 
 body{
@@ -92,6 +93,7 @@ label[for=bzw-file]:hover{
 }
 
 textarea{
+  padding-right: 2rem;
   background-color: var(--background-color);
   color: transparent;
   caret-color: #FFF;
@@ -147,6 +149,10 @@ textarea.show{
 
 .highlight .keyword{
   color: var(--highlight-keyword);
+}
+
+.highlight .flag{
+  color: var(--highlight-flag);
 }
 
 @media only screen and (max-width: 768px){
