@@ -275,7 +275,7 @@ window.onload = () => {
   canvas.addEventListener("wheel", (e): void => {
     const delta = (e as WheelEvent).deltaY;
     viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
-    viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 2 ? -map.worldSize * 2 : viewMatrix[14];
+    viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 3 ? -map.worldSize * 3 : viewMatrix[14];
   });
 
   const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
@@ -362,7 +362,7 @@ window.onload = () => {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, canvas.width/canvas.height, .01, map.worldSize * 6));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, canvas.width/canvas.height, -MAX_ZOOM / 2, map.worldSize * 5));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
