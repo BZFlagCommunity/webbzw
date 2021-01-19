@@ -98,6 +98,8 @@ label[for=bzw-file]:hover{
 }
 
 textarea{
+  --scrollbar-size: .5rem;
+
   padding-right: 2rem;
   background-color: var(--background-color);
   color: transparent;
@@ -111,6 +113,21 @@ textarea{
 
 textarea::selection{
   background-color: rgba(255, 255 ,255, .2);
+}
+
+textarea::-webkit-scrollbar{
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+  border-left: 1px solid var(--border-color);
+}
+
+textarea::-webkit-scrollbar-thumb{
+  background: rgba(255, 255, 255, .4);
+  border-radius: var(--scrollbar-size);
+}
+
+textarea::-webkit-scrollbar-thumb:hover{
+  background: rgba(255, 255, 255, .6);
 }
 
 textarea.show{
