@@ -46,14 +46,14 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
     return;
   }
 
-  const elem = editor.children.item(1);
+  const elem = editor.children.item(1) as HTMLElement;
 
   const selectionStart = textarea.selectionStart;
   const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
 
   const html = highlightHtml(lines[currentLineNumber]);
 
-  if(sourceLines < lines.length){
+  if(sourceLines < lines.length && elem.children[currentLineNumber]){
     const newLine = document.createElement("div");
     newLine.innerHTML = html;
     elem.insertBefore(newLine, elem.children[currentLineNumber]);
