@@ -34,9 +34,10 @@ const HEADERS_REGEX = new RegExp(`^(${HEADERS.join("|")})`, "gm");
 
 const KEYWORDS = [
   "position",
+  "pos",
   "size",
-  "shift",
   "rotation",
+  "rot",
   "color",
   "name",
   "flagHeight",
@@ -44,9 +45,46 @@ const KEYWORDS = [
   "to",
   "noWalls",
   "freeCtfSpawns",
+  "height",
+  "materials",
+  "red",
+  "green",
+  "blue",
+  "alpha",
+  "center",
+  "fixedscale",
+  "scale",
+  "fixedspin",
+  "spin",
+  "fixedshift",
+  "shift",
+  // physics
+  "linear",
+  "angular",
+  "slide",
+  "death",
+  // phaseable
+  "passable",
+  "drivethrough",
+  "shootthrough",
+  "ricochet",
+  // base
+  "oncap",
+  // teleporter
+  "border",
+  "from",
+  "to",
+  // weapon
+  "tilt",
+  "initdelay",
+  "delay",
+  "type",
+  "trigger",
+  "eventteam",
+  // zone
   "zoneflag",
   "flag",
-  "type",
+  "safety",
 ];
 const KEYWORDS_REGEX = new RegExp(`^([ \t]*)(${KEYWORDS.join("|")})`, "gm");
 
