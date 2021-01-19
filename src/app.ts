@@ -424,7 +424,7 @@ function updateMesh(gl: WebGL2RenderingContext){
     map.worldSize = map.objects[map.objects.length - 1].size[0];
   }
 
-  map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? -1 : 1); // sort by alpha
+  map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1); // sort by alpha
   for(const object of map.objects){
     object.buildMesh(mesh);
   }
