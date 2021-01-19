@@ -17,7 +17,7 @@
   font-size: 18px;
 
   --background-color: #121212;
-  --border-color: #222;
+  --border-color: #1E1E1E;
 
   /* syntax highlighter theme */
   --highlight-comment: #AAA;
@@ -56,13 +56,24 @@ header{
   flex-direction: column;
 }
 
+footer{
+  padding: .25rem .5rem;
+  background-color: var(--border-color);
+  font-size: .8rem;
+  display: flex;
+}
+
+footer > span:not(:last-child){
+  margin-right: 1rem;
+}
+
 main{
   flex: 1;
   display: flex;
 }
 
 main > *:not(.resizer){
-  flex: 1 0 0;
+  flex: 1;
 }
 
 header label:not(:last-child){
@@ -85,21 +96,6 @@ label[for=bzw-file]:hover{
   background-color: #28F;
 }
 
-.editor{
-  display: flex;
-  position: relative;
-  border-right: 1px solid var(--border-color);
-}
-
-.editor > *{
-  padding: .2rem .5rem;
-  font-size: .8rem;
-  font-family: "Source Code Pro", monospace;
-  line-height: 1.1em;
-  flex: 1;
-  overflow: auto;
-}
-
 textarea{
   padding-right: 2rem;
   background-color: var(--background-color);
@@ -118,6 +114,21 @@ textarea::selection{
 
 textarea.show{
   color: #FFF;
+}
+
+.editor{
+  display: flex;
+  position: relative;
+  border-right: 1px solid var(--border-color);
+}
+
+.editor > *{
+  padding: .2rem .5rem;
+  font-size: .8rem;
+  font-family: "Source Code Pro", monospace;
+  line-height: 1.1em;
+  flex: 1;
+  overflow: auto;
 }
 
 .resizer{
@@ -197,6 +208,14 @@ textarea.show{
     <div class="resizer"></div>
     <canvas></canvas>
   </main>
+  <footer>
+    <span id="objects"></span>
+    <span id="vertices"></span>
+    <span style="flex:1"></span>
+    <span><a href="https://github.com/BZFlagCommunity/webbzw/issues/new?labels=bug" target="_blank" rel="noopener noreferrer">Report a Bug</a></span>
+    <span><a href="https://github.com/BZFlagCommunity/webbzw" target="_blank" rel="noopener noreferrer">GitHub</a></span>
+    <span>Copyright &copy; 2020-2021 The Noah</span>
+  </footer>
   <script>const VERTEX_SHADER = `#version 300 es\nlayout(location = 0) in vec3 position;\nlayout(location = 1) in vec4 color;\n\nout vec4 vColor;\n\nuniform mat4 proj;\nuniform mat4 view;\nuniform mat4 model;\n\nvoid main(void){\n  vColor = color;\n\n  gl_Position = proj * view * model * vec4(position, 1.0);\n}`;
 const FRAGMENT_SHADER = `#version 300 es\nprecision highp float;\n\nin vec4 vColor;\n\nout vec4 finalColor;\n\nvoid main(void){\n  if(vColor.a < .05){\n    discard;\n  }\n\n  finalColor = vColor;\n}`;
 function createShader(gl, vertCode, fragCode) {
@@ -1073,6 +1092,10 @@ const textarea = document.querySelector(".editor textarea");
 const editor = document.querySelector(".editor");
 const canvas1 = document.querySelector("canvas");
 const bzwFile = document.querySelector("#bzw-file");
+const statusBar = {
+    objects: document.querySelector("#objects"),
+    vertices: document.querySelector("#vertices")
+};
 const autoRotate = document.querySelector("#auto-rotate");
 const showAxis = document.querySelector("#show-axis");
 const syntaxHighlighting = document.querySelector("#syntax-highlighting");
@@ -1437,6 +1460,7 @@ function parseSource() {
             }
         }
     }
+    statusBar.objects.innerText = `${map.objects.length} Objects`;
 }
 function updateMesh(gl1) {
     console.log("updating mesh");
@@ -1476,6 +1500,7 @@ function updateMesh(gl1) {
     gl1.enableVertexAttribArray(1);
     gl1.vertexAttribPointer(1, 4, gl1.FLOAT, false, 16, 0);
     gl1.bindBuffer(gl1.ARRAY_BUFFER, null);
+    statusBar.vertices.innerText = `${elementCount} Vertices`;
 }
 </script>
 </body>
