@@ -16,8 +16,8 @@
 :root{
   font-size: 18px;
 
-  --background-color: #121212;
-  --border-color: #1E1E1E;
+  --background-color:hsl(240, 10%, 10%);
+  --border-color: hsl(240, 10%, 15%);
 
   /* syntax highlighter theme */
   --highlight-comment: #AAA;
@@ -70,9 +70,10 @@ footer > span:not(:last-child){
 main{
   flex: 1;
   display: flex;
+  overflow: auto;
 }
 
-main > *:not(.resizer){
+main > *:not(.resizer):not(.line-numbers){
   flex: 1;
 }
 
@@ -116,6 +117,26 @@ textarea.show{
   color: #FFF;
 }
 
+.line-numbers, .editor > *{
+  padding: .2rem .5rem;
+  font-size: .8rem;
+  font-family: "Source Code Pro", monospace;
+  line-height: 1.1em;
+}
+
+.line-numbers{
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+  overflow: hidden;
+  user-select: none;
+}
+
+.line-numbers > span{
+  color: #777;
+}
+
 .editor{
   display: flex;
   position: relative;
@@ -123,10 +144,6 @@ textarea.show{
 }
 
 .editor > *{
-  padding: .2rem .5rem;
-  font-size: .8rem;
-  font-family: "Source Code Pro", monospace;
-  line-height: 1.1em;
   flex: 1;
   overflow: auto;
 }
@@ -184,6 +201,10 @@ textarea.show{
   main{
     flex-direction: column;
   }
+
+  .line-numbers{
+    display: none
+  }
 }
 </style>
 </head>
@@ -202,6 +223,7 @@ textarea.show{
     <input type="file" id="bzw-file" accept=".bzw">
   </header>
   <main>
+    <div class="line-numbers"></div>
     <div class="editor">
       <textarea placeholder="bzw source" spellcheck="false"></textarea>
     </div>
@@ -359,6 +381,7 @@ const highlightWord = (type, first = 1, second = 2)=>`$${first}<span class="${ty
 ;
 const highlightHtml = (text)=>text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([-\.*/"=]+?)/g, highlightSpan("symbol")).replace(/(#.*?$)/gm, highlightSpan("comment")).replace(/([0-9]+)/g, highlightSpan("number")).replace(HEADERS_REGEX, highlightSpan("header")).replace(KEYWORDS_REGEX, highlightWord("keyword")).replace(FLAGS_REGEX, highlightWord("flag", undefined, 3))
 ;
+const lineNumbersElement = document.querySelector(".line-numbers");
 function deleteHighlightElement(editor) {
     const highlighter = editor.children.item(1);
     if (highlighter) {
@@ -372,6 +395,16 @@ function highlight(editor, textarea, source) {
     if (reset) {
         deleteHighlightElement(editor);
     }
+    setTimeout(()=>{
+        while(lineNumbersElement.lastChild){
+            lineNumbersElement.lastChild.remove();
+        }
+        for(let i = 0; i < lines.length; i++){
+            const lineNumberElement = document.createElement("span");
+            lineNumberElement.innerText = `${i + 1}`;
+            lineNumbersElement.appendChild(lineNumberElement);
+        }
+    });
     if (!editor.children.item(1)) {
         const elem = document.createElement("pre");
         if (!elem) {
@@ -388,6 +421,7 @@ function highlight(editor, textarea, source) {
         editor.appendChild(elem);
         elem.scrollTop = textarea.scrollTop;
         elem.scrollLeft = textarea.scrollLeft;
+        lineNumbersElement.scrollTop = textarea.scrollTop;
     }
     if (reset) {
         return;
@@ -1091,6 +1125,7 @@ const MAX_ZOOM = -5;
 const textarea = document.querySelector(".editor textarea");
 const editor = document.querySelector(".editor");
 const canvas1 = document.querySelector("canvas");
+const lineNumbersElement1 = document.querySelector(".line-numbers");
 const bzwFile = document.querySelector("#bzw-file");
 const statusBar = {
     objects: document.querySelector("#objects"),
@@ -1173,6 +1208,7 @@ textarea.onscroll = ()=>{
         highlighter.scrollTop = textarea.scrollTop;
         highlighter.scrollLeft = textarea.scrollLeft;
     }
+    lineNumbersElement1.scrollTop = textarea.scrollTop;
 };
 textarea.oninput = (e)=>{
     textarea.value = e.currentTarget.value;
