@@ -489,7 +489,6 @@ const highlightWord = (type, first = 1, second = 2)=>`$${first}<span class="${ty
 ;
 const highlightHtml = (text)=>text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([-\.*/"=]+?)/g, highlightSpan("symbol")).replace(/(#.*?$)/gm, highlightSpan("comment")).replace(/([0-9]+)/g, highlightSpan("number")).replace(HEADERS_REGEX, highlightSpan("header")).replace(KEYWORDS_REGEX, highlightWord("keyword")).replace(FLAGS_REGEX, highlightWord("flag", undefined, 3))
 ;
-const lineNumbersElement = document.querySelector(".line-numbers");
 function deleteHighlightElement(editor) {
     const highlighter = editor.children.item(1);
     if (highlighter) {
@@ -503,10 +502,6 @@ function highlight(editor, textarea, source) {
     if (reset) {
         deleteHighlightElement(editor);
     }
-    lineNumbersElement.innerHTML = [
-        ...Array(lines.length).keys()
-    ].map((i)=>i + 1
-    ).join("\n");
     if (!editor.children.item(1)) {
         const elem = document.createElement("pre");
         if (!elem) {
@@ -523,7 +518,6 @@ function highlight(editor, textarea, source) {
         editor.appendChild(elem);
         elem.scrollTop = textarea.scrollTop;
         elem.scrollLeft = textarea.scrollLeft;
-        lineNumbersElement.scrollTop = textarea.scrollTop;
     }
     if (reset) {
         return;
@@ -1226,7 +1220,7 @@ const MAX_ZOOM = -5;
 const textarea = document.querySelector(".editor textarea");
 const editor = document.querySelector(".editor");
 const canvas1 = document.querySelector("canvas");
-const lineNumbersElement1 = document.querySelector(".line-numbers");
+const lineNumbersElement = document.querySelector(".line-numbers");
 const bzwFile = document.querySelector("#bzw-file");
 const statusBar = {
     objects: document.querySelector("#objects"),
@@ -1246,6 +1240,7 @@ if (syntaxHighlighting.checked) {
     setTimeout(()=>highlight(editor, textarea)
     );
 }
+updateLineNumbers();
 let vbo, cbo, ebo;
 let elementCount = 0;
 const map = {
@@ -1272,6 +1267,13 @@ function handleFile(files) {
     });
     reader.readAsText(file);
 }
+function updateLineNumbers() {
+    lineNumbersElement.innerHTML = [
+        ...Array(source.split("\n").length).keys()
+    ].map((i)=>i + 1
+    ).join("\n");
+    lineNumbersElement.scrollTop = textarea.scrollTop;
+}
 function _textareaChanged() {
     if (textarea.value === source) {
         return;
@@ -1280,6 +1282,7 @@ function _textareaChanged() {
         highlight(editor, textarea, source);
     }
     source = textarea.value;
+    updateLineNumbers();
     parseSource();
     updateMesh(gl);
     localStorage.setItem("bzw", source);
@@ -1316,7 +1319,7 @@ textarea.onscroll = ()=>{
         highlighter.scrollTop = textarea.scrollTop;
         highlighter.scrollLeft = textarea.scrollLeft;
     }
-    lineNumbersElement1.scrollTop = textarea.scrollTop;
+    lineNumbersElement.scrollTop = textarea.scrollTop;
 };
 textarea.oninput = (e)=>{
     textarea.value = e.currentTarget.value;
