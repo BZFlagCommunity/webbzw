@@ -11,6 +11,7 @@ Preview BZW files on the web.
 
 - [x] Real-time preview
 - [x] Syntax highlighting
+- [x] Drag 'n drop files
 - [x] Mobile support
 
 The list of supported map features can be found in issue [#2](https://github.com/The-Noah/webbzw/issues/2).
