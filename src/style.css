@@ -134,10 +134,12 @@ select{
   padding: .2rem;
   background-color: var(--background-color);
   font-family: Montserrat, sans-serif;
+  font-size: .8rem;
   font-weight: 600;
   border: none;
   border-radius: 0;
   outline: none;
+  cursor: pointer;
 }
 
 textarea{
