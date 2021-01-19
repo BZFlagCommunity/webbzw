@@ -716,7 +716,7 @@ class World extends MapObject {
         0.3,
         0.75,
         0.3,
-        1
+        0
     ];
     noWalls = false;
     buildMesh(mesh) {
@@ -1551,7 +1551,7 @@ function updateMesh(gl1) {
         map.objects.push(new World());
         map.worldSize = map.objects[map.objects.length - 1].size[0];
     }
-    map.objects = map.objects.sort((a, b)=>(a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? -1 : 1
+    map.objects = map.objects.sort((a, b)=>(a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1
     );
     for (const object of map.objects){
         object.buildMesh(mesh);
