@@ -1,40 +1,65 @@
 import {highlightHtml} from "./core.ts";
 
-export const deleteHighlightElement = (editor: HTMLElement): void => {
+/** Find and delete highlight element */
+export function deleteHighlightElement(editor: HTMLElement): void{
   const highlighter = editor.children.item(1);
   if(highlighter){
     highlighter.remove();
   }
 };
 
-export const highlight = (editor: HTMLElement, textarea: HTMLTextAreaElement): void => {
-  console.time("delete old element");
-  deleteHighlightElement(editor);
-  console.timeEnd("delete old element");
+/** Run highlighter */
+export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, source?: string): void{
+  const lines = textarea.value.split("\n");
+  let sourceLines = source ? source.split("\n").length : lines.length;
+  const reset = Math.abs(sourceLines - lines.length) > 1;
 
-  console.time("create new element");
-  const elem = document.createElement("pre");
-  if(!elem){
-    console.error("highlight element could not be created");
+  // if multiple lines changes brute force update - FIXME: this is a very bad hack
+  if(reset){
+    deleteHighlightElement(editor);
+  }
+
+  if(!editor.children.item(1)){
+    const elem = document.createElement("pre");
+    if(!elem){
+      console.error("highlight element could not be created");
+      return;
+    }
+    elem.classList.add("highlight");
+    // console.timeEnd("create new element");
+
+    const html = (highlightHtml(textarea.value) + "\n").split("\n");
+
+    for(const lineNumber in html){
+      const line = document.createElement("div");
+      line.innerHTML = html[lineNumber];
+      elem.appendChild(line);
+    }
+
+    editor.appendChild(elem);
+
+    elem.scrollTop = textarea.scrollTop;
+    elem.scrollLeft = textarea.scrollLeft;
+  }
+
+  if(reset){
     return;
   }
-  elem.classList.add("highlight");
-  console.timeEnd("create new element");
 
-  console.time("build html");
-  const html = highlightHtml(textarea.value) + "\n";
-  console.timeEnd("build html");
+  const elem = editor.children.item(1);
 
-  console.time("set html");
-  elem.innerHTML = html;
-  console.timeEnd("set html");
+  const selectionStart = textarea.selectionStart;
+  const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
 
-  console.time("add element to dom");
-  editor.appendChild(elem);
-  console.timeEnd("add element to dom");
+  const html = highlightHtml(lines[currentLineNumber]);
 
-  console.time("set element scroll");
-  elem.scrollTop = textarea.scrollTop;
-  elem.scrollLeft = textarea.scrollLeft;
-  console.timeEnd("set element scroll");
+  if(sourceLines < lines.length){
+    const newLine = document.createElement("div");
+    newLine.innerHTML = html;
+    elem.insertBefore(newLine, elem.children[currentLineNumber]);
+  }else if(sourceLines > lines.length){
+    elem.removeChild(elem.children[currentLineNumber + 1]);
+  }else{
+    elem.children[currentLineNumber].innerHTML = html;
+  }
 };

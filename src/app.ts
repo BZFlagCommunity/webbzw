@@ -7,6 +7,7 @@ import "./editor/mod.ts";
 
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 75;
+const EDITOR_CHANGE_TIMEOUT = 15;
 
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
@@ -74,14 +75,15 @@ function _textareaChanged(){
   if(textarea.value === source){
     return;
   }
-  source = textarea.value;
 
-  parseSource();
-
-  updateMesh(gl);
   if(syntaxHighlighting.checked){
-    highlight(editor, textarea);
+    highlight(editor, textarea, source);
   }
+
+  source = textarea.value;
+  parseSource();
+  updateMesh(gl);
+
   localStorage.setItem("bzw", source);
 }
 
@@ -92,7 +94,7 @@ function textareaChanged(){
     clearTimeout(timeoutId);
   }
 
-  timeoutId = setTimeout(() => _textareaChanged(), 50);
+  timeoutId = setTimeout(() => _textareaChanged(), EDITOR_CHANGE_TIMEOUT);
 }
 
 syntaxHighlighting.addEventListener("change", () => {

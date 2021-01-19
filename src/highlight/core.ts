@@ -30,7 +30,7 @@ const HEADERS = [
   "lod",
   "end",
 ];
-const HEADERS_REGEX = new RegExp(`^([ \t]*)(${HEADERS.join("|")})$`, "gm");
+const HEADERS_REGEX = new RegExp(`^(${HEADERS.join("|")})`, "gm");
 
 const KEYWORDS = [
   "position",
@@ -114,7 +114,7 @@ export const highlightHtml = (text: string): string =>
     .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
     .replace(/(#.*?$)/gm, highlightSpan("comment"))
     .replace(/([0-9]+)/g, highlightSpan("number"))
-    .replace(HEADERS_REGEX, highlightWord("header"))
+    .replace(HEADERS_REGEX, highlightSpan("header"))
     .replace(KEYWORDS_REGEX, highlightWord("keyword"))
     .replace(FLAGS_REGEX, highlightWord("flag", undefined, 3))
 ;
