@@ -12,6 +12,7 @@ const EDITOR_CHANGE_TIMEOUT = 15;
 const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
 const editor = document.querySelector(".editor") as HTMLDivElement;
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+const lineNumbersElement = document.querySelector(".line-numbers") as HTMLElement;
 const bzwFile = document.querySelector("#bzw-file") as HTMLInputElement;
 
 const statusBar = {
@@ -122,6 +123,8 @@ textarea.onscroll = () => {
     highlighter.scrollTop = textarea.scrollTop;
     highlighter.scrollLeft = textarea.scrollLeft;
   }
+
+  lineNumbersElement.scrollTop = textarea.scrollTop;
 };
 
 textarea.oninput = (e: Event) => {

@@ -9,8 +9,8 @@
 :root{
   font-size: 18px;
 
-  --background-color: #121212;
-  --border-color: #1E1E1E;
+  --background-color:hsl(240, 10%, 10%);
+  --border-color: hsl(240, 10%, 15%);
 
   /* syntax highlighter theme */
   --highlight-comment: #AAA;
@@ -63,9 +63,10 @@ footer > span:not(:last-child){
 main{
   flex: 1;
   display: flex;
+  overflow: auto;
 }
 
-main > *:not(.resizer){
+main > *:not(.resizer):not(.line-numbers){
   flex: 1;
 }
 
@@ -109,6 +110,26 @@ textarea.show{
   color: #FFF;
 }
 
+.line-numbers, .editor > *{
+  padding: .2rem .5rem;
+  font-size: .8rem;
+  font-family: "Source Code Pro", monospace;
+  line-height: 1.1em;
+}
+
+.line-numbers{
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+  overflow: hidden;
+  user-select: none;
+}
+
+.line-numbers > span{
+  color: #777;
+}
+
 .editor{
   display: flex;
   position: relative;
@@ -116,10 +137,6 @@ textarea.show{
 }
 
 .editor > *{
-  padding: .2rem .5rem;
-  font-size: .8rem;
-  font-family: "Source Code Pro", monospace;
-  line-height: 1.1em;
   flex: 1;
   overflow: auto;
 }
@@ -176,5 +193,9 @@ textarea.show{
 @media only screen and (max-width: 768px){
   main{
     flex-direction: column;
+  }
+
+  .line-numbers{
+    display: none
   }
 }
