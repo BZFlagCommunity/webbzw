@@ -24,6 +24,7 @@ const statusBar = {
 const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
 const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
 const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTMLInputElement;
+const colorTheme = document.querySelector("#color-theme") as HTMLSelectElement;
 
 const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
 if(!gl){
@@ -102,6 +103,14 @@ function textareaChanged(){
 
   timeoutId = setTimeout(() => _textareaChanged(), EDITOR_CHANGE_TIMEOUT);
 }
+
+colorTheme.value = localStorage.getItem("colorTheme") ?? "default";
+document.documentElement.setAttribute("data-theme", colorTheme.value);
+
+colorTheme.addEventListener("change", () => {
+  document.documentElement.setAttribute("data-theme", colorTheme.value);
+  localStorage.setItem("colorTheme", colorTheme.value);
+});
 
 syntaxHighlighting.addEventListener("change", () => {
   if(syntaxHighlighting.checked){
