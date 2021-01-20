@@ -1,25 +1,27 @@
 import {highlightHtml} from "./core.ts";
 
+import {elements} from "../dom/mod.ts";
+
 /** Find and delete highlight element */
-export function deleteHighlightElement(editor: HTMLElement): void{
-  const highlighter = editor.children.item(1);
+export function deleteHighlightElement(): void{
+  const highlighter = elements.editor.children.item(1);
   if(highlighter){
     highlighter.remove();
   }
 };
 
 /** Run highlighter */
-export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, source?: string): void{
-  const lines = textarea.value.split("\n");
+export function highlight(source?: string): void{
+  const lines = elements.textarea.value.split("\n");
   let sourceLines = source ? source.split("\n").length : lines.length;
   const reset = Math.abs(sourceLines - lines.length) > 1;
 
   // if multiple lines changes brute force update - FIXME: this is a very bad hack
   if(reset){
-    deleteHighlightElement(editor);
+    deleteHighlightElement();
   }
 
-  if(!editor.children.item(1)){
+  if(!elements.editor.children.item(1)){
     const elem = document.createElement("pre");
     if(!elem){
       console.error("highlight element could not be created");
@@ -27,7 +29,7 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
     }
     elem.classList.add("highlight");
 
-    const html = (highlightHtml(textarea.value) + "\n").split("\n");
+    const html = (highlightHtml(elements.textarea.value) + "\n").split("\n");
 
     for(const lineNumber in html){
       const line = document.createElement("div");
@@ -35,23 +37,23 @@ export function highlight(editor: HTMLElement, textarea: HTMLTextAreaElement, so
       elem.appendChild(line);
     }
 
-    editor.appendChild(elem);
+    elements.editor.appendChild(elem);
 
-    elem.scrollTop = textarea.scrollTop;
-    elem.scrollLeft = textarea.scrollLeft;
+    elem.scrollTop = elements.textarea.scrollTop;
+    elem.scrollLeft = elements.textarea.scrollLeft;
   }
 
   if(reset){
     return;
   }
 
-  const elem = editor.children.item(1) as HTMLElement;
+  const elem = elements.editor.children.item(1) as HTMLElement;
   if(!elem){
     return;
   }
 
-  const selectionStart = textarea.selectionStart;
-  const currentLineNumber = (sourceLines === lines.length ? textarea.value : source ?? "").substr(0, selectionStart).split("\n").length - 1;
+  const selectionStart = elements.textarea.selectionStart;
+  const currentLineNumber = (sourceLines === lines.length ? elements.textarea.value : source ?? "").substr(0, selectionStart).split("\n").length - 1;
 
   const html = highlightHtml(lines[currentLineNumber]);
 

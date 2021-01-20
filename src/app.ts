@@ -2,44 +2,27 @@ import * as math from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone} from "./bzw/mod.ts";
-import "./dom/mod.ts";
+import {elements} from "./dom/mod.ts";
 import "./editor/mod.ts";
 
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 75;
 const EDITOR_CHANGE_TIMEOUT = 15;
 
-const textarea = document.querySelector(".editor textarea") as HTMLTextAreaElement;
-const editor = document.querySelector(".editor") as HTMLDivElement;
-const canvas = document.querySelector("canvas") as HTMLCanvasElement;
-const lineNumbersElement = document.querySelector(".line-numbers") as HTMLElement;
-const bzwFile = document.querySelector("#bzw-file") as HTMLInputElement;
+elements.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
+elements.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
+elements.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
-const statusBar = {
-  objects: document.querySelector("#objects") as HTMLElement,
-  vertices: document.querySelector("#vertices") as HTMLElement,
-};
-
-// settings
-const autoRotate = document.querySelector("#auto-rotate") as HTMLInputElement;
-const showAxis = document.querySelector("#show-axis") as HTMLInputElement;
-const syntaxHighlighting = document.querySelector("#syntax-highlighting") as HTMLInputElement;
-const colorTheme = document.querySelector("#color-theme") as HTMLSelectElement;
-
-autoRotate.checked = localStorage.getItem("autoRotate") === "true";
-showAxis.checked = localStorage.getItem("showAxis") !== "false";
-syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
-
-colorTheme.value = localStorage.getItem("colorTheme") ?? "default";
+elements.settings.colorTheme.value = localStorage.getItem("colorTheme") ?? "default";
 colorThemeChanged();
 
-const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
+const gl = elements.canvas.getContext("webgl2") as WebGL2RenderingContext;
 if(!gl){
   alert("WebGL 2.0 not available");
 }
 
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
-textarea.value = source;
+elements.textarea.value = source;
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
@@ -69,7 +52,7 @@ function handleFile(files: FileList | null | undefined){
 
   reader.addEventListener("load", (e) => {
     const text = e.target?.result;
-    textarea.value = text as string;
+    elements.textarea.value = text as string;
     textareaChanged();
   });
 
@@ -82,22 +65,22 @@ function handleFile(files: FileList | null | undefined){
 
 /** Update line numbers to match source */
 function updateLineNumbers(){
-  lineNumbersElement.innerHTML = [...Array(source.split("\n").length).keys()].map((i) => i + 1).join("\n");
-  lineNumbersElement.scrollTop = textarea.scrollTop;
+  elements.lineNumbersElement.innerHTML = [...Array(source.split("\n").length).keys()].map((i) => i + 1).join("\n");
+  elements.lineNumbersElement.scrollTop = elements.textarea.scrollTop;
 }
 
 /** Raw handler for textarea being changed */
 function _textareaChanged(){
   // don't preform unnecessary updates if source hasn't changed
-  if(textarea.value === source){
+  if(elements.textarea.value === source){
     return;
   }
 
-  if(syntaxHighlighting.checked){
-    highlight(editor, textarea, source);
+  if(elements.settings.syntaxHighlighting.checked){
+    highlight(source);
   }
 
-  source = textarea.value;
+  source = elements.textarea.value;
   updateLineNumbers();
   parseSource();
   updateMesh(gl);
@@ -116,65 +99,65 @@ function textareaChanged(){
 }
 
 function colorThemeChanged(){
-  document.documentElement.setAttribute("data-theme", colorTheme.value);
+  document.documentElement.setAttribute("data-theme", elements.settings.colorTheme.value);
 }
 
 function syntaxHighlightingChanged(){
-  if(syntaxHighlighting.checked){
-    textarea.classList.remove("show");
-    highlight(editor, textarea);
+  if(elements.settings.syntaxHighlighting.checked){
+    elements.textarea.classList.remove("show");
+    highlight();
   }else{
-    textarea.classList.add("show");
-    deleteHighlightElement(editor);
+    elements.textarea.classList.add("show");
+    deleteHighlightElement();
   }
 }
 
-colorTheme.addEventListener("change", () => {
+elements.settings.colorTheme.addEventListener("change", () => {
   colorThemeChanged();
-  localStorage.setItem("colorTheme", colorTheme.value);
+  localStorage.setItem("colorTheme", elements.settings.colorTheme.value);
 });
 
-autoRotate.addEventListener("change", () => {
-  localStorage.setItem("autoRotate", autoRotate.checked ? "true" : "false");
+elements.settings.autoRotate.addEventListener("change", () => {
+  localStorage.setItem("autoRotate", elements.settings.autoRotate.checked ? "true" : "false");
 });
 
-showAxis.addEventListener("change", () => {
-  localStorage.setItem("showAxis", showAxis.checked ? "true" : "false");
+elements.settings.showAxis.addEventListener("change", () => {
+  localStorage.setItem("showAxis", elements.settings.showAxis.checked ? "true" : "false");
 });
 
-syntaxHighlighting.addEventListener("change", () => {
+elements.settings.syntaxHighlighting.addEventListener("change", () => {
   syntaxHighlightingChanged();
-  localStorage.setItem("syntaxHighlighting", syntaxHighlighting.checked ? "true" : "false");
+  localStorage.setItem("syntaxHighlighting", elements.settings.syntaxHighlighting.checked ? "true" : "false");
 });
 
-bzwFile.addEventListener("change", () => {
-  handleFile(bzwFile.files);
+elements.bzwFile.addEventListener("change", () => {
+  handleFile(elements.bzwFile.files);
 });
 
-textarea.onscroll = () => {
-  const highlighter = editor.children.item(1);
+elements.textarea.onscroll = () => {
+  const highlighter = elements.editor.children.item(1);
   if(highlighter){
-    highlighter.scrollTop = textarea.scrollTop;
-    highlighter.scrollLeft = textarea.scrollLeft;
+    highlighter.scrollTop = elements.textarea.scrollTop;
+    highlighter.scrollLeft = elements.textarea.scrollLeft;
   }
 
-  lineNumbersElement.scrollTop = textarea.scrollTop;
+  elements.lineNumbersElement.scrollTop = elements.textarea.scrollTop;
 };
 
-textarea.oninput = (e: Event) => {
-  textarea.value = (e.currentTarget as HTMLTextAreaElement).value;
+elements.textarea.oninput = (e: Event) => {
+  elements.textarea.value = (e.currentTarget as HTMLTextAreaElement).value;
   textareaChanged();
 };
 
 // custom keyboard shotcuts (editor)
-textarea.onkeydown = (e: KeyboardEvent) => {
+elements.textarea.onkeydown = (e: KeyboardEvent) => {
   // Ctrl+/ (toggle comment)
   if(e.keyCode === 191 && e.ctrlKey){
     e.preventDefault();
 
-    let selectionStart = textarea.selectionStart;
-    const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
-    const lines = textarea.value.split("\n");
+    let selectionStart = elements.textarea.selectionStart;
+    const currentLineNumber = elements.textarea.value.substr(0, selectionStart).split("\n").length - 1;
+    const lines = elements.textarea.value.split("\n");
 
     if(lines[currentLineNumber].startsWith("#")){ // remove comment
       lines[currentLineNumber] = lines[currentLineNumber].substr(1);
@@ -184,9 +167,9 @@ textarea.onkeydown = (e: KeyboardEvent) => {
       selectionStart++;
     }
 
-    textarea.value = lines.join("\n");
+    elements.textarea.value = lines.join("\n");
     textareaChanged();
-    textarea.selectionEnd = selectionStart;
+    elements.textarea.selectionEnd = selectionStart;
   }
 };
 
@@ -212,12 +195,12 @@ window.onkeydown = (e: KeyboardEvent) => {
   // Ctrl+O (open file)
   if(e.keyCode === 79 && e.ctrlKey){
     e.preventDefault();
-    bzwFile.click();
+    elements.bzwFile.click();
   }
 };
 
 window.onload = () => {
-  if(!canvas){
+  if(!elements.canvas){
     return;
   }
 
@@ -229,8 +212,8 @@ window.onload = () => {
   let dX = 0, dY = 0;
   let THETA = 180, PHI = 40, oldTime = 0;
 
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
+  elements.canvas.width = elements.canvas.offsetWidth;
+  elements.canvas.height = elements.canvas.offsetHeight;
 
   const mouseDown = (e: any) => {
     drag = true;
@@ -252,8 +235,8 @@ window.onload = () => {
     const x = getCoord(e, "X");
     const y = getCoord(e, "Y");
 
-    dX = (x - oldX) * MOUSE_SPEED * Math.PI / canvas.width;
-    dY = (y - oldY) * MOUSE_SPEED * Math.PI / canvas.height;
+    dX = (x - oldX) * MOUSE_SPEED * Math.PI / elements.canvas.width;
+    dY = (y - oldY) * MOUSE_SPEED * Math.PI / elements.canvas.height;
     THETA += dX;
     PHI += dY;
     oldX = x
@@ -261,16 +244,16 @@ window.onload = () => {
     e.preventDefault();
   };
 
-  canvas.addEventListener("mousedown", mouseDown, false);
-  canvas.addEventListener("mouseup", mouseUp, false);
-  canvas.addEventListener("mouseout", mouseUp, false);
-  canvas.addEventListener("mousemove", mouseMove, false);
+  elements.canvas.addEventListener("mousedown", mouseDown, false);
+  elements.canvas.addEventListener("mouseup", mouseUp, false);
+  elements.canvas.addEventListener("mouseout", mouseUp, false);
+  elements.canvas.addEventListener("mousemove", mouseMove, false);
   // mobile
-  canvas.addEventListener("touchstart", mouseDown, false);
-  canvas.addEventListener("touchend", mouseUp, false);
-  canvas.addEventListener("touchmove", mouseMove, false);
+  elements.canvas.addEventListener("touchstart", mouseDown, false);
+  elements.canvas.addEventListener("touchend", mouseUp, false);
+  elements.canvas.addEventListener("touchmove", mouseMove, false);
 
-  canvas.addEventListener("wheel", (e): void => {
+  elements.canvas.addEventListener("wheel", (e): void => {
     const delta = (e as WheelEvent).deltaY;
     viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
     viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 3 ? -map.worldSize * 3 : viewMatrix[14];
@@ -342,7 +325,7 @@ window.onload = () => {
     const dt = time - oldTime;
     oldTime = time;
 
-    if(!drag && autoRotate.checked){
+    if(!drag && elements.settings.autoRotate.checked){
       THETA += .015 * dt;
     }
 
@@ -359,15 +342,15 @@ window.onload = () => {
     ]);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, canvas.width/canvas.height, -MAX_ZOOM / 2, map.worldSize * 5));
+    gl.viewport(0, 0, elements.canvas.width, elements.canvas.height);
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, elements.canvas.width/elements.canvas.height, -MAX_ZOOM / 2, map.worldSize * 5));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
 
     gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
 
-    if(showAxis.checked){
+    if(elements.settings.showAxis.checked){
       gl.disable(gl.DEPTH_TEST);
 
       gl.bindVertexArray(axisVao);
@@ -440,7 +423,7 @@ function parseSource(){
     }
   }
 
-  statusBar.objects.innerText = `${map.objects.length} Objects`;
+  elements.statusBar.objects.innerText = `${map.objects.length} Objects`;
 }
 
 /** Update world mesh */
@@ -491,7 +474,7 @@ function updateMesh(gl: WebGL2RenderingContext){
 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  statusBar.vertices.innerText = `${elementCount} Vertices`;
+  elements.statusBar.vertices.innerText = `${elementCount} Vertices`;
 }
 
 syntaxHighlightingChanged();
