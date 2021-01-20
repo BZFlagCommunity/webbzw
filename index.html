@@ -21,8 +21,8 @@
   --shadow-spread: .5rem;
 
   /* color theme */
-  --background-color:hsl(240, 10%, 10%);
-  --border-color: hsl(240, 10%, 15%);
+  --background-color: #17171C;
+  --border-color: #27272F;
   --text-color: #FFF;
   --selection-color: rgba(255, 255, 255, .2);
 
@@ -64,7 +64,7 @@
 }
 
 :root[data-theme=palenight]{
-  --background-color:#292D3E;
+  --background-color: #292D3E;
   --border-color: #424864;
   --selection-color: #7580B850;
 
@@ -114,12 +114,12 @@ input[type=checkbox]{
 }
 
 header{
-  padding: .1rem 1rem;
+  padding: 0 1rem;
   background-color: var(--border-color);
   display: flex;
   flex-direction: column;
   box-shadow: 0 var(--shadow-height) var(--shadow-spread) var(--shadow-color);
-  z-index: 1;
+  z-index: 9;
 }
 
 header h1{
@@ -128,6 +128,80 @@ header h1{
   line-height: 1rem;
   display: flex;
   align-items: center;
+}
+
+nav{
+  display: flex;
+}
+
+nav span{
+  opacity: .75;
+}
+
+nav span:hover{
+  opacity: 1;
+}
+
+nav > div{
+  font-size: .9rem;
+  user-select: none;
+}
+
+nav > div:hover, nav .menu > span:hover{
+  background-color: var(--selection-color);
+}
+
+nav > .parent > span{
+  padding: .2rem .75rem;
+  font-weight: 500;
+  display: block;
+}
+
+nav .parent{
+  position: relative;
+}
+
+nav .parent:hover > .menu{
+  display: flex;
+}
+
+nav .menu{
+  width: 15rem;
+  padding: .5rem 0;
+  background-color: var(--background-color);
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 var(--shadow-height) var(--shadow-spread) var(--shadow-color);
+  cursor: default;
+  z-index: 9;
+}
+
+nav .menu.submenu{
+  margin-left: -2px;
+  top: 0;
+  left: 15rem;
+}
+
+nav > .menu:not(.submenu){
+  border-top: none;
+}
+
+nav .menu > span{
+  padding: .3rem 1rem;
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+nav .shortcut{
+  padding-left: 1rem;
+  font-size: .8em;
+  text-align: right;
+  flex: 1;
+  opacity: .75;
 }
 
 footer{
@@ -332,22 +406,54 @@ textarea.show{
 <body>
   <header>
     <h1>Web BZW <span class="beta">Beta</span></h1>
-    <div>
-      <label for="bzw-file">Open Map</label>
-      <input type="checkbox" id="auto-rotate">
-      <label for="auto-rotate">Auto rotate</label>
-      <input type="checkbox" id="show-axis">
-      <label for="show-axis">Show Axis</label>
-      <input type="checkbox" id="syntax-highlighting">
-      <label for="syntax-highlighting">Syntax Highlighting</label>
-      <select id="color-theme">
-        <option value="default">Default Theme</option>
-        <option value="one-dark-pro">One Dark Pro</option>
-        <option value="one-half-light">One Half Light</option>
-        <option value="palenight">Palenight</option>
-        <option value="one-monokai">One Monokai</option>
-      </select>
-    </div>
+    <nav>
+      <div class="parent">
+        <span>File</span>
+        <div class="menu">
+          <span onclick="mod.bzwFile.click()">
+            Open
+            <span class="shortcut">Ctrl+O</span>
+          </span>
+        </div>
+      </div>
+      <div class="parent">
+        <span>Edit</span>
+        <div class="menu">
+          <span onclick="toggleComment()">
+            Toggle Commnt
+            <span class="shortcut">Ctrl+/</span>
+          </span>
+        </div>
+      </div>
+      <div class="parent">
+        <span>View</span>
+        <div class="menu">
+          <span onclick="mod.settings.autoRotate.click()">
+            <input type="checkbox" id="auto-rotate" onclick="event.stopPropagation()">
+            Auto Rotate
+          </span>
+          <span onclick="mod.settings.showAxis.click()">
+            <input type="checkbox" id="show-axis" onclick="event.stopPropagation()">
+            Show Axis
+          </span>
+          <span onclick="mod.settings.syntaxHighlighting.click()">
+            <input type="checkbox" id="syntax-highlighting" onclick="event.stopPropagation()">
+            Syntax Highlighting
+          </span>
+          <span class="parent">
+            Color Theme
+            <span class="shortcut">&gt;</span>
+            <div class="menu submenu" onclick="setColorTheme(event)">
+              <span>Default</span>
+              <span>One Dark Pro</span>
+              <span>One Half Light</span>
+              <span>Palenight</span>
+              <span>One Monokai</span>
+            </div>
+          </span>
+        </div>
+      </div>
+    </nav>
     <input type="file" id="bzw-file" accept=".bzw">
   </header>
   <main>
@@ -426,8 +532,7 @@ const mod = function() {
     const settings = {
         autoRotate: document.querySelector("#auto-rotate"),
         showAxis: document.querySelector("#show-axis"),
-        syntaxHighlighting: document.querySelector("#syntax-highlighting"),
-        colorTheme: document.querySelector("#color-theme")
+        syntaxHighlighting: document.querySelector("#syntax-highlighting")
     };
     const textarea1 = textarea;
     const editor1 = editor;
@@ -449,7 +554,6 @@ const mod = function() {
 mod.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
 mod.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
 mod.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
-mod.settings.colorTheme.value = localStorage.getItem("colorTheme") ?? "default";
 colorThemeChanged();
 const gl = mod.canvas.getContext("webgl2");
 if (!gl) {
@@ -704,8 +808,36 @@ function textareaChanged() {
     timeoutId = setTimeout(()=>_textareaChanged()
     , 15);
 }
+function toggleComment() {
+    mod.textarea.focus();
+    let selectionStart = mod.textarea.selectionStart;
+    const currentLineNumber = mod.textarea.value.substr(0, selectionStart).split("\n").length - 1;
+    const lines = mod.textarea.value.split("\n");
+    if (lines[currentLineNumber].startsWith("#")) {
+        lines[currentLineNumber] = lines[currentLineNumber].substr(1);
+        selectionStart--;
+    } else {
+        lines[currentLineNumber] = "#" + lines[currentLineNumber];
+        selectionStart++;
+    }
+    mod.textarea.value = lines.join("\n");
+    textareaChanged();
+    mod.textarea.selectionEnd = selectionStart;
+}
+function setColorTheme(e) {
+    if (!e) {
+        return;
+    }
+    const target = e.target;
+    if (target.classList.contains("menu")) {
+        return;
+    }
+    localStorage.setItem("colorTheme", target.innerText.toLowerCase().replace(/ /g, "-"));
+    colorThemeChanged();
+}
+setColorTheme();
 function colorThemeChanged() {
-    document.documentElement.setAttribute("data-theme", mod.settings.colorTheme.value);
+    document.documentElement.setAttribute("data-theme", localStorage.getItem("colorTheme") ?? "default");
 }
 function syntaxHighlightingChanged() {
     if (mod.settings.syntaxHighlighting.checked) {
@@ -716,10 +848,6 @@ function syntaxHighlightingChanged() {
         deleteHighlightElement();
     }
 }
-mod.settings.colorTheme.addEventListener("change", ()=>{
-    colorThemeChanged();
-    localStorage.setItem("colorTheme", mod.settings.colorTheme.value);
-});
 mod.settings.autoRotate.addEventListener("change", ()=>{
     localStorage.setItem("autoRotate", mod.settings.autoRotate.checked ? "true" : "false");
 });
@@ -748,19 +876,7 @@ mod.textarea.oninput = (e)=>{
 mod.textarea.onkeydown = (e)=>{
     if (e.keyCode === 191 && e.ctrlKey) {
         e.preventDefault();
-        let selectionStart = mod.textarea.selectionStart;
-        const currentLineNumber = mod.textarea.value.substr(0, selectionStart).split("\n").length - 1;
-        const lines = mod.textarea.value.split("\n");
-        if (lines[currentLineNumber].startsWith("#")) {
-            lines[currentLineNumber] = lines[currentLineNumber].substr(1);
-            selectionStart--;
-        } else {
-            lines[currentLineNumber] = "#" + lines[currentLineNumber];
-            selectionStart++;
-        }
-        mod.textarea.value = lines.join("\n");
-        textareaChanged();
-        mod.textarea.selectionEnd = selectionStart;
+        toggleComment();
     }
 };
 window.addEventListener("dragenter", (e)=>{
