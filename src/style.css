@@ -14,8 +14,8 @@
   --shadow-spread: .5rem;
 
   /* color theme */
-  --background-color:hsl(240, 10%, 10%);
-  --border-color: hsl(240, 10%, 15%);
+  --background-color: #17171C;
+  --border-color: #27272F;
   --text-color: #FFF;
   --selection-color: rgba(255, 255, 255, .2);
 
@@ -57,7 +57,7 @@
 }
 
 :root[data-theme=palenight]{
-  --background-color:#292D3E;
+  --background-color: #292D3E;
   --border-color: #424864;
   --selection-color: #7580B850;
 
@@ -107,12 +107,12 @@ input[type=checkbox]{
 }
 
 header{
-  padding: .1rem 1rem;
+  padding: 0 1rem;
   background-color: var(--border-color);
   display: flex;
   flex-direction: column;
   box-shadow: 0 var(--shadow-height) var(--shadow-spread) var(--shadow-color);
-  z-index: 1;
+  z-index: 9;
 }
 
 header h1{
@@ -121,6 +121,80 @@ header h1{
   line-height: 1rem;
   display: flex;
   align-items: center;
+}
+
+nav{
+  display: flex;
+}
+
+nav span{
+  opacity: .75;
+}
+
+nav span:hover{
+  opacity: 1;
+}
+
+nav > div{
+  font-size: .9rem;
+  user-select: none;
+}
+
+nav > div:hover, nav .menu > span:hover{
+  background-color: var(--selection-color);
+}
+
+nav > .parent > span{
+  padding: .2rem .75rem;
+  font-weight: 500;
+  display: block;
+}
+
+nav .parent{
+  position: relative;
+}
+
+nav .parent:hover > .menu{
+  display: flex;
+}
+
+nav .menu{
+  width: 15rem;
+  padding: .5rem 0;
+  background-color: var(--background-color);
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 var(--shadow-height) var(--shadow-spread) var(--shadow-color);
+  cursor: default;
+  z-index: 9;
+}
+
+nav .menu.submenu{
+  margin-left: -2px;
+  top: 0;
+  left: 15rem;
+}
+
+nav > .menu:not(.submenu){
+  border-top: none;
+}
+
+nav .menu > span{
+  padding: .3rem 1rem;
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+nav .shortcut{
+  padding-left: 1rem;
+  font-size: .8em;
+  text-align: right;
+  flex: 1;
+  opacity: .75;
 }
 
 footer{

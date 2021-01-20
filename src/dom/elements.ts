@@ -12,6 +12,5 @@ export const statusBar = {
 export const settings = {
   autoRotate: document.querySelector("#auto-rotate") as HTMLInputElement,
   showAxis: document.querySelector("#show-axis") as HTMLInputElement,
-  syntaxHighlighting: document.querySelector("#syntax-highlighting") as HTMLInputElement,
-  colorTheme: document.querySelector("#color-theme") as HTMLSelectElement,
+  syntaxHighlighting: document.querySelector("#syntax-highlighting") as HTMLInputElement
 };

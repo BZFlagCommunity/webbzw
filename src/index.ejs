@@ -10,22 +10,54 @@
 <body>
   <header>
     <h1>Web BZW <span class="beta">Beta</span></h1>
-    <div>
-      <label for="bzw-file">Open Map</label>
-      <input type="checkbox" id="auto-rotate">
-      <label for="auto-rotate">Auto rotate</label>
-      <input type="checkbox" id="show-axis">
-      <label for="show-axis">Show Axis</label>
-      <input type="checkbox" id="syntax-highlighting">
-      <label for="syntax-highlighting">Syntax Highlighting</label>
-      <select id="color-theme">
-        <option value="default">Default Theme</option>
-        <option value="one-dark-pro">One Dark Pro</option>
-        <option value="one-half-light">One Half Light</option>
-        <option value="palenight">Palenight</option>
-        <option value="one-monokai">One Monokai</option>
-      </select>
-    </div>
+    <nav>
+      <div class="parent">
+        <span>File</span>
+        <div class="menu">
+          <span onclick="mod.bzwFile.click()">
+            Open
+            <span class="shortcut">Ctrl+O</span>
+          </span>
+        </div>
+      </div>
+      <div class="parent">
+        <span>Edit</span>
+        <div class="menu">
+          <span onclick="toggleComment()">
+            Toggle Commnt
+            <span class="shortcut">Ctrl+/</span>
+          </span>
+        </div>
+      </div>
+      <div class="parent">
+        <span>View</span>
+        <div class="menu">
+          <span onclick="mod.settings.autoRotate.click()">
+            <input type="checkbox" id="auto-rotate" onclick="event.stopPropagation()">
+            Auto Rotate
+          </span>
+          <span onclick="mod.settings.showAxis.click()">
+            <input type="checkbox" id="show-axis" onclick="event.stopPropagation()">
+            Show Axis
+          </span>
+          <span onclick="mod.settings.syntaxHighlighting.click()">
+            <input type="checkbox" id="syntax-highlighting" onclick="event.stopPropagation()">
+            Syntax Highlighting
+          </span>
+          <span class="parent">
+            Color Theme
+            <span class="shortcut">&gt;</span>
+            <div class="menu submenu" onclick="setColorTheme(event)">
+              <span>Default</span>
+              <span>One Dark Pro</span>
+              <span>One Half Light</span>
+              <span>Palenight</span>
+              <span>One Monokai</span>
+            </div>
+          </span>
+        </div>
+      </div>
+    </nav>
     <input type="file" id="bzw-file" accept=".bzw">
   </header>
   <main>

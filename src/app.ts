@@ -14,7 +14,6 @@ elements.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "t
 elements.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
 elements.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
-elements.settings.colorTheme.value = localStorage.getItem("colorTheme") ?? "default";
 colorThemeChanged();
 
 const gl = elements.canvas.getContext("webgl2") as WebGL2RenderingContext;
@@ -99,8 +98,46 @@ function textareaChanged(){
   timeoutId = setTimeout(() => _textareaChanged(), EDITOR_CHANGE_TIMEOUT);
 }
 
+/** Toggle current line as a comment */
+function toggleComment(){
+  elements.textarea.focus();
+
+  let selectionStart = elements.textarea.selectionStart;
+  const currentLineNumber = elements.textarea.value.substr(0, selectionStart).split("\n").length - 1;
+  const lines = elements.textarea.value.split("\n");
+
+  if(lines[currentLineNumber].startsWith("#")){ // remove comment
+    lines[currentLineNumber] = lines[currentLineNumber].substr(1);
+    selectionStart--;
+  }else{ // add comment
+    lines[currentLineNumber] = "#" + lines[currentLineNumber];
+    selectionStart++;
+  }
+
+  elements.textarea.value = lines.join("\n");
+  textareaChanged();
+  elements.textarea.selectionEnd = selectionStart;
+}
+
+function setColorTheme(e?: Event){
+  if(!e){
+    return;
+  }
+
+  const target = (e.target as HTMLElement);
+
+  // ignore if we clicked the menu element
+  if(target.classList.contains("menu")){
+    return;
+  }
+
+  localStorage.setItem("colorTheme", target.innerText.toLowerCase().replace(/ /g, "-"));
+  colorThemeChanged();
+}
+setColorTheme(); // FIXME: this is a hack so the function is not removed
+
 function colorThemeChanged(){
-  document.documentElement.setAttribute("data-theme", elements.settings.colorTheme.value);
+  document.documentElement.setAttribute("data-theme", localStorage.getItem("colorTheme") ?? "default");
 }
 
 function syntaxHighlightingChanged(){
@@ -112,11 +149,6 @@ function syntaxHighlightingChanged(){
     deleteHighlightElement();
   }
 }
-
-elements.settings.colorTheme.addEventListener("change", () => {
-  colorThemeChanged();
-  localStorage.setItem("colorTheme", elements.settings.colorTheme.value);
-});
 
 elements.settings.autoRotate.addEventListener("change", () => {
   localStorage.setItem("autoRotate", elements.settings.autoRotate.checked ? "true" : "false");
@@ -155,22 +187,7 @@ elements.textarea.onkeydown = (e: KeyboardEvent) => {
   // Ctrl+/ (toggle comment)
   if(e.keyCode === 191 && e.ctrlKey){
     e.preventDefault();
-
-    let selectionStart = elements.textarea.selectionStart;
-    const currentLineNumber = elements.textarea.value.substr(0, selectionStart).split("\n").length - 1;
-    const lines = elements.textarea.value.split("\n");
-
-    if(lines[currentLineNumber].startsWith("#")){ // remove comment
-      lines[currentLineNumber] = lines[currentLineNumber].substr(1);
-      selectionStart--;
-    }else{ // add comment
-      lines[currentLineNumber] = "#" + lines[currentLineNumber];
-      selectionStart++;
-    }
-
-    elements.textarea.value = lines.join("\n");
-    textareaChanged();
-    elements.textarea.selectionEnd = selectionStart;
+    toggleComment();
   }
 };
 
