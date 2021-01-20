@@ -142,11 +142,16 @@ const FLAGS = [
 ];
 const FLAGS_REGEX = new RegExp(`^([ \t]*(zoneflag|flag|type) )(${FLAGS.join("|").replace(/\*/g, "\\*")})`, "gm");
 
-const highlightSpan = (type: string): string => `<span class="${type}">$1</span>`;
-const highlightWord = (type: string, first = 1, second = 2): string => `$${first}<span class="${type}">$${second}</span>`;
+function highlightSpan(type: string): string{
+  return `<span class="${type}">$1</span>`;
+}
 
-export const highlightHtml = (text: string): string =>
-  text
+function highlightWord(type: string, first = 1, second = 2): string{
+  return `$${first}<span class="${type}">$${second}</span>`;
+}
+
+export function highlightHtml(text: string): string{
+  return text
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
@@ -154,5 +159,5 @@ export const highlightHtml = (text: string): string =>
     .replace(/([0-9]+)/g, highlightSpan("number"))
     .replace(HEADERS_REGEX, highlightSpan("header"))
     .replace(KEYWORDS_REGEX, highlightWord("keyword"))
-    .replace(FLAGS_REGEX, highlightWord("flag", undefined, 3))
-;
+    .replace(FLAGS_REGEX, highlightWord("flag", undefined, 3));
+}

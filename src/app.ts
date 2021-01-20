@@ -40,8 +40,6 @@ if(!gl){
 
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
 textarea.value = source;
-syntaxHighlightingChanged();
-updateLineNumbers();
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
@@ -495,3 +493,6 @@ function updateMesh(gl: WebGL2RenderingContext){
 
   statusBar.vertices.innerText = `${elementCount} Vertices`;
 }
+
+syntaxHighlightingChanged();
+updateLineNumbers();

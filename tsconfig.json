@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
-    "target": "es6",
-    "module": "es2015",
-    "lib": ["dom", "DOM.Iterable", "es2015", "es6"]
+    "target": "es2015",
+    "module": "amd",
+    "lib": ["dom", "DOM.Iterable", "es2015"],
+    "sourceMap": false,
+    "strict": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "bundle": "esm"
 }

@@ -2,6 +2,7 @@
 
 [![CD](https://github.com/BZFlagCommunity/webbzw/workflows/CD/badge.svg)](https://bzw.thenoah.dev)
 ![CI](https://github.com/BZFlagCommunity/webbzw/workflows/CI/badge.svg)
+[![Deno](https://img.shields.io/badge/Deno-v1.7.0+-blue)](https://deno.land)
 
 Preview BZW files on the web.
 
@@ -18,7 +19,7 @@ The list of supported map features can be found in issue [#2](https://github.com
 
 ## Building
 
-[Deno](https://deno.land/) is required to build the website.
+> [Deno](https://deno.land/) v1.7.0+ is required to build the application.
 
 `deno run --unstable --allow-read --allow-write build.ts`
 
