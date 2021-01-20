@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Montserrat:400,600,700&family=Source+Code+Pro&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,500,600&family=Source+Code+Pro&display=swap");
 
 *{
   color: var(--text-color);
@@ -115,6 +115,14 @@ header{
   z-index: 1;
 }
 
+header h1{
+  margin: .5rem 0;
+  font-weight: 600;
+  line-height: 1rem;
+  display: flex;
+  align-items: center;
+}
+
 footer{
   padding: .25rem .5rem;
   background-color: var(--border-color);
@@ -144,7 +152,7 @@ header label:not(:last-child){
 
 label{
   font-size: .9rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   user-select: none;
 }
@@ -164,7 +172,7 @@ select{
   background-color: var(--background-color);
   font-family: Montserrat, sans-serif;
   font-size: .8rem;
-  font-weight: 600;
+  font-weight: 500;
   border: none;
   border-radius: 0;
   outline: none;
@@ -214,6 +222,16 @@ textarea.show{
   font-size: .8rem;
   font-family: "Source Code Pro", monospace;
   line-height: 1.1em;
+}
+
+.beta{
+  margin-left: 1rem;
+  padding: .2rem .5rem;
+  background-color: #F005;
+  font-size: .9rem;
+  font-weight: 500;
+  border: 1px solid #F00;
+  border-radius: 1rem;
 }
 
 .line-numbers{
