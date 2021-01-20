@@ -417,6 +417,10 @@ textarea.show{
             Open
             <span class="shortcut">Ctrl+O</span>
           </span>
+          <span onclick="saveFile()">
+            Save
+            <span class="shortcut">Ctrl+S</span>
+          </span>
         </div>
       </div>
       <div class="parent">
@@ -590,6 +594,20 @@ function handleFile(files) {
         alert("Error: failed to read file");
     });
     reader.readAsText(file);
+}
+function saveFile() {
+    const blob = new Blob([
+        source
+    ], {
+        type: "text/plain"
+    });
+    const link = document.createElement("a");
+    link.download = "map.bzw";
+    link.href = window.URL.createObjectURL(blob);
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
 }
 function updateLineNumbers() {
     mod.lineNumbersElement.innerHTML = [
@@ -881,6 +899,9 @@ mod.textarea.onkeydown = (e)=>{
     if (e.keyCode === 191 && e.ctrlKey) {
         e.preventDefault();
         toggleComment();
+    } else if (e.keyCode === 83 && e.ctrlKey) {
+        e.preventDefault();
+        saveFile();
     }
 };
 window.addEventListener("dragenter", (e)=>{
