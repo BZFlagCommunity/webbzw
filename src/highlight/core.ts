@@ -157,7 +157,7 @@ export function highlightHtml(text: string): string{
     .replace(/([-\.*/"=]+?)/g, highlightSpan("symbol"))
     .replace(/(#.*?$)/gm, highlightSpan("comment"))
     .replace(/([0-9]+)/g, highlightSpan("number"))
+    .replace(FLAGS_REGEX, highlightWord("flag", undefined, 3))
     .replace(HEADERS_REGEX, highlightSpan("header"))
-    .replace(KEYWORDS_REGEX, highlightWord("keyword"))
-    .replace(FLAGS_REGEX, highlightWord("flag", undefined, 3));
+    .replace(KEYWORDS_REGEX, highlightWord("keyword"));
 }
