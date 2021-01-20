@@ -348,31 +348,97 @@ textarea.show{
     <span><a href="https://github.com/BZFlagCommunity/webbzw" target="_blank" rel="noopener noreferrer">GitHub</a></span>
     <span>Copyright &copy; 2020-2021 The Noah</span>
   </footer>
-  <script>const MAX_ZOOM = -5;
-const textarea = document.querySelector(".editor textarea");
-const editor = document.querySelector(".editor");
-const canvas = document.querySelector("canvas");
-const lineNumbersElement = document.querySelector(".line-numbers");
-const bzwFile = document.querySelector("#bzw-file");
-const statusBar = {
-    objects: document.querySelector("#objects"),
-    vertices: document.querySelector("#vertices")
-};
-const autoRotate = document.querySelector("#auto-rotate");
-const showAxis = document.querySelector("#show-axis");
-const syntaxHighlighting = document.querySelector("#syntax-highlighting");
-const colorTheme = document.querySelector("#color-theme");
-autoRotate.checked = localStorage.getItem("autoRotate") === "true";
-showAxis.checked = localStorage.getItem("showAxis") !== "false";
-syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
-colorTheme.value = localStorage.getItem("colorTheme") ?? "default";
+  <script>for (const resizer of document.querySelectorAll(".resizer")){
+    const parent = resizer.parentElement;
+    const leftSide = resizer.previousElementSibling;
+    const rightSide = resizer.nextElementSibling;
+    let x = 0;
+    let rightWidth = 0;
+    const mouseDownHandler = (e)=>{
+        x = e.clientX;
+        rightWidth = rightSide.width;
+        resizer.style.cursor = "col-resize";
+        document.body.style.cursor = "col-resize";
+        leftSide.style.userSelect = "none";
+        leftSide.style.pointerEvents = "none";
+        rightSide.style.userSelect = "none";
+        rightSide.style.pointerEvents = "none";
+        document.addEventListener("mousemove", mouseMoveHandler);
+        document.addEventListener("mouseup", mouseUpHandler);
+    };
+    const mouseMoveHandler = (e)=>{
+        if (!parent) {
+            return;
+        }
+        const dx = e.clientX - x;
+        const parentWidth = parent.getBoundingClientRect().width;
+        const minWidth = parentWidth / 2;
+        const maxWidth = parentWidth - parentWidth / 4;
+        let newRightWidth = rightWidth - dx;
+        if (newRightWidth < minWidth) {
+            newRightWidth = minWidth;
+        } else if (newRightWidth > maxWidth) {
+            newRightWidth = maxWidth;
+        }
+        rightSide.width = newRightWidth;
+    };
+    const mouseUpHandler = function() {
+        resizer.style.removeProperty("cursor");
+        document.body.style.removeProperty("cursor");
+        leftSide.style.removeProperty("user-select");
+        leftSide.style.removeProperty("pointer-events");
+        rightSide.style.removeProperty("user-select");
+        rightSide.style.removeProperty("pointer-events");
+        document.removeEventListener("mousemove", mouseMoveHandler);
+        document.removeEventListener("mouseup", mouseUpHandler);
+    };
+    resizer.addEventListener("mousedown", mouseDownHandler);
+}
+const MAX_ZOOM = -5;
+const mod = function() {
+    const textarea = document.querySelector(".editor textarea");
+    const editor = document.querySelector(".editor");
+    const canvas = document.querySelector("canvas");
+    const lineNumbersElement = document.querySelector(".line-numbers");
+    const bzwFile = document.querySelector("#bzw-file");
+    const statusBar = {
+        objects: document.querySelector("#objects"),
+        vertices: document.querySelector("#vertices")
+    };
+    const settings = {
+        autoRotate: document.querySelector("#auto-rotate"),
+        showAxis: document.querySelector("#show-axis"),
+        syntaxHighlighting: document.querySelector("#syntax-highlighting"),
+        colorTheme: document.querySelector("#color-theme")
+    };
+    const textarea1 = textarea;
+    const editor1 = editor;
+    const canvas1 = canvas;
+    const lineNumbersElement1 = lineNumbersElement;
+    const bzwFile1 = bzwFile;
+    const statusBar1 = statusBar;
+    const settings1 = settings;
+    return {
+        textarea: textarea,
+        editor: editor,
+        canvas: canvas,
+        lineNumbersElement: lineNumbersElement,
+        bzwFile: bzwFile,
+        statusBar: statusBar,
+        settings: settings
+    };
+}();
+mod.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
+mod.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
+mod.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
+mod.settings.colorTheme.value = localStorage.getItem("colorTheme") ?? "default";
 colorThemeChanged();
-const gl = canvas.getContext("webgl2");
+const gl = mod.canvas.getContext("webgl2");
 if (!gl) {
     alert("WebGL 2.0 not available");
 }
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
-textarea.value = source;
+mod.textarea.value = source;
 let vbo, cbo, ebo;
 let elementCount = 0;
 const map = {
@@ -391,7 +457,7 @@ function handleFile(files) {
     const reader = new FileReader();
     reader.addEventListener("load", (e)=>{
         const text = e.target?.result;
-        textarea.value = text;
+        mod.textarea.value = text;
         textareaChanged();
     });
     reader.addEventListener("error", ()=>{
@@ -400,11 +466,11 @@ function handleFile(files) {
     reader.readAsText(file);
 }
 function updateLineNumbers() {
-    lineNumbersElement.innerHTML = [
+    mod.lineNumbersElement.innerHTML = [
         ...Array(source.split("\n").length).keys()
     ].map((i)=>i + 1
     ).join("\n");
-    lineNumbersElement.scrollTop = textarea.scrollTop;
+    mod.lineNumbersElement.scrollTop = mod.textarea.scrollTop;
 }
 const HEADERS = [
     "world",
@@ -550,45 +616,45 @@ function highlightWord(type, first = 1, second = 2) {
 function highlightHtml(text) {
     return text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([-\.*/"=]+?)/g, highlightSpan("symbol")).replace(/(#.*?$)/gm, highlightSpan("comment")).replace(/([0-9]+)/g, highlightSpan("number")).replace(HEADERS_REGEX, highlightSpan("header")).replace(KEYWORDS_REGEX, highlightWord("keyword")).replace(FLAGS_REGEX, highlightWord("flag", undefined, 3));
 }
-function deleteHighlightElement(editor1) {
-    const highlighter = editor1.children.item(1);
+function deleteHighlightElement() {
+    const highlighter = mod.editor.children.item(1);
     if (highlighter) {
         highlighter.remove();
     }
 }
-function highlight(editor1, textarea1, source1) {
-    const lines = textarea1.value.split("\n");
+function highlight(source1) {
+    const lines = mod.textarea.value.split("\n");
     let sourceLines = source1 ? source1.split("\n").length : lines.length;
     const reset = Math.abs(sourceLines - lines.length) > 1;
     if (reset) {
-        deleteHighlightElement(editor1);
+        deleteHighlightElement();
     }
-    if (!editor1.children.item(1)) {
+    if (!mod.editor.children.item(1)) {
         const elem = document.createElement("pre");
         if (!elem) {
             console.error("highlight element could not be created");
             return;
         }
         elem.classList.add("highlight");
-        const html = (highlightHtml(textarea1.value) + "\n").split("\n");
+        const html = (highlightHtml(mod.textarea.value) + "\n").split("\n");
         for(const lineNumber in html){
             const line = document.createElement("div");
             line.innerHTML = html[lineNumber];
             elem.appendChild(line);
         }
-        editor1.appendChild(elem);
-        elem.scrollTop = textarea1.scrollTop;
-        elem.scrollLeft = textarea1.scrollLeft;
+        mod.editor.appendChild(elem);
+        elem.scrollTop = mod.textarea.scrollTop;
+        elem.scrollLeft = mod.textarea.scrollLeft;
     }
     if (reset) {
         return;
     }
-    const elem = editor1.children.item(1);
+    const elem = mod.editor.children.item(1);
     if (!elem) {
         return;
     }
-    const selectionStart = textarea1.selectionStart;
-    const currentLineNumber = (sourceLines === lines.length ? textarea1.value : source1 ?? "").substr(0, selectionStart).split("\n").length - 1;
+    const selectionStart = mod.textarea.selectionStart;
+    const currentLineNumber = (sourceLines === lines.length ? mod.textarea.value : source1 ?? "").substr(0, selectionStart).split("\n").length - 1;
     const html = highlightHtml(lines[currentLineNumber]);
     if (sourceLines < lines.length) {
         const newLine = document.createElement("div");
@@ -600,13 +666,13 @@ function highlight(editor1, textarea1, source1) {
     elem.children[currentLineNumber].innerHTML = html;
 }
 function _textareaChanged() {
-    if (textarea.value === source) {
+    if (mod.textarea.value === source) {
         return;
     }
-    if (syntaxHighlighting.checked) {
-        highlight(editor, textarea, source);
+    if (mod.settings.syntaxHighlighting.checked) {
+        highlight(source);
     }
-    source = textarea.value;
+    source = mod.textarea.value;
     updateLineNumbers();
     parseSource();
     updateMesh(gl);
@@ -621,52 +687,52 @@ function textareaChanged() {
     , 15);
 }
 function colorThemeChanged() {
-    document.documentElement.setAttribute("data-theme", colorTheme.value);
+    document.documentElement.setAttribute("data-theme", mod.settings.colorTheme.value);
 }
 function syntaxHighlightingChanged() {
-    if (syntaxHighlighting.checked) {
-        textarea.classList.remove("show");
-        highlight(editor, textarea);
+    if (mod.settings.syntaxHighlighting.checked) {
+        mod.textarea.classList.remove("show");
+        highlight();
     } else {
-        textarea.classList.add("show");
-        deleteHighlightElement(editor);
+        mod.textarea.classList.add("show");
+        deleteHighlightElement();
     }
 }
-colorTheme.addEventListener("change", ()=>{
+mod.settings.colorTheme.addEventListener("change", ()=>{
     colorThemeChanged();
-    localStorage.setItem("colorTheme", colorTheme.value);
+    localStorage.setItem("colorTheme", mod.settings.colorTheme.value);
 });
-autoRotate.addEventListener("change", ()=>{
-    localStorage.setItem("autoRotate", autoRotate.checked ? "true" : "false");
+mod.settings.autoRotate.addEventListener("change", ()=>{
+    localStorage.setItem("autoRotate", mod.settings.autoRotate.checked ? "true" : "false");
 });
-showAxis.addEventListener("change", ()=>{
-    localStorage.setItem("showAxis", showAxis.checked ? "true" : "false");
+mod.settings.showAxis.addEventListener("change", ()=>{
+    localStorage.setItem("showAxis", mod.settings.showAxis.checked ? "true" : "false");
 });
-syntaxHighlighting.addEventListener("change", ()=>{
+mod.settings.syntaxHighlighting.addEventListener("change", ()=>{
     syntaxHighlightingChanged();
-    localStorage.setItem("syntaxHighlighting", syntaxHighlighting.checked ? "true" : "false");
+    localStorage.setItem("syntaxHighlighting", mod.settings.syntaxHighlighting.checked ? "true" : "false");
 });
-bzwFile.addEventListener("change", ()=>{
-    handleFile(bzwFile.files);
+mod.bzwFile.addEventListener("change", ()=>{
+    handleFile(mod.bzwFile.files);
 });
-textarea.onscroll = ()=>{
-    const highlighter = editor.children.item(1);
+mod.textarea.onscroll = ()=>{
+    const highlighter = mod.editor.children.item(1);
     if (highlighter) {
-        highlighter.scrollTop = textarea.scrollTop;
-        highlighter.scrollLeft = textarea.scrollLeft;
+        highlighter.scrollTop = mod.textarea.scrollTop;
+        highlighter.scrollLeft = mod.textarea.scrollLeft;
     }
-    lineNumbersElement.scrollTop = textarea.scrollTop;
+    mod.lineNumbersElement.scrollTop = mod.textarea.scrollTop;
 };
-textarea.oninput = (e)=>{
-    textarea.value = e.currentTarget.value;
+mod.textarea.oninput = (e)=>{
+    mod.textarea.value = e.currentTarget.value;
     textareaChanged();
 };
-textarea.onkeydown = (e)=>{
+mod.textarea.onkeydown = (e)=>{
     if (e.keyCode === 191 && e.ctrlKey) {
         e.preventDefault();
-        let selectionStart = textarea.selectionStart;
-        const currentLineNumber = textarea.value.substr(0, selectionStart).split("\n").length - 1;
-        const lines = textarea.value.split("\n");
+        let selectionStart = mod.textarea.selectionStart;
+        const currentLineNumber = mod.textarea.value.substr(0, selectionStart).split("\n").length - 1;
+        const lines = mod.textarea.value.split("\n");
         if (lines[currentLineNumber].startsWith("#")) {
             lines[currentLineNumber] = lines[currentLineNumber].substr(1);
             selectionStart--;
@@ -674,9 +740,9 @@ textarea.onkeydown = (e)=>{
             lines[currentLineNumber] = "#" + lines[currentLineNumber];
             selectionStart++;
         }
-        textarea.value = lines.join("\n");
+        mod.textarea.value = lines.join("\n");
         textareaChanged();
-        textarea.selectionEnd = selectionStart;
+        mod.textarea.selectionEnd = selectionStart;
     }
 };
 window.addEventListener("dragenter", (e)=>{
@@ -695,7 +761,7 @@ window.addEventListener("drop", (e)=>{
 window.onkeydown = (e)=>{
     if (e.keyCode === 79 && e.ctrlKey) {
         e.preventDefault();
-        bzwFile.click();
+        mod.bzwFile.click();
     }
 };
 const VERTEX_SHADER = `#version 300 es\nlayout(location = 0) in vec3 position;\nlayout(location = 1) in vec4 color;\n\nout vec4 vColor;\n\nuniform mat4 proj;\nuniform mat4 view;\nuniform mat4 model;\n\nvoid main(void){\n  vColor = color;\n\n  gl_Position = proj * view * model * vec4(position, 1.0);\n}`;
@@ -849,7 +915,7 @@ function rotY(position, angle) {
     ];
 }
 window.onload = ()=>{
-    if (!canvas) {
+    if (!mod.canvas) {
         return;
     }
     const viewMatrix = [
@@ -892,8 +958,8 @@ window.onload = ()=>{
     let oldX = 0, oldY = 0;
     let dX = 0, dY = 0;
     let THETA = 180, PHI = 40, oldTime = 0;
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    mod.canvas.width = mod.canvas.offsetWidth;
+    mod.canvas.height = mod.canvas.offsetHeight;
     const mouseDown = (e)=>{
         drag = true;
         oldX = getCoord(e, "X");
@@ -910,22 +976,22 @@ window.onload = ()=>{
         }
         const x = getCoord(e, "X");
         const y = getCoord(e, "Y");
-        dX = (x - oldX) * 75 * Math.PI / canvas.width;
-        dY = (y - oldY) * 75 * Math.PI / canvas.height;
+        dX = (x - oldX) * 75 * Math.PI / mod.canvas.width;
+        dY = (y - oldY) * 75 * Math.PI / mod.canvas.height;
         THETA += dX;
         PHI += dY;
         oldX = x;
         oldY = y;
         e.preventDefault();
     };
-    canvas.addEventListener("mousedown", mouseDown, false);
-    canvas.addEventListener("mouseup", mouseUp, false);
-    canvas.addEventListener("mouseout", mouseUp, false);
-    canvas.addEventListener("mousemove", mouseMove, false);
-    canvas.addEventListener("touchstart", mouseDown, false);
-    canvas.addEventListener("touchend", mouseUp, false);
-    canvas.addEventListener("touchmove", mouseMove, false);
-    canvas.addEventListener("wheel", (e)=>{
+    mod.canvas.addEventListener("mousedown", mouseDown, false);
+    mod.canvas.addEventListener("mouseup", mouseUp, false);
+    mod.canvas.addEventListener("mouseout", mouseUp, false);
+    mod.canvas.addEventListener("mousemove", mouseMove, false);
+    mod.canvas.addEventListener("touchstart", mouseDown, false);
+    mod.canvas.addEventListener("touchend", mouseUp, false);
+    mod.canvas.addEventListener("touchmove", mouseMove, false);
+    mod.canvas.addEventListener("wheel", (e)=>{
         const delta = e.deltaY;
         viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
         viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 3 ? -map.worldSize * 3 : viewMatrix[14];
@@ -1012,7 +1078,7 @@ window.onload = ()=>{
         }
         const dt = time - oldTime;
         oldTime = time;
-        if (!drag && autoRotate.checked) {
+        if (!drag && mod.settings.autoRotate.checked) {
             THETA += 0.015 * dt;
         }
         if (PHI > 90) {
@@ -1026,12 +1092,12 @@ window.onload = ()=>{
             modelMatrix, 
         ]);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, canvas.width / canvas.height, -MAX_ZOOM / 2, map.worldSize * 5));
+        gl.viewport(0, 0, mod.canvas.width, mod.canvas.height);
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, mod.canvas.width / mod.canvas.height, -MAX_ZOOM / 2, map.worldSize * 5));
         gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
         gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
         gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
-        if (showAxis.checked) {
+        if (mod.settings.showAxis.checked) {
             gl.disable(gl.DEPTH_TEST);
             gl.bindVertexArray(axisVao);
             gl.drawArrays(gl.LINES, 0, 6);
@@ -1592,7 +1658,7 @@ function parseSource() {
             }
         }
     }
-    statusBar.objects.innerText = `${map.objects.length} Objects`;
+    mod.statusBar.objects.innerText = `${map.objects.length} Objects`;
 }
 function updateMesh(gl1) {
     console.log("updating mesh");
@@ -1632,58 +1698,11 @@ function updateMesh(gl1) {
     gl1.enableVertexAttribArray(1);
     gl1.vertexAttribPointer(1, 4, gl1.FLOAT, false, 16, 0);
     gl1.bindBuffer(gl1.ARRAY_BUFFER, null);
-    statusBar.vertices.innerText = `${elementCount} Vertices`;
+    mod.statusBar.vertices.innerText = `${elementCount} Vertices`;
 }
 syntaxHighlightingChanged();
 updateLineNumbers();
-for (const resizer of document.querySelectorAll(".resizer")){
-    const parent = resizer.parentElement;
-    const leftSide = resizer.previousElementSibling;
-    const rightSide = resizer.nextElementSibling;
-    let x = 0;
-    let rightWidth = 0;
-    const mouseDownHandler = (e)=>{
-        x = e.clientX;
-        rightWidth = rightSide.width;
-        resizer.style.cursor = "col-resize";
-        document.body.style.cursor = "col-resize";
-        leftSide.style.userSelect = "none";
-        leftSide.style.pointerEvents = "none";
-        rightSide.style.userSelect = "none";
-        rightSide.style.pointerEvents = "none";
-        document.addEventListener("mousemove", mouseMoveHandler);
-        document.addEventListener("mouseup", mouseUpHandler);
-    };
-    const mouseMoveHandler = (e)=>{
-        if (!parent) {
-            return;
-        }
-        const dx = e.clientX - x;
-        const parentWidth = parent.getBoundingClientRect().width;
-        const minWidth = parentWidth / 2;
-        const maxWidth = parentWidth - parentWidth / 4;
-        let newRightWidth = rightWidth - dx;
-        if (newRightWidth < minWidth) {
-            newRightWidth = minWidth;
-        } else if (newRightWidth > maxWidth) {
-            newRightWidth = maxWidth;
-        }
-        rightSide.width = newRightWidth;
-    };
-    const mouseUpHandler = function() {
-        resizer.style.removeProperty("cursor");
-        document.body.style.removeProperty("cursor");
-        leftSide.style.removeProperty("user-select");
-        leftSide.style.removeProperty("pointer-events");
-        rightSide.style.removeProperty("user-select");
-        rightSide.style.removeProperty("pointer-events");
-        document.removeEventListener("mousemove", mouseMoveHandler);
-        document.removeEventListener("mouseup", mouseUpHandler);
-    };
-    resizer.addEventListener("mousedown", mouseDownHandler);
-}
-const canvas1 = document.querySelector("canvas");
-const canvasParent = canvas1.parentElement;
+const canvasParent = mod.canvas.parentElement;
 window.addEventListener("resize", ()=>{
     if (!canvasParent) {
         return;
@@ -1691,13 +1710,13 @@ window.addEventListener("resize", ()=>{
     const parentWidth = canvasParent.getBoundingClientRect().width;
     const minWidth = parentWidth / 2;
     const maxWidth = parentWidth - parentWidth / 4;
-    let newRightWidth = canvas1.width;
+    let newRightWidth = mod.canvas.width;
     if (newRightWidth < minWidth) {
         newRightWidth = minWidth;
     } else if (newRightWidth > maxWidth) {
         newRightWidth = maxWidth;
     }
-    canvas1.width = newRightWidth;
+    mod.canvas.width = newRightWidth;
 });
 </script>
 </body>
