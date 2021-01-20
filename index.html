@@ -27,12 +27,21 @@
   --selection-color: rgba(255, 255, 255, .2);
 
   --highlight-default: #E9E9E9;
-  --highlight-comment: #999;
+  --highlight-comment: #888;
   --highlight-number: #F93;
   --highlight-symbol: #3AF;
   --highlight-headers: #F55;
   --highlight-keyword: #A8F;
   --highlight-flag: #AC8;
+}
+
+:root[data-theme=high-contrast]{
+  --background-color: #000;
+  --border-color: #444;
+  --selection-color: rgba(255, 255, 255, .3);
+
+  --highlight-default: #FFF;
+  --highlight-comment: #CCC;
 }
 
 :root[data-theme=one-dark-pro]{
@@ -131,14 +140,6 @@ header > span{
 
 nav{
   display: flex;
-}
-
-nav span{
-  opacity: .75;
-}
-
-nav span:hover{
-  opacity: 1;
 }
 
 nav input[type=checkbox]{
@@ -319,7 +320,7 @@ textarea.show{
 
 .line-numbers{
   margin: 0;
-  color: #777;
+  color: #888;
   text-align: right;
   display: flex;
   flex-direction: column;
@@ -447,6 +448,7 @@ textarea.show{
             <span class="shortcut">&gt;</span>
             <div class="menu submenu" onclick="setColorTheme(event)">
               <span>Default</span>
+              <span>High Contrast</span>
               <span>One Dark Pro</span>
               <span>One Half Light</span>
               <span>Palenight</span>
