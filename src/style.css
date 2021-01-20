@@ -19,8 +19,8 @@
   --text-color: #FFF;
   --selection-color: rgba(255, 255, 255, .2);
 
-  --highlight-default: #F0F0F0;
-  --highlight-comment: #AAA;
+  --highlight-default: #E9E9E9;
+  --highlight-comment: #999;
   --highlight-number: #F93;
   --highlight-symbol: #3AF;
   --highlight-headers: #F55;
