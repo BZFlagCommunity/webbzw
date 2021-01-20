@@ -18,13 +18,17 @@ async function loadCSS(){
 }
 
 async function loadJS(){
-  const {diagnostics, files} = await Deno.emit("src/app.ts", JSON.parse(await Deno.readTextFile("tsconfig.json")));
+  try{
+    const {diagnostics, files} = await Deno.emit("src/app.ts", JSON.parse(await Deno.readTextFile("tsconfig.json")));
 
-  if(diagnostics.length > 0){
-    console.log(diagnostics);
+    if(diagnostics.length > 0){
+      console.log(diagnostics);
+    }
+
+    js = files["deno:///bundle.js"];
+  }catch(err){
+    console.error(err);
   }
-
-  js = files["deno:///bundle.js"];
 }
 
 async function build(): Promise<string>{
