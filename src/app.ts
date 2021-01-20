@@ -6,8 +6,9 @@ import {elements} from "./dom/mod.ts";
 import "./editor/mod.ts";
 
 const MAX_ZOOM = -5;
-const MOUSE_SPEED = 75;
+const MOUSE_SPEED = 100;
 const EDITOR_CHANGE_TIMEOUT = 15;
+const NEAR_PLANE = 1;
 
 elements.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
 elements.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
@@ -343,7 +344,7 @@ window.onload = () => {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, elements.canvas.width, elements.canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, elements.canvas.width/elements.canvas.height, -MAX_ZOOM / 2, map.worldSize * 5));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, elements.canvas.width/elements.canvas.height, NEAR_PLANE, map.worldSize * 5));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
