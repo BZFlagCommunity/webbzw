@@ -110,15 +110,14 @@ header{
   padding: 0 1rem;
   background-color: var(--border-color);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   box-shadow: 0 var(--shadow-height) var(--shadow-spread) var(--shadow-color);
   z-index: 9;
 }
 
-header h1{
-  margin: .5rem 0;
+header > span{
+  margin-right: 1rem;
   font-weight: 600;
-  line-height: 1rem;
   display: flex;
   align-items: center;
 }
@@ -135,6 +134,10 @@ nav span:hover{
   opacity: 1;
 }
 
+nav input[type=checkbox]{
+  margin-right: .5rem;
+}
+
 nav > div{
   font-size: .9rem;
   user-select: none;
@@ -146,7 +149,6 @@ nav > div:hover, nav .menu > span:hover{
 
 nav > .parent > span{
   padding: .2rem .75rem;
-  font-weight: 500;
   display: block;
 }
 
@@ -299,10 +301,10 @@ textarea.show{
 }
 
 .beta{
-  margin-left: 1rem;
-  padding: .2rem .5rem;
+  margin-left: .5rem;
+  padding: .1rem .5rem;
   background-color: #F005;
-  font-size: .9rem;
+  font-size: .8rem;
   font-weight: 500;
   border: 1px solid #F00;
   border-radius: 1rem;
