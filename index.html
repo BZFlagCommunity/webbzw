@@ -976,8 +976,8 @@ window.onload = ()=>{
         }
         const x = getCoord(e, "X");
         const y = getCoord(e, "Y");
-        dX = (x - oldX) * 75 * Math.PI / mod.canvas.width;
-        dY = (y - oldY) * 75 * Math.PI / mod.canvas.height;
+        dX = (x - oldX) * 100 * Math.PI / mod.canvas.width;
+        dY = (y - oldY) * 100 * Math.PI / mod.canvas.height;
         THETA += dX;
         PHI += dY;
         oldX = x;
@@ -1093,7 +1093,7 @@ window.onload = ()=>{
         ]);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.viewport(0, 0, mod.canvas.width, mod.canvas.height);
-        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, mod.canvas.width / mod.canvas.height, -MAX_ZOOM / 2, map.worldSize * 5));
+        gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, getProjection(50, mod.canvas.width / mod.canvas.height, 1, map.worldSize * 5));
         gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
         gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
         gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
