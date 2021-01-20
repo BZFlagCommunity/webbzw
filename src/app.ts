@@ -63,6 +63,19 @@ function handleFile(files: FileList | null | undefined){
   reader.readAsText(file);
 }
 
+/** Save map to device */
+function saveFile(){
+  const blob = new Blob([source], {type: "text/plain"});
+
+  const link = document.createElement("a");
+  link.download = "map.bzw";
+  link.href = window.URL.createObjectURL(blob);
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 /** Update line numbers to match source */
 function updateLineNumbers(){
   elements.lineNumbersElement.innerHTML = [...Array(source.split("\n").length).keys()].map((i) => i + 1).join("\n");
@@ -184,10 +197,12 @@ elements.textarea.oninput = (e: Event) => {
 
 // custom keyboard shotcuts (editor)
 elements.textarea.onkeydown = (e: KeyboardEvent) => {
-  // Ctrl+/ (toggle comment)
-  if(e.keyCode === 191 && e.ctrlKey){
+  if(e.keyCode === 191 && e.ctrlKey){ // Ctrl+/ (toggle comment)
     e.preventDefault();
     toggleComment();
+  }else if(e.keyCode === 83 && e.ctrlKey){ // Ctrl+S (save)
+    e.preventDefault();
+    saveFile();
   }
 };
 
