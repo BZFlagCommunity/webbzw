@@ -632,7 +632,7 @@ function highlightWord(type, first = 1, second = 2) {
     return `$${first}<span class="${type}">$${second}</span>`;
 }
 function highlightHtml(text) {
-    return text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([-\.*/"=]+?)/g, highlightSpan("symbol")).replace(/(#.*?$)/gm, highlightSpan("comment")).replace(/([0-9]+)/g, highlightSpan("number")).replace(HEADERS_REGEX, highlightSpan("header")).replace(KEYWORDS_REGEX, highlightWord("keyword")).replace(FLAGS_REGEX, highlightWord("flag", undefined, 3));
+    return text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([-\.*/"=]+?)/g, highlightSpan("symbol")).replace(/(#.*?$)/gm, highlightSpan("comment")).replace(/([0-9]+)/g, highlightSpan("number")).replace(FLAGS_REGEX, highlightWord("flag", undefined, 3)).replace(HEADERS_REGEX, highlightSpan("header")).replace(KEYWORDS_REGEX, highlightWord("keyword"));
 }
 function deleteHighlightElement() {
     const highlighter = mod.editor.children.item(1);
