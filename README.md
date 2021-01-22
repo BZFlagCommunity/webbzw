@@ -3,7 +3,7 @@
 [![CD](https://github.com/BZFlagCommunity/webbzw/workflows/CD/badge.svg)](https://github.com/BZFlagCommunity/webbzw/actions)
 [![Deno](https://img.shields.io/badge/Deno-v1.7.0+-blue)](https://deno.land)
 
-Preview BZW files on the web.
+Preview and edit BZW files on the web.
 
 ![screenshot](screenshot.png)
 
