@@ -1,7 +1,6 @@
 # webbzw
 
 [![CD](https://github.com/BZFlagCommunity/webbzw/workflows/CD/badge.svg)](https://bzw.thenoah.dev)
-![CI](https://github.com/BZFlagCommunity/webbzw/workflows/CI/badge.svg)
 [![Deno](https://img.shields.io/badge/Deno-v1.7.0+-blue)](https://deno.land)
 
 Preview BZW files on the web.
