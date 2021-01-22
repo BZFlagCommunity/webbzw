@@ -141,6 +141,7 @@ nav input[type=checkbox]{
 
 nav a{
   text-decoration: none;
+  flex: 1;
 }
 
 nav > div{
