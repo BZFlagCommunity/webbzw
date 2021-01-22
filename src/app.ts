@@ -42,8 +42,8 @@ function handleFile(files: FileList | null | undefined){
 
   const reader = new FileReader();
 
-  reader.addEventListener("load", (e: Event) => {
-    const text = e.target?.result;
+  reader.addEventListener("load", () => {
+    const text = reader.result;
     dom.textarea.value = text as string;
     textareaChanged();
   });
