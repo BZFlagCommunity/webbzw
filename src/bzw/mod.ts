@@ -1,2 +1,2 @@
 export * from "./types.ts";
-export * from "./objects/mod.ts";
+export * as objects from "./objects/mod.ts";

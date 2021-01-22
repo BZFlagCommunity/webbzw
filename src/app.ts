@@ -1,8 +1,8 @@
 import * as math from "./math.ts";
 import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
-import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone} from "./bzw/mod.ts";
-import {elements} from "./dom/mod.ts";
+import * as bzw from "./bzw/mod.ts";
+import * as dom from "./dom/mod.ts";
 import {getCoord, saveFile, colorThemeChanged} from "./utils.ts";
 import "./editor/mod.ts";
 
@@ -13,20 +13,20 @@ const NEAR_PLANE = 1;
 
 colorThemeChanged();
 
-const gl = elements.canvas.getContext("webgl2") as WebGL2RenderingContext;
+const gl = dom.canvas.getContext("webgl2") as WebGL2RenderingContext;
 if(!gl){
   alert("WebGL 2.0 not available");
 }
 
 let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
-elements.textarea.value = source;
+dom.textarea.value = source;
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
 
 const map: {
   worldSize: number,
-  objects: MapObject[]
+  objects: bzw.MapObject[]
 } = {
   worldSize: 400,
   objects: []
@@ -42,9 +42,9 @@ function handleFile(files: FileList | null | undefined){
 
   const reader = new FileReader();
 
-  reader.addEventListener("load", (e) => {
+  reader.addEventListener("load", (e: Event) => {
     const text = e.target?.result;
-    elements.textarea.value = text as string;
+    dom.textarea.value = text as string;
     textareaChanged();
   });
 
@@ -62,22 +62,22 @@ function saveMap(){
 
 /** Update line numbers to match source */
 function updateLineNumbers(){
-  elements.lineNumbersElement.innerHTML = [...Array(source.split("\n").length).keys()].map((i) => i + 1).join("\n");
-  elements.lineNumbersElement.scrollTop = elements.textarea.scrollTop;
+  dom.lineNumbersElement.innerHTML = [...Array(source.split("\n").length).keys()].map((i) => i + 1).join("\n");
+  dom.lineNumbersElement.scrollTop = dom.textarea.scrollTop;
 }
 
 /** Raw handler for textarea being changed */
 function _textareaChanged(){
   // don't preform unnecessary updates if source hasn't changed
-  if(elements.textarea.value === source){
+  if(dom.textarea.value === source){
     return;
   }
 
-  if(elements.settings.syntaxHighlighting.checked){
+  if(dom.settings.syntaxHighlighting.checked){
     highlight(source);
   }
 
-  source = elements.textarea.value;
+  source = dom.textarea.value;
   updateLineNumbers();
   parseSource();
   updateMesh(gl);
@@ -97,11 +97,11 @@ function textareaChanged(){
 
 /** Toggle current line as a comment */
 function toggleComment(){
-  elements.textarea.focus();
+  dom.textarea.focus();
 
-  let selectionStart = elements.textarea.selectionStart;
-  const currentLineNumber = elements.textarea.value.substr(0, selectionStart).split("\n").length - 1;
-  const lines = elements.textarea.value.split("\n");
+  let selectionStart = dom.textarea.selectionStart;
+  const currentLineNumber = dom.textarea.value.substr(0, selectionStart).split("\n").length - 1;
+  const lines = dom.textarea.value.split("\n");
 
   if(lines[currentLineNumber].startsWith("#")){ // remove comment
     lines[currentLineNumber] = lines[currentLineNumber].substr(1);
@@ -111,9 +111,9 @@ function toggleComment(){
     selectionStart++;
   }
 
-  elements.textarea.value = lines.join("\n");
+  dom.textarea.value = lines.join("\n");
   textareaChanged();
-  elements.textarea.selectionEnd = selectionStart;
+  dom.textarea.selectionEnd = selectionStart;
 }
 
 function setColorTheme(e?: Event){
@@ -134,46 +134,46 @@ function setColorTheme(e?: Event){
 setColorTheme(); // FIXME: this is a hack so the function is not removed
 
 function syntaxHighlightingChanged(){
-  if(elements.settings.syntaxHighlighting.checked){
-    elements.textarea.classList.remove("show");
+  if(dom.settings.syntaxHighlighting.checked){
+    dom.textarea.classList.remove("show");
     highlight();
   }else{
-    elements.textarea.classList.add("show");
+    dom.textarea.classList.add("show");
     deleteHighlightElement();
   }
 }
 
-elements.settings.autoRotate.addEventListener("change", () => {
-  localStorage.setItem("autoRotate", elements.settings.autoRotate.checked ? "true" : "false");
+dom.settings.autoRotate.addEventListener("change", () => {
+  localStorage.setItem("autoRotate", dom.settings.autoRotate.checked ? "true" : "false");
 });
 
-elements.settings.showAxis.addEventListener("change", () => {
-  localStorage.setItem("showAxis", elements.settings.showAxis.checked ? "true" : "false");
+dom.settings.showAxis.addEventListener("change", () => {
+  localStorage.setItem("showAxis", dom.settings.showAxis.checked ? "true" : "false");
 });
 
-elements.settings.syntaxHighlighting.addEventListener("change", () => {
-  localStorage.setItem("syntaxHighlighting", elements.settings.syntaxHighlighting.checked ? "true" : "false");
+dom.settings.syntaxHighlighting.addEventListener("change", () => {
+  localStorage.setItem("syntaxHighlighting", dom.settings.syntaxHighlighting.checked ? "true" : "false");
   syntaxHighlightingChanged();
 });
 
-elements.bzwFile.addEventListener("change", () => {
-  handleFile(elements.bzwFile.files);
+dom.bzwFile.addEventListener("change", () => {
+  handleFile(dom.bzwFile.files);
 });
 
-elements.textarea.onscroll = () => {
-  const highlighter = elements.editor.children.item(1);
+dom.textarea.onscroll = () => {
+  const highlighter = dom.editor.children.item(1);
   if(highlighter){
-    highlighter.scrollTop = elements.textarea.scrollTop;
-    highlighter.scrollLeft = elements.textarea.scrollLeft;
+    highlighter.scrollTop = dom.textarea.scrollTop;
+    highlighter.scrollLeft = dom.textarea.scrollLeft;
   }
 
-  elements.lineNumbersElement.scrollTop = elements.textarea.scrollTop;
+  dom.lineNumbersElement.scrollTop = dom.textarea.scrollTop;
 };
 
-elements.textarea.oninput = () => textareaChanged();
+dom.textarea.oninput = () => textareaChanged();
 
 // custom keyboard shotcuts (editor)
-elements.textarea.onkeydown = (e: KeyboardEvent) => {
+dom.textarea.onkeydown = (e: KeyboardEvent) => {
   if(e.keyCode === 191 && e.ctrlKey){ // Ctrl+/ (toggle comment)
     e.preventDefault();
     toggleComment();
@@ -205,12 +205,12 @@ window.onkeydown = (e: KeyboardEvent) => {
   // Ctrl+O (open file)
   if(e.keyCode === 79 && e.ctrlKey){
     e.preventDefault();
-    elements.bzwFile.click();
+    dom.bzwFile.click();
   }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  if(!elements.canvas){
+  if(!dom.canvas){
     return;
   }
 
@@ -223,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let THETA = 180, PHI = 40, oldTime = 0;
 
   // set canvas size to match element size
-  elements.canvas.width = elements.canvas.offsetWidth;
-  elements.canvas.height = elements.canvas.offsetHeight;
+  dom.canvas.width = dom.canvas.offsetWidth;
+  dom.canvas.height = dom.canvas.offsetHeight;
 
   const mouseDown = (e: Event) => {
     e.preventDefault();
@@ -248,24 +248,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const x = getCoord(e, "X");
     const y = getCoord(e, "Y");
 
-    dX = (x - oldX) * MOUSE_SPEED * Math.PI / elements.canvas.width;
-    dY = (y - oldY) * MOUSE_SPEED * Math.PI / elements.canvas.height;
+    dX = (x - oldX) * MOUSE_SPEED * Math.PI / dom.canvas.width;
+    dY = (y - oldY) * MOUSE_SPEED * Math.PI / dom.canvas.height;
     THETA += dX;
     PHI += dY;
     oldX = x
     oldY = y;
   };
 
-  elements.canvas.addEventListener("mousedown", mouseDown, false);
-  elements.canvas.addEventListener("mouseup", mouseUp, false);
-  elements.canvas.addEventListener("mouseout", mouseUp, false);
-  elements.canvas.addEventListener("mousemove", mouseMove, false);
+  dom.canvas.addEventListener("mousedown", mouseDown, false);
+  dom.canvas.addEventListener("mouseup", mouseUp, false);
+  dom.canvas.addEventListener("mouseout", mouseUp, false);
+  dom.canvas.addEventListener("mousemove", mouseMove, false);
   // mobile
-  elements.canvas.addEventListener("touchstart", mouseDown, false);
-  elements.canvas.addEventListener("touchend", mouseUp, false);
-  elements.canvas.addEventListener("touchmove", mouseMove, false);
+  dom.canvas.addEventListener("touchstart", mouseDown, false);
+  dom.canvas.addEventListener("touchend", mouseUp, false);
+  dom.canvas.addEventListener("touchmove", mouseMove, false);
 
-  elements.canvas.addEventListener("wheel", (e: WheelEvent): void => {
+  dom.canvas.addEventListener("wheel", (e: WheelEvent): void => {
     const delta = e.deltaY;
     viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
     viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 3 ? -map.worldSize * 3 : viewMatrix[14];
@@ -337,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dt = time - oldTime;
     oldTime = time;
 
-    if(!drag && elements.settings.autoRotate.checked){
+    if(!drag && dom.settings.autoRotate.checked){
       THETA += .015 * dt;
     }
 
@@ -354,15 +354,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ]);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.viewport(0, 0, elements.canvas.width, elements.canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, elements.canvas.width/elements.canvas.height, NEAR_PLANE, map.worldSize * 5));
+    gl.viewport(0, 0, dom.canvas.width, dom.canvas.height);
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, dom.canvas.width/dom.canvas.height, NEAR_PLANE, map.worldSize * 5));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
 
     gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
 
-    if(elements.settings.showAxis.checked){
+    if(dom.settings.showAxis.checked){
       gl.disable(gl.DEPTH_TEST);
 
       gl.bindVertexArray(axisVao);
@@ -376,9 +376,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // load settings
-  elements.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
-  elements.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
-  elements.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
+  dom.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
+  dom.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
+  dom.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
   parseSource();
   updateMesh(gl);
@@ -414,25 +414,25 @@ function parseSource(){
       current = "";
     }else if(line === "world"){
       current = line;
-      map.objects.push(new World());
+      map.objects.push(new bzw.objects.World());
     }else if(line === "box"){
       current = line;
-      map.objects.push(new Box());
+      map.objects.push(new bzw.objects.Box());
     }else if(line === "meshbox"){
       current = line;
-      map.objects.push(new MeshBox());
+      map.objects.push(new bzw.objects.MeshBox());
     }else if(line === "pyramid"){
       current = line;
-      map.objects.push(new Pyramid());
+      map.objects.push(new bzw.objects.Pyramid());
     }else if(line === "meshpyr"){
       current = line;
-      map.objects.push(new MeshPyramid());
+      map.objects.push(new bzw.objects.MeshPyramid());
     }else if(line === "base"){
       current = line;
-      map.objects.push(new Base());
+      map.objects.push(new bzw.objects.Base());
     }else if(line === "zone"){
       current = line;
-      map.objects.push(new Zone());
+      map.objects.push(new bzw.objects.Zone());
     }else{
       switch(current){
         case "world":
@@ -445,7 +445,7 @@ function parseSource(){
           map.objects[map.objects.length - 1].parseLine(line);
 
           if(current === "world" && line.startsWith("size")){
-            map.worldSize = (map.objects[map.objects.length - 1] as World).size[0];
+            map.worldSize = (map.objects[map.objects.length - 1] as bzw.objects.World).size[0];
           }
           break;
         default:
@@ -454,12 +454,12 @@ function parseSource(){
     }
   }
 
-  elements.statusBar.objects.innerText = `${map.objects.length} Objects`;
+  dom.statusBar.objects.innerText = `${map.objects.length} Objects`;
 }
 
 /** Update world mesh */
 function updateMesh(gl: WebGL2RenderingContext){
-  const mesh: IMesh = {
+  const mesh: bzw.IMesh = {
     vertices: [],
     indices: [],
     colors: [],
@@ -467,8 +467,8 @@ function updateMesh(gl: WebGL2RenderingContext){
   };
 
   // add world object if one doesn't already exist
-  if(!map.objects.find((object) => object instanceof World)){
-    map.objects.push(new World());
+  if(!map.objects.find((object) => object instanceof bzw.objects.World)){
+    map.objects.push(new bzw.objects.World());
     map.worldSize = map.objects[map.objects.length - 1].size[0];
   }
 
@@ -505,5 +505,5 @@ function updateMesh(gl: WebGL2RenderingContext){
 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  elements.statusBar.vertices.innerText = `${elementCount} Vertices`;
+  dom.statusBar.vertices.innerText = `${elementCount} Vertices`;
 }

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
-    "target": "es2015",
-    "lib": ["dom", "DOM.Iterable", "es2015"],
+    "target": "es6",
+    "lib": ["dom", "DOM.Iterable", "es6"],
     "sourceMap": false,
     "strict": true
   },
