@@ -398,7 +398,14 @@ function parseSource(){
   map.objects = [];
 
   for(let line of source.split("\n")){
+    // remove trailing comment if there is one
+    if(line.includes("#")){
+      line = line.substring(0, line.indexOf("#"));
+    }
+
+    // remove extra whitespace
     line = line.trim().replace(/ +(?= )/g, "");
+
     if(line[0] === "#"){
       continue;
     }
