@@ -18,7 +18,7 @@
             Open
             <span class="shortcut">Ctrl+O</span>
           </span>
-          <span onclick="saveFile()">
+          <span onclick="saveMap()">
             Save
             <span class="shortcut">Ctrl+S</span>
           </span>
@@ -68,7 +68,10 @@
   <main>
     <pre class="line-numbers"></pre>
     <div class="editor">
-      <textarea placeholder="bzw source" spellcheck="false"></textarea>
+      <textarea spellcheck="false"></textarea>
+      <pre class="highlight">
+        <span class="comment"># loading...</span>
+      </pre>
     </div>
     <div class="resizer"></div>
     <canvas></canvas>

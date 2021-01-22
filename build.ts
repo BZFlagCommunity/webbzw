@@ -1,20 +1,26 @@
-import {serve} from "https://deno.land/std@0.80.0/http/server.ts";
+import {serve as httpServer} from "https://deno.land/std@0.80.0/http/server.ts";
 
 import {renderToString} from "https://deno.land/x/dejs@0.9.3/mod.ts";
 import ws from "https://deno.land/x/deno_ws@0.1.4/mod.ts";
 
 // const WASM_PATH = "./wasm/target/wasm32-unknown-unknown/release/wasm.wasm";
 
+const serve = Deno.args[0] === "serve";
+
 let template = "";
 let css = "";
 let js = "";
+
+function compress(text: string, force: boolean = false): string{
+  return serve && !force ? text : text.split("\n").map((line) => line.trim()).join("");
+}
 
 async function loadTemplate(){
   template = await Deno.readTextFile("./src/index.ejs");
 }
 
 async function loadCSS(){
-  css = await Deno.readTextFile("./src/style.css");
+  css = compress(await Deno.readTextFile("./src/style.css"), true).replace(/: /g, ":");
 }
 
 async function loadJS(){
@@ -25,7 +31,7 @@ async function loadJS(){
       console.log(diagnostics);
     }
 
-    js = files["deno:///bundle.js"];
+    js = compress(files["deno:///bundle.js"]);
   }catch(err){
     console.error(err);
   }
@@ -55,14 +61,14 @@ await loadTemplate();
 await loadCSS();
 await loadJS();
 
-if(Deno.args[0] === "serve"){
+if(serve){
   const WS_PORT = 8001;
   const RELOAD_COMMAND = "reload";
   const RELOAD_TIMEOUT = 50;
 
   const RELOAD_HTML = `<script>var ssgs=new WebSocket("ws://localhost:${WS_PORT}");ssgs.onmessage=function(event){if(event.data==="${RELOAD_COMMAND}"){window.location.reload()}}</script>`;
 
-  const server = serve({port: 8000});
+  const server = httpServer({port: 8000});
   console.log("dev server running on http://localhost:8000/");
 
   const wss = new ws.Server(undefined, WS_PORT);

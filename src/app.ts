@@ -3,16 +3,13 @@ import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import {MapObject, IMesh, Box, MeshBox, Base, Pyramid, MeshPyramid, World, Zone} from "./bzw/mod.ts";
 import {elements} from "./dom/mod.ts";
+import {getCoord, saveFile, colorThemeChanged} from "./utils.ts";
 import "./editor/mod.ts";
 
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 100;
 const EDITOR_CHANGE_TIMEOUT = 15;
 const NEAR_PLANE = 1;
-
-elements.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
-elements.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
-elements.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
 colorThemeChanged();
 
@@ -21,7 +18,7 @@ if(!gl){
   alert("WebGL 2.0 not available");
 }
 
-let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend`;
+let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
 elements.textarea.value = source;
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
@@ -34,11 +31,6 @@ const map: {
   worldSize: 400,
   objects: []
 };
-
-/** Smartly get coordinate for input */
-function getCoord(e: any, coord: "X" | "Y"): number{
-  return e.touches ? e.touches[0][`page${coord}`] : e[`page${coord}`];
-}
 
 /** Handle a file being uploaded */
 function handleFile(files: FileList | null | undefined){
@@ -64,16 +56,8 @@ function handleFile(files: FileList | null | undefined){
 }
 
 /** Save map to device */
-function saveFile(){
-  const blob = new Blob([source], {type: "text/plain"});
-
-  const link = document.createElement("a");
-  link.download = "map.bzw";
-  link.href = window.URL.createObjectURL(blob);
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+function saveMap(){
+  saveFile("map.bzw", source);
 }
 
 /** Update line numbers to match source */
@@ -149,10 +133,6 @@ function setColorTheme(e?: Event){
 }
 setColorTheme(); // FIXME: this is a hack so the function is not removed
 
-function colorThemeChanged(){
-  document.documentElement.setAttribute("data-theme", localStorage.getItem("colorTheme") ?? "default");
-}
-
 function syntaxHighlightingChanged(){
   if(elements.settings.syntaxHighlighting.checked){
     elements.textarea.classList.remove("show");
@@ -172,8 +152,8 @@ elements.settings.showAxis.addEventListener("change", () => {
 });
 
 elements.settings.syntaxHighlighting.addEventListener("change", () => {
-  syntaxHighlightingChanged();
   localStorage.setItem("syntaxHighlighting", elements.settings.syntaxHighlighting.checked ? "true" : "false");
+  syntaxHighlightingChanged();
 });
 
 elements.bzwFile.addEventListener("change", () => {
@@ -190,10 +170,7 @@ elements.textarea.onscroll = () => {
   elements.lineNumbersElement.scrollTop = elements.textarea.scrollTop;
 };
 
-elements.textarea.oninput = (e: Event) => {
-  elements.textarea.value = (e.currentTarget as HTMLTextAreaElement).value;
-  textareaChanged();
-};
+elements.textarea.oninput = () => textareaChanged();
 
 // custom keyboard shotcuts (editor)
 elements.textarea.onkeydown = (e: KeyboardEvent) => {
@@ -202,7 +179,7 @@ elements.textarea.onkeydown = (e: KeyboardEvent) => {
     toggleComment();
   }else if(e.keyCode === 83 && e.ctrlKey){ // Ctrl+S (save)
     e.preventDefault();
-    saveFile();
+    saveMap();
   }
 };
 
@@ -232,7 +209,7 @@ window.onkeydown = (e: KeyboardEvent) => {
   }
 };
 
-window.onload = () => {
+document.addEventListener("DOMContentLoaded", () => {
   if(!elements.canvas){
     return;
   }
@@ -245,24 +222,27 @@ window.onload = () => {
   let dX = 0, dY = 0;
   let THETA = 180, PHI = 40, oldTime = 0;
 
+  // set canvas size to match element size
   elements.canvas.width = elements.canvas.offsetWidth;
   elements.canvas.height = elements.canvas.offsetHeight;
 
-  const mouseDown = (e: any) => {
+  const mouseDown = (e: Event) => {
+    e.preventDefault();
+
     drag = true;
     oldX = getCoord(e, "X");
     oldY = getCoord(e, "Y");
-    e.preventDefault();
-    return false;
   };
 
   const mouseUp = () => {
     drag = false;
   };
 
-  const mouseMove = (e: any) => {
+  const mouseMove = (e: Event) => {
+    e.preventDefault();
+
     if(!drag){
-      return false;
+      return;
     }
 
     const x = getCoord(e, "X");
@@ -274,7 +254,6 @@ window.onload = () => {
     PHI += dY;
     oldX = x
     oldY = y;
-    e.preventDefault();
   };
 
   elements.canvas.addEventListener("mousedown", mouseDown, false);
@@ -286,15 +265,15 @@ window.onload = () => {
   elements.canvas.addEventListener("touchend", mouseUp, false);
   elements.canvas.addEventListener("touchmove", mouseMove, false);
 
-  elements.canvas.addEventListener("wheel", (e): void => {
-    const delta = (e as WheelEvent).deltaY;
+  elements.canvas.addEventListener("wheel", (e: WheelEvent): void => {
+    const delta = e.deltaY;
     viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
     viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 3 ? -map.worldSize * 3 : viewMatrix[14];
   });
 
   const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
   if(!shader){
-    return;
+    return alert("Error creating shader");
   }
   gl.useProgram(shader);
 
@@ -322,7 +301,7 @@ window.onload = () => {
     0, 0, 1, 1, 0, 0, 1, 1
   ];
 
-  var axisVao = gl.createVertexArray();
+  const axisVao = gl.createVertexArray();
   gl.bindVertexArray(axisVao);
 
   const axisVbo = gl.createBuffer() as WebGLBuffer;
@@ -396,10 +375,22 @@ window.onload = () => {
     requestAnimationFrame(render);
   };
 
+  // load settings
+  elements.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
+  elements.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
+  elements.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
+
   parseSource();
   updateMesh(gl);
+
+  setTimeout(() => {
+    updateLineNumbers();
+    deleteHighlightElement();
+    syntaxHighlightingChanged();
+  });
+
   requestAnimationFrame(render);
-};
+});
 
 /** Parse world source */
 function parseSource(){
@@ -509,6 +500,3 @@ function updateMesh(gl: WebGL2RenderingContext){
 
   elements.statusBar.vertices.innerText = `${elementCount} Vertices`;
 }
-
-syntaxHighlightingChanged();
-updateLineNumbers();
