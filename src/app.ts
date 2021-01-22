@@ -24,10 +24,7 @@ dom.textarea.value = source;
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
 let elementCount = 0;
 
-const map: {
-  worldSize: number,
-  objects: bzw.MapObject[]
-} = {
+let map: bzw.IMap = {
   worldSize: 400,
   objects: []
 };
@@ -79,7 +76,6 @@ function _textareaChanged(){
 
   source = dom.textarea.value;
   updateLineNumbers();
-  parseSource();
   updateMesh(gl);
 
   localStorage.setItem("bzw", source);
@@ -380,7 +376,6 @@ document.addEventListener("DOMContentLoaded", () => {
   dom.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
   dom.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
-  parseSource();
   updateMesh(gl);
 
   setTimeout(() => {
@@ -392,73 +387,10 @@ document.addEventListener("DOMContentLoaded", () => {
   requestAnimationFrame(render);
 });
 
-/** Parse world source */
-function parseSource(){
-  let current = "";
-  map.objects = [];
-
-  for(let line of source.split("\n")){
-    // remove trailing comment if there is one
-    if(line.includes("#")){
-      line = line.substring(0, line.indexOf("#"));
-    }
-
-    // remove extra whitespace
-    line = line.trim().replace(/ +(?= )/g, "");
-
-    if(line[0] === "#"){
-      continue;
-    }
-
-    if(line === "end"){
-      current = "";
-    }else if(line === "world"){
-      current = line;
-      map.objects.push(new bzw.objects.World());
-    }else if(line === "box"){
-      current = line;
-      map.objects.push(new bzw.objects.Box());
-    }else if(line === "meshbox"){
-      current = line;
-      map.objects.push(new bzw.objects.MeshBox());
-    }else if(line === "pyramid"){
-      current = line;
-      map.objects.push(new bzw.objects.Pyramid());
-    }else if(line === "meshpyr"){
-      current = line;
-      map.objects.push(new bzw.objects.MeshPyramid());
-    }else if(line === "base"){
-      current = line;
-      map.objects.push(new bzw.objects.Base());
-    }else if(line === "zone"){
-      current = line;
-      map.objects.push(new bzw.objects.Zone());
-    }else{
-      switch(current){
-        case "world":
-        case "box":
-        case "meshbox":
-        case "pyramid":
-        case "meshpyr":
-        case "base":
-        case "zone":
-          map.objects[map.objects.length - 1].parseLine(line);
-
-          if(current === "world" && line.startsWith("size")){
-            map.worldSize = (map.objects[map.objects.length - 1] as bzw.objects.World).size[0];
-          }
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  dom.statusBar.objects.innerText = `${map.objects.length} Objects`;
-}
-
 /** Update world mesh */
 function updateMesh(gl: WebGL2RenderingContext){
+  map = bzw.parse(source);
+
   const mesh: bzw.IMesh = {
     vertices: [],
     indices: [],

@@ -31,7 +31,17 @@ async function loadJS(){
       console.log(diagnostics);
     }
 
-    js = compress(files["deno:///bundle.js"]);
+    // FIXME: these `replace` calls are a hack
+    js = compress(files["deno:///bundle.js"].replace("const mod = function() {", "").replace(`return {
+        Box: Box,
+        Pyramid: Pyramid,
+        Zone: Zone,
+        MeshPyramid: MeshPyramid,
+        Base: Base,
+        MeshBox: MeshBox,
+        World: World
+    };
+}();`, "").replace(/mod\./g, ""));
   }catch(err){
     console.error(err);
   }
