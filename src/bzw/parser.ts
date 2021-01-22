@@ -1,6 +1,7 @@
 import {MapObject} from "./types.ts";
 import * as objects from "./objects/mod.ts";
 
+/** Parsed map */
 export interface IMap{
   worldSize: number;
   objects: MapObject[];
