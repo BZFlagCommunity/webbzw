@@ -29,6 +29,8 @@ jobs:
 
       - uses: actions-ecosystem/action-get-latest-tag@v1
         id: get-latest-tag
+        with:
+          semver_only: true
 
       - name: Build 🧱
         run: deno run --unstable --allow-read --allow-write --allow-env build.ts
