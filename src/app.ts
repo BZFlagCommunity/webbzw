@@ -437,5 +437,6 @@ function updateMesh(gl: WebGL2RenderingContext){
 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
+  dom.statusBar.objects.innerText = `${map.objects.length} Objects`;
   dom.statusBar.vertices.innerText = `${elementCount} Vertices`;
 }
