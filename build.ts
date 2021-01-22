@@ -51,7 +51,12 @@ async function build(): Promise<string>{
     await loadJS();
   }
 
+  const versionProcess = Deno.run({cmd: ["git", "describe", "--tags"], stdout: "piped", stderr: "piped"});
+  const version = new TextDecoder().decode(await versionProcess.output());
+  versionProcess.close();
+
   return await renderToString(template, {
+    version,
     css,
     js
   });

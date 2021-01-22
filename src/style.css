@@ -139,6 +139,10 @@ nav input[type=checkbox]{
   margin-right: .5rem;
 }
 
+nav a{
+  text-decoration: none;
+}
+
 nav > div{
   font-size: .9rem;
   user-select: none;
