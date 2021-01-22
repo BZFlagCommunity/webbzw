@@ -1,6 +1,9 @@
 {
   "recommendations": [
-    "denoland.vscode-deno",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "denoland.vscode-deno-canary",
+    "digitalbrainstem.javascript-ejs-support",
+    "me-dutour-mathieu.vscode-github-actions",
+    "wayou.vscode-todo-highlight"
   ]
 }

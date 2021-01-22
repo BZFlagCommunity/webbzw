@@ -459,7 +459,6 @@ function parseSource(){
 
 /** Update world mesh */
 function updateMesh(gl: WebGL2RenderingContext){
-  console.log("updating mesh");
   const mesh: IMesh = {
     vertices: [],
     indices: [],
@@ -467,7 +466,8 @@ function updateMesh(gl: WebGL2RenderingContext){
     indicesCount: 0
   };
 
-  if(map.objects.filter((object) => object instanceof World).length === 0){
+  // add world object if one doesn't already exist
+  if(!map.objects.find((object) => object instanceof World)){
     map.objects.push(new World());
     map.worldSize = map.objects[map.objects.length - 1].size[0];
   }

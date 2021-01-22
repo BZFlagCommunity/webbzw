@@ -2,7 +2,6 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "target": "es2015",
-    "module": "amd",
     "lib": ["dom", "DOM.Iterable", "es2015"],
     "sourceMap": false,
     "strict": true
