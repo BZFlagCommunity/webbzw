@@ -27,11 +27,13 @@ jobs:
         with:
           deno-version: v1.7.0
 
-      - name: Set env
-        run: echo "GIT_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
 
       - name: Build 🧱
         run: deno run --unstable --allow-read --allow-write --allow-env build.ts
+        env:
+          GIT_TAG: ${{ steps.get-latest-tag.outputs.tag }}
 
       - uses: actions/upload-artifact@v2
         with:
