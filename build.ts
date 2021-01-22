@@ -51,9 +51,14 @@ async function build(): Promise<string>{
     await loadJS();
   }
 
-  const versionProcess = Deno.run({cmd: ["git", "describe", "--tags"], stdout: "piped", stderr: "piped"});
-  const version = new TextDecoder().decode(await versionProcess.output());
-  versionProcess.close();
+  let version = "unknown";
+  if(serve){
+    const versionProcess = Deno.run({cmd: ["git", "describe", "--tags"], stdout: "piped", stderr: "piped"});
+    version = new TextDecoder().decode(await versionProcess.output());
+    versionProcess.close();
+  }else{
+    version = Deno.env.get("GIT_TAG") ?? "unknown";
+  }
 
   return await renderToString(template, {
     version,

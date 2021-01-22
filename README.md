@@ -19,7 +19,7 @@ The list of supported map features can be found in issue [#2](https://github.com
 
 > [Deno](https://deno.land/) v1.7.0+ is required to build the application.
 
-`deno run --unstable --allow-read --allow-write --allow-run build.ts`
+`deno run --unstable --allow-read --allow-write --allow-env build.ts`
 
 Or to run the live server with hot reloading: `deno run --unstable --allow-read --allow-write --allow-net --allow-run build.ts serve`
 
