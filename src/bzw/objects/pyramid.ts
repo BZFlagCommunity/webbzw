@@ -2,7 +2,7 @@ import {MapObject, IMesh} from "../types.ts";
 
 /** Pyramid object */
 export class Pyramid extends MapObject{
-  VERTEX_COUNT = 48;
+  vertexCount = 48;
 
   buildMesh(mesh: IMesh): void{
     if(!this.color){

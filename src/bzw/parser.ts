@@ -29,29 +29,45 @@ export function parse(source: string): IMap{
       continue;
     }
 
+    if(current === "define"){
+      if(line === "enddef"){
+        current = "";
+        continue;
+      }
+
+      map.objects[map.objects.length - 1].parseLine(line);
+      continue;
+    }
+
     if(line === "end"){
       current = "";
     }else if(line === "world"){
       current = line;
-      map.objects.push(new objects.World());
+      map.objects.push(new objects.World(line));
     }else if(line === "box"){
       current = line;
-      map.objects.push(new objects.Box());
+      map.objects.push(new objects.Box(line));
     }else if(line === "meshbox"){
       current = line;
-      map.objects.push(new objects.MeshBox());
+      map.objects.push(new objects.MeshBox(line));
     }else if(line === "pyramid"){
       current = line;
-      map.objects.push(new objects.Pyramid());
+      map.objects.push(new objects.Pyramid(line));
     }else if(line === "meshpyr"){
       current = line;
-      map.objects.push(new objects.MeshPyramid());
+      map.objects.push(new objects.MeshPyramid(line));
     }else if(line === "base"){
       current = line;
-      map.objects.push(new objects.Base());
+      map.objects.push(new objects.Base(line));
     }else if(line === "zone"){
       current = line;
-      map.objects.push(new objects.Zone());
+      map.objects.push(new objects.Zone(line));
+    }else if(line.startsWith("define")){
+      current = "define";
+      map.objects.push(new objects.Define(line));
+    }else if(line.startsWith("group")){
+      current = "group";
+      map.objects.push(new objects.Group(line));
     }else{
       switch(current){
         case "world":
@@ -61,6 +77,8 @@ export function parse(source: string): IMap{
         case "meshpyr":
         case "base":
         case "zone":
+        case "define":
+        case "group":
           map.objects[map.objects.length - 1].parseLine(line);
 
           if(current === "world" && line.startsWith("size")){

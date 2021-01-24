@@ -2,7 +2,7 @@ import {MapObject, IMesh} from "../types.ts";
 
 /** Box object */
 export class Box extends MapObject{
-  VERTEX_COUNT = 72;
+  vertexCount = 72;
 
   buildMesh(mesh: IMesh): void{
     let defaultColor = false;

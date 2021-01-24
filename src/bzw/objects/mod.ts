@@ -5,3 +5,5 @@ export * from "./base.ts";
 export * from "./pyramid.ts";
 export * from "./meshpyr.ts";
 export * from "./zone.ts";
+export * from "./define.ts";
+export * from "./group.ts";

@@ -31,15 +31,16 @@ async function loadJS(){
       console.warn(Deno.formatDiagnostics(diagnostics));
     }
 
-    // FIXME: these `replace` calls are a hack
+    // HACK: there shouldn't need to be any `replace` calls
     js = compress(files["deno:///bundle.js"].replace("const mod = function() {", "").replace(`return {
-        Box: Box,
-        Pyramid: Pyramid,
-        Zone: Zone,
+        MeshBox: MeshBox,
         MeshPyramid: MeshPyramid,
         Base: Base,
-        MeshBox: MeshBox,
-        World: World
+        Group: Group,
+        Define: Define,
+        Zone: Zone,
+        World: World,
+        Box: Box
     };
 }();`, "").replace(/mod\./g, ""));
   }catch(err){

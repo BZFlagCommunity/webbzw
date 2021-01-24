@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let drag = false;
   let oldX = 0, oldY = 0;
   let dX = 0, dY = 0;
-  let THETA = 180, PHI = 40, oldTime = 0;
+  let THETA = 0, PHI = 40, oldTime = 0;
 
   // set canvas size to match element size
   dom.canvas.width = dom.canvas.offsetWidth;
@@ -279,14 +279,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const AXIS_LINE_LENGTH = 100;
   const axisVertices = [
     // x
-     0,                0, 0,
-    -AXIS_LINE_LENGTH, 0, 0,
+    0,                0, 0,
+    AXIS_LINE_LENGTH, 0, 0,
     // y
-     0, 0,                0,
-     0, AXIS_LINE_LENGTH, 0,
+    0, 0,                0,
+    0, AXIS_LINE_LENGTH, 0,
     // z
-     0, 0, 0,
-     0, 0, AXIS_LINE_LENGTH,
+    0, 0, 0,
+    0, 0, -AXIS_LINE_LENGTH,
   ];
   const axisColors = [
     // x
@@ -406,6 +406,9 @@ function updateMesh(gl: WebGL2RenderingContext){
 
   map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1); // sort by alpha
   for(const object of map.objects){
+    if(object instanceof bzw.objects.Group){
+      (object as bzw.objects.Group).define = map.objects.find((object) => object instanceof bzw.objects.Define && (object as bzw.objects.Define).name === (object as bzw.objects.Group).name) as bzw.objects.Define;
+    }
     object.buildMesh(mesh);
   }
 

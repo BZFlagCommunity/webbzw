@@ -22,25 +22,25 @@ export function highlight(source?: string): void{
   }
 
   if(!dom.editor.children.item(1)){
-    const elem = document.createElement("pre");
-    if(!elem){
+    const highlightElement = document.createElement("pre");
+    if(!highlightElement){
       console.error("highlight element could not be created");
       return;
     }
-    elem.classList.add("highlight");
+    highlightElement.classList.add("highlight");
 
     const html = (highlightHtml(dom.textarea.value) + "\n").split("\n");
 
     for(const lineNumber in html){
       const line = document.createElement("div");
       line.innerHTML = html[lineNumber];
-      elem.appendChild(line);
+      highlightElement.appendChild(line);
     }
 
-    dom.editor.appendChild(elem);
+    dom.editor.appendChild(highlightElement);
 
-    elem.scrollTop = dom.textarea.scrollTop;
-    elem.scrollLeft = dom.textarea.scrollLeft;
+    highlightElement.scrollTop = dom.textarea.scrollTop;
+    highlightElement.scrollLeft = dom.textarea.scrollLeft;
   }
 
   if(reset){

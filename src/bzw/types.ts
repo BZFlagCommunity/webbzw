@@ -13,7 +13,7 @@ export interface IMesh{
 }
 
 /** Smartly parse `string` into `number` */
-function parseNum(str: string, fallback: number = 0): number{
+export function parseNum(str: string, fallback: number = 0): number{
   const value = parseFloat(str);
   if(isNaN(value)){
     return fallback;
@@ -36,7 +36,10 @@ export abstract class MapObject{
   color?: [number, number, number, number];
 
   /** Number of vertices */
-  readonly VERTEX_COUNT: number = 0;
+  vertexCount: number = 0;
+
+  constructor(line?: string){
+  }
 
   /** Build the object's mesh and append it to `mesh` */
   abstract buildMesh(mesh: IMesh): void;
@@ -92,30 +95,39 @@ export abstract class MapObject{
 
   /** Apply this object's `rotation`, `position` and `shift` to `mesh` */
   protected applyRotPosShift(mesh: IMesh): void{
-    if(this.VERTEX_COUNT === 0){
+    if(this.vertexCount === 0){
+      console.error("this should not happen");
+      return;
+    }
+
+    this.applyRotation(mesh);
+
+    // apply position + shift
+    for(let i = mesh.vertices.length - this.vertexCount; i < mesh.vertices.length; i += 3){
+      mesh.vertices[i] += this.position[0] + this.shift[0];
+    }
+    for(let i = mesh.vertices.length - (this.vertexCount - 1); i < mesh.vertices.length; i += 3){
+      mesh.vertices[i] += this.position[2] + this.shift[2];
+    }
+    for(let i = mesh.vertices.length - (this.vertexCount - 2); i < mesh.vertices.length; i += 3){
+      mesh.vertices[i] -= this.position[1] + this.shift[1];
+    }
+  }
+
+  /** Apply this objects rotation */
+  protected applyRotation(mesh: IMesh): void{
+    if(this.vertexCount === 0){
       console.error("this should not happen");
       return;
     }
 
     const _rotation = this.rotation * Math.PI / 180;
 
-    // apply rotation
-    for(let i = mesh.vertices.length - this.VERTEX_COUNT; i < mesh.vertices.length; i += 3){
+    for(let i = mesh.vertices.length - this.vertexCount; i < mesh.vertices.length; i += 3){
       const rot = math.rotY([mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]], _rotation);
       mesh.vertices[i] = rot[0];
       mesh.vertices[i + 1] = rot[1];
       mesh.vertices[i + 2] = rot[2];
     }
-
-    // apply position + shift
-    for(let i = mesh.vertices.length - this.VERTEX_COUNT; i < mesh.vertices.length; i += 3){
-      mesh.vertices[i] -= this.position[0] + this.shift[0];
-    }
-    for(let i = mesh.vertices.length - (this.VERTEX_COUNT - 1); i < mesh.vertices.length; i += 3){
-      mesh.vertices[i] += this.position[2] + this.shift[2];
-    }
-    for(let i = mesh.vertices.length - (this.VERTEX_COUNT - 2); i < mesh.vertices.length; i += 3){
-      mesh.vertices[i] += this.position[1] + this.shift[1];
-    }
-  };
+  }
 }

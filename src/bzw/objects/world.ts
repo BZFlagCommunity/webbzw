@@ -4,7 +4,7 @@ const WALL_HEIGHT = 6.15; // 3 * _tankHeight (2.05)
 
 /** World object */
 export class World extends MapObject{
-  VERTEX_COUNT = 60;
+  vertexCount = 60;
 
   // FIXME: the types should NOT need to be redeclared
   size: [number, number, number] = [400, 400, 0];
