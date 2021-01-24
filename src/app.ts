@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, dom.canvas.width, dom.canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(50, dom.canvas.width/dom.canvas.height, NEAR_PLANE, map.worldSize * 5));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(60, dom.canvas.width/dom.canvas.height, NEAR_PLANE, map.worldSize * 5));
 
     gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
     gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
