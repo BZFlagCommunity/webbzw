@@ -407,7 +407,7 @@ function updateMesh(gl: WebGL2RenderingContext){
   map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1); // sort by alpha
   for(const object of map.objects){
     if(object instanceof bzw.objects.Group){
-      (object as bzw.objects.Group).define = map.objects.find((object) => object instanceof bzw.objects.Define && (object as bzw.objects.Define).name === (object as bzw.objects.Group).name) as bzw.objects.Define;
+      (object as bzw.objects.Group).define = map.objects.find((otherObject) => otherObject instanceof bzw.objects.Define && (otherObject as bzw.objects.Define).name === (object as bzw.objects.Group).name) as bzw.objects.Define;
     }
     object.buildMesh(mesh);
   }
