@@ -1,7 +1,9 @@
-import {MapObject, IMesh} from "../types.ts";
+import {BasicMapObject, IMesh} from "../types.ts";
 
 /** Pyramid object */
-export class Pyramid extends MapObject{
+export class Pyramid extends BasicMapObject{
+  HEADER = "pyramid";
+
   vertexCount = 48;
 
   buildMesh(mesh: IMesh): void{
@@ -47,5 +49,14 @@ export class Pyramid extends MapObject{
     this.pushColors(mesh, 4, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
     this.pushColors(mesh, 6, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
     this.pushColors(mesh, 6, color[0], color[1], color[2], color[3]);
+  }
+
+  // FIXME: this should be part of `pushIndices` with a dynamic number
+  /** Add indices 2 */
+  private pushIndices2(mesh: IMesh): void{
+    mesh.indices.push(mesh.indicesCount);
+    mesh.indices.push(mesh.indicesCount + 1);
+    mesh.indices.push(mesh.indicesCount + 2);
+    mesh.indicesCount += 3;
   }
 }

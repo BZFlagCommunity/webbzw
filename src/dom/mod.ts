@@ -6,6 +6,16 @@ export const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 export const lineNumbersElement = document.querySelector(".line-numbers") as HTMLElement;
 export const bzwFile = document.querySelector("#bzw-file") as HTMLInputElement;
 
+export const tree: {
+  root: HTMLDivElement,
+  objects: HTMLDivElement,
+  properties: HTMLDivElement,
+} = {
+  root: document.querySelector(".tree") as HTMLDivElement,
+  objects: document.querySelector(".tree > .objects") as HTMLDivElement,
+  properties: document.querySelector(".tree > .properties") as HTMLDivElement,
+};
+
 export const statusBar = {
   objects: document.querySelector("#objects") as HTMLElement,
   vertices: document.querySelector("#vertices") as HTMLElement,

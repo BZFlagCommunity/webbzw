@@ -32,7 +32,7 @@ async function loadJS(){
     }
 
     // HACK: there shouldn't need to be any `replace` calls
-    js = compress(files["deno:///bundle.js"].replace("const mod = function() {", "").replace(`return {
+    js = compress(files["deno:///bundle.js"].replace(/Box1/g, "Box").replace("const Box = Box;\n", "").replace("const MeshBox = MeshBox;\n", "").replace("const mod = function() {", "").replace(`return {
         MeshBox: MeshBox,
         MeshPyramid: MeshPyramid,
         Base: Base,

@@ -3,6 +3,8 @@ import {Box} from "./box.ts";
 
 /** (Team) Base object */
 export class Base extends Box{
+  HEADER = "base";
+
   buildMesh(mesh: IMesh): void{
     if(!this.color){
       this.color = [1, 1, 1, 1];
