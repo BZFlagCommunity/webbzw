@@ -5,8 +5,17 @@ import {Box} from "./box.ts";
 export class Zone extends Box{
   HEADER = "zone";
 
+  color: [number, number, number, number] = [1, 1, 0, .5];
+
   buildMesh(mesh: IMesh): void{
-    this.color = [1, 1, 0, .5];
     super.buildMesh(mesh);
+  }
+
+  parseLine(line: string): void{
+    if(line.split(" ")[0] === "color"){
+      return;
+    }
+
+    super.parseLine(line);
   }
 }
