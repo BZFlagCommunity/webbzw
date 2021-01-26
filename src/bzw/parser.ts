@@ -82,12 +82,18 @@ export function parse(source: string): IMap{
           map.objects[map.objects.length - 1].parseLine(line);
 
           if(current === "world" && line.startsWith("size")){
-            map.worldSize = map.objects[map.objects.length - 1].size[0];
+            map.worldSize = (map.objects[map.objects.length - 1] as objects.World).size;
           }
           break;
         default:
           break;
       }
+    }
+  }
+
+  for(const object of map.objects){
+    if(object instanceof objects.Group){
+      (object as objects.Group).define = map.objects.find((otherObject) => otherObject instanceof objects.Define && (otherObject as objects.Define).id === (object as objects.Group).id) as objects.Define;
     }
   }
 

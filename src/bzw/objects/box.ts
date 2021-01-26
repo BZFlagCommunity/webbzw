@@ -1,7 +1,9 @@
-import {MapObject, IMesh} from "../types.ts";
+import {BasicMapObject, IMesh} from "../types.ts";
 
 /** Box object */
-export class Box extends MapObject{
+export class Box extends BasicMapObject{
+  HEADER = "box";
+
   vertexCount = 72;
 
   buildMesh(mesh: IMesh): void{

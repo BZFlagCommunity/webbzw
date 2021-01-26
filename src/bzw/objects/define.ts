@@ -1,4 +1,4 @@
-import {MapObject, IMesh} from "../types.ts";
+import {MapObject} from "../types.ts";
 
 import {Box} from "./box.ts";
 import {MeshBox} from "./meshbox.ts";
@@ -8,7 +8,9 @@ import {Base} from "./base.ts";
 
 /** Define object */
 export class Define extends MapObject{
-  name: string = "";
+  HEADER = "define";
+
+  id: string = "";
   children: MapObject[] = [];
 
   private current: string = "";
@@ -20,10 +22,10 @@ export class Define extends MapObject{
       return;
     }
 
-    this.name = line.split(" ")[1];
+    this.id = line.split(" ")[1];
   }
 
-  buildMesh(mesh: IMesh): void{
+  buildMesh(): void{
   }
 
   parseLine(line: string): void{

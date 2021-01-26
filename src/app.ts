@@ -179,6 +179,114 @@ dom.textarea.onkeydown = (e: KeyboardEvent) => {
   }
 };
 
+let selectedMapObject: bzw.MapObject | undefined;
+function selectedMapObjectChanged(){
+  if(!selectedMapObject){
+    dom.tree.properties.style.display = "none";
+    return;
+  }
+
+  // remove all children
+  while(dom.tree.properties.lastChild){
+    dom.tree.properties.lastChild.remove();
+  }
+
+  const properties = Object.keys(selectedMapObject);
+  const values = Object.values(selectedMapObject);
+
+  const typeElement = document.createElement("div");
+  typeElement.innerText = `type: ${selectedMapObject.HEADER}`;
+  dom.tree.properties.appendChild(typeElement);
+
+  for(const i in properties){
+    const property = properties[i];
+    const value = values[i];
+
+    if(["vertexCount", "HEADER"].includes(property)){
+      continue;
+    }
+
+    const nameElement = document.createElement("span");
+    nameElement.innerText = property;
+    dom.tree.properties.appendChild(nameElement);
+
+    const valueElement = document.createElement("div");
+
+    const createInputElement = (type: "text" | "number" | "checkbox", value: unknown, changedHandler: (inputElement: HTMLInputElement) => void): HTMLInputElement => {
+      const inputElement = document.createElement("input") as HTMLInputElement;
+      inputElement.type = type;
+
+      if(type === "checkbox"){
+        inputElement.checked = value;
+      }else{
+        inputElement.value = value;
+      }
+
+      inputElement.addEventListener("change", () => {
+        if(!selectedMapObject){
+          return;
+        }
+
+        changedHandler(inputElement);
+      });
+
+      valueElement.appendChild(inputElement);
+    };
+
+    switch(typeof value){
+      case "string": {
+        createInputElement("text", value, (inputElement) => {
+          selectedMapObject[property] = inputElement.value;
+        });
+      } break;
+      case "number": {
+        createInputElement("number", `${value}`, (inputElement) => {
+          selectedMapObject[property] = inputElement.value;
+        });
+      } break;
+      case "boolean": {
+        createInputElement("checkbox", value, (inputElement) => {
+          selectedMapObject[property] = inputElement.checked;
+        });
+      } break;
+      case "object": {
+        if(Array.isArray(value) && typeof value[0] === "number"){
+          for(const valueIndex in value){
+            createInputElement("number", `${value[valueIndex]}`, (inputElement) => {
+              selectedMapObject[property][valueIndex] = bzw.parseNum(inputElement.value);
+            });
+          }
+
+          break;
+        }
+      } // notice no break as we may not handle it
+      default:
+        valueElement.innerText = "unsupported property";
+        break;
+    }
+
+    dom.tree.properties.appendChild(valueElement);
+  }
+
+  dom.tree.properties.style.display = "flex";
+}
+
+dom.tree.objects.addEventListener("click", (e: Event) => {
+  const target = e.target as HTMLElement;
+  if(!target || !target.parentElement || !target.parentElement.classList.contains("objects")){
+    return;
+  }
+
+  for(const selected of dom.tree.objects.querySelectorAll<HTMLDivElement>(".selected")){
+    selected.classList.remove("selected");
+  }
+  target.classList.add("selected");
+
+  const index = Array.from(target.parentElement.children).indexOf(target);
+  selectedMapObject = map.objects[index];
+  selectedMapObjectChanged();
+});
+
 window.addEventListener("dragenter", (e: DragEvent) => {
   e.stopPropagation();
   e.preventDefault();
@@ -391,6 +499,18 @@ document.addEventListener("DOMContentLoaded", () => {
 function updateMesh(gl: WebGL2RenderingContext){
   map = bzw.parse(source);
 
+  dom.tree.objects.innerHTML = "";
+  for(const object of map.objects){
+    const div = document.createElement("div");
+    div.innerText = object.name || object.HEADER;
+    dom.tree.objects.appendChild(div);
+  }
+
+  if(selectedMapObject && map.objects.indexOf(selectedMapObject) < 0){
+    selectedMapObject = undefined;
+    selectedMapObjectChanged();
+  }
+
   const mesh: bzw.IMesh = {
     vertices: [],
     indices: [],
@@ -401,14 +521,11 @@ function updateMesh(gl: WebGL2RenderingContext){
   // add world object if one doesn't already exist
   if(!map.objects.find((object) => object instanceof bzw.objects.World)){
     map.objects.push(new bzw.objects.World());
-    map.worldSize = map.objects[map.objects.length - 1].size[0];
+    map.worldSize = (map.objects[map.objects.length - 1] as bzw.objects.World).size;
   }
 
-  map.objects = map.objects.sort((a, b) => (a.color ? a.color[3] : 1) > (b.color ? b.color[3] : 1) ? 1 : -1); // sort by alpha
-  for(const object of map.objects){
-    if(object instanceof bzw.objects.Group){
-      (object as bzw.objects.Group).define = map.objects.find((otherObject) => otherObject instanceof bzw.objects.Define && (otherObject as bzw.objects.Define).name === (object as bzw.objects.Group).name) as bzw.objects.Define;
-    }
+  // sort by alpha
+  for(const object of [...map.objects].sort((a: any, b: any) => (a.color?.[3] ?? 1) > (b.color?.[3] ?? 1) ? 1 : -1)){
     object.buildMesh(mesh);
   }
 
