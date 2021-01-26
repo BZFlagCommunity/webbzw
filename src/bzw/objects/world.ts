@@ -10,8 +10,9 @@ export class World extends MapObject{
   vertexCount = 60;
 
   size: number = 400;
-
+  flagHeight: number = 10;
   noWalls: boolean = false;
+  freeCtfSpawns: boolean = false;
 
   buildMesh(mesh: IMesh): void{
     const {size} = this;
@@ -65,8 +66,12 @@ export class World extends MapObject{
 
     if(parts[0] === "size"){
       this.size = parseNum(parts[1]) || 400;
+    }else if(parts[0] === "flagHeight"){
+      this.flagHeight = parseNum(parts[1]) || 10;
     }else if(parts[0] === "noWalls"){
       this.noWalls = true;
+    }else if(parts[0] === "freeCtfSpawns"){
+      this.freeCtfSpawns = true;
     }
   }
 }

@@ -16,7 +16,8 @@ export function highlight(source?: string): void{
   let sourceLines = source ? source.split("\n").length : lines.length;
   const reset = Math.abs(sourceLines - lines.length) > 1;
 
-  // if multiple lines changes brute force update - FIXME: this is a very bad hack
+  // if multiple lines changes brute force update
+  // HACK this should not be brute-forced
   if(reset){
     deleteHighlightElement();
   }
@@ -66,4 +67,4 @@ export function highlight(source?: string): void{
   }
 
   elem.children[currentLineNumber].innerHTML = html;
-};
+}

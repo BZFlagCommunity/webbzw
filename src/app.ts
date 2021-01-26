@@ -64,7 +64,7 @@ function updateLineNumbers(){
 }
 
 function trimSource(text: string): string{
-  return text.split("\n").map((line: string) => line.trim()).join("\n");
+  return text.split("\n").map((line: string) => line.replace(/\s+$/g, "")).join("\n");
 }
 
 /** Raw handler for textarea being changed */
@@ -184,12 +184,14 @@ dom.textarea.onkeydown = (e: KeyboardEvent) => {
   }
 };
 
-let selectedMapObject: bzw.MapObject | undefined;
+let selectedMapObjectIndex: number;
 function selectedMapObjectChanged(){
-  if(!selectedMapObject){
+  if(selectedMapObjectIndex < 0){
     dom.tree.properties.style.display = "none";
     return;
   }
+
+  const selectedMapObject = map.objects[selectedMapObjectIndex];
 
   // remove all children
   while(dom.tree.properties.lastChild){
@@ -229,13 +231,70 @@ function selectedMapObjectChanged(){
         inputElement.value = value as string;
       }
 
-      inputElement.addEventListener("change", () => {
-        if(!selectedMapObject){
+      inputElement.addEventListener("input", () => {
+        if(selectedMapObjectIndex === -1){
           return;
         }
 
         changedHandler(inputElement);
-        updateMesh(gl);
+
+        // modify the bzw source
+
+        const lines: string[] = dom.textarea.value.split("\n").map(bzw.cleanLine);
+        let inObject = false;
+        let endCount = 0;
+
+        const rawLines = dom.textarea.value.split("\n");
+        const saveEdits = (lineNumber: number): void => {
+          dom.textarea.value = rawLines.join("\n");
+
+          setTimeout(() => {
+            dom.textarea.selectionStart = dom.textarea.value.indexOf(dom.textarea.value.split("\n").filter((_: string, i: number) => i >= lineNumber).join("\n"));
+            dom.textarea.selectionEnd = dom.textarea.selectionStart;
+
+            textareaChanged();
+          });
+        };
+
+        // FIXME what in the world is this? It should be a `number` but it's a `string` for some odd reason
+        for(const lineNumberAsAStringForSomeOddReason in lines){
+          const lineNumber = parseInt(lineNumberAsAStringForSomeOddReason);
+          const line = lines[lineNumber];
+
+          if(line[0] === "#"){
+            continue;
+          }
+
+          if(line === "end"){
+            endCount++;
+
+            // add line
+            if(inObject){
+              rawLines.splice(lineNumber, 0, property); // insert line
+              if(typeof value !== "boolean"){
+                rawLines[lineNumber] += ` ${value}`;
+              }
+
+              saveEdits(lineNumber);
+              break;
+            }
+          }else if(inObject && line.startsWith(property)){ // edit line
+            if(typeof value === "boolean"){
+              rawLines.splice(lineNumber, 1);
+            }else{
+              if(Array.isArray(value) && typeof value[0] === "number"){
+                console.log(value.join(" "));
+              }
+              const valueAsString = Array.isArray(value) && typeof value[0] === "number" ? `${value.join(" ")}` :`${inputElement.value}`;
+              rawLines[lineNumber] = `${rawLines[lineNumber].split(property)[0]}${property} ${valueAsString}`;
+            }
+
+            saveEdits(lineNumber);
+            break;
+          }else if(!inObject && line.startsWith(selectedMapObject.HEADER) && endCount === selectedMapObjectIndex){
+            inObject = true;
+          }
+        }
       });
 
       valueElement.appendChild(inputElement);
@@ -244,24 +303,24 @@ function selectedMapObjectChanged(){
     switch(typeof value){
       case "string": {
         createInputElement("text", value, (inputElement) => {
-          selectedMapObject[property] = inputElement.value;
+          map.objects[selectedMapObjectIndex][property] = inputElement.value;
         });
       } break;
       case "number": {
         createInputElement("number", `${value}`, (inputElement) => {
-          selectedMapObject[property] = inputElement.value;
+          map.objects[selectedMapObjectIndex][property] = inputElement.value;
         });
       } break;
       case "boolean": {
         createInputElement("checkbox", value, (inputElement) => {
-          selectedMapObject[property] = inputElement.checked;
+          map.objects[selectedMapObjectIndex][property] = inputElement.checked;
         });
       } break;
       case "object": {
         if(Array.isArray(value) && typeof value[0] === "number"){
           for(const valueIndex in value){
             createInputElement("number", `${value[valueIndex]}`, (inputElement) => {
-              selectedMapObject[property][valueIndex] = bzw.parseNum(inputElement.value);
+              map.objects[selectedMapObjectIndex][property][valueIndex] = bzw.parseNum(inputElement.value);
             });
           }
 
@@ -291,7 +350,7 @@ dom.tree.objects.addEventListener("click", (e: Event) => {
   target.classList.add("selected");
 
   const index = Array.from(target.parentElement.children).indexOf(target);
-  selectedMapObject = map.objects[index];
+  selectedMapObjectIndex = index;
   selectedMapObjectChanged();
 });
 
@@ -518,8 +577,8 @@ function parseSource(){
     dom.tree.objects.appendChild(div);
   }
 
-  if(selectedMapObject && map.objects.indexOf(selectedMapObject) < 0){
-    selectedMapObject = undefined;
+  if(selectedMapObjectIndex > -1){
+    selectedMapObjectIndex = -1;
     selectedMapObjectChanged();
   }
 }
