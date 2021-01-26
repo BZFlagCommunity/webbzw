@@ -308,6 +308,7 @@ textarea.show{
 .tree > .objects{
   display: flex;
   flex-direction: column;
+  flex: 1;
   overflow: auto;
   user-select: none;
 }
@@ -342,7 +343,7 @@ textarea.show{
   flex: 1;
 }
 
-.tree > .properties > div > input:not(:last-child){
+.tree > .properties > div > *:not(:last-child){
   margin-right: .2rem;
 }
 

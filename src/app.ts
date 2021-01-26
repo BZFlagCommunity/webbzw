@@ -7,7 +7,7 @@ import {getCoord, saveFile, colorThemeChanged} from "./utils.ts";
 import "./editor/mod.ts";
 
 const MAX_ZOOM = -5;
-const MOUSE_SPEED = 100;
+const MOUSE_SPEED = 75;
 const EDITOR_CHANGE_TIMEOUT = 15;
 const NEAR_PLANE = 1;
 
@@ -63,10 +63,14 @@ function updateLineNumbers(){
   dom.lineNumbersElement.scrollTop = dom.textarea.scrollTop;
 }
 
+function trimSource(text: string): string{
+  return text.split("\n").map((line: string) => line.trim()).join("\n");
+}
+
 /** Raw handler for textarea being changed */
 function _textareaChanged(){
   // don't preform unnecessary updates if source hasn't changed
-  if(dom.textarea.value === source){
+  if(trimSource(dom.textarea.value) === trimSource(source)){
     return;
   }
 
@@ -76,6 +80,7 @@ function _textareaChanged(){
 
   source = dom.textarea.value;
   updateLineNumbers();
+  parseSource();
   updateMesh(gl);
 
   localStorage.setItem("bzw", source);
@@ -194,6 +199,7 @@ function selectedMapObjectChanged(){
   const properties = Object.keys(selectedMapObject);
   const values = Object.values(selectedMapObject);
 
+  // add element saying object type
   const typeElement = document.createElement("div");
   typeElement.innerText = `type: ${selectedMapObject.HEADER}`;
   dom.tree.properties.appendChild(typeElement);
@@ -212,14 +218,15 @@ function selectedMapObjectChanged(){
 
     const valueElement = document.createElement("div");
 
-    const createInputElement = (type: "text" | "number" | "checkbox", value: unknown, changedHandler: (inputElement: HTMLInputElement) => void): HTMLInputElement => {
+    const createInputElement = (type: "text" | "number" | "checkbox", value: string | boolean, changedHandler: (inputElement: HTMLInputElement) => void): void => {
       const inputElement = document.createElement("input") as HTMLInputElement;
       inputElement.type = type;
+      inputElement.spellcheck = false;
 
       if(type === "checkbox"){
-        inputElement.checked = value;
+        inputElement.checked = value as boolean;
       }else{
-        inputElement.value = value;
+        inputElement.value = value as string;
       }
 
       inputElement.addEventListener("change", () => {
@@ -228,6 +235,7 @@ function selectedMapObjectChanged(){
         }
 
         changedHandler(inputElement);
+        updateMesh(gl);
       });
 
       valueElement.appendChild(inputElement);
@@ -484,6 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
   dom.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
   dom.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
+  parseSource();
   updateMesh(gl);
 
   setTimeout(() => {
@@ -495,11 +504,14 @@ document.addEventListener("DOMContentLoaded", () => {
   requestAnimationFrame(render);
 });
 
-/** Update world mesh */
-function updateMesh(gl: WebGL2RenderingContext){
+function parseSource(){
   map = bzw.parse(source);
 
-  dom.tree.objects.innerHTML = "";
+  // remove all children
+  while(dom.tree.objects.lastChild){
+    dom.tree.objects.lastChild.remove();
+  }
+
   for(const object of map.objects){
     const div = document.createElement("div");
     div.innerText = object.name || object.HEADER;
@@ -510,7 +522,10 @@ function updateMesh(gl: WebGL2RenderingContext){
     selectedMapObject = undefined;
     selectedMapObjectChanged();
   }
+}
 
+/** Update world mesh */
+function updateMesh(gl: WebGL2RenderingContext){
   const mesh: bzw.IMesh = {
     vertices: [],
     indices: [],
@@ -525,7 +540,7 @@ function updateMesh(gl: WebGL2RenderingContext){
   }
 
   // sort by alpha
-  for(const object of [...map.objects].sort((a: any, b: any) => (a.color?.[3] ?? 1) > (b.color?.[3] ?? 1) ? 1 : -1)){
+  for(const object of [...map.objects].sort((a: any, b: any) => (a.color?.[3] ?? -1) > (b.color?.[3] ?? 1) ? 1 : -1)){
     object.buildMesh(mesh);
   }
 
