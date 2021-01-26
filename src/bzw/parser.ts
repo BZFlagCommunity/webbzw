@@ -7,6 +7,19 @@ export interface IMap{
   objects: MapObject[];
 }
 
+/** Remove trailing comments and extra whitespace from line */
+export function cleanLine(line: string): string{
+  // remove trailing comment if there is one
+  if(line.includes("#")){
+    line = line.substring(0, line.indexOf("#"));
+  }
+
+  // remove extra whitespace
+  line = line.trim().replace(/ +(?= )/g, "");
+
+  return line;
+}
+
 /** Parse world source */
 export function parse(source: string): IMap{
   const map: IMap = {
@@ -17,13 +30,7 @@ export function parse(source: string): IMap{
   let current = "";
 
   for(let line of source.split("\n")){
-    // remove trailing comment if there is one
-    if(line.includes("#")){
-      line = line.substring(0, line.indexOf("#"));
-    }
-
-    // remove extra whitespace
-    line = line.trim().replace(/ +(?= )/g, "");
+    line = cleanLine(line);
 
     if(line[0] === "#"){
       continue;
