@@ -182,8 +182,9 @@ nav .menu{
 }
 
 nav .menu.submenu{
+  margin-top: -1px;
   margin-left: -2px;
-  top: 0;
+  top: -.5rem;
   left: 15rem;
 }
 
