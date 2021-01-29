@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "deno",
+      "args": ["run", "--unstable", "--allow-read", "--allow-write", "--allow-env", "build.ts"],
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+    },
+    {
+      "label": "watch",
+      "type": "shell",
+      "command": "deno",
+      "args": ["run", "--unstable", "--allow-read", "--allow-write", "--allow-net", "--allow-run", "build.ts", "serve"],
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "group": "build"
+    }
+  ]
+}
