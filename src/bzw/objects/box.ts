@@ -1,5 +1,7 @@
 import {BasicMapObject, IMesh} from "../types.ts";
 
+const DEFAULT_COLOR = [.61, .26, .12, 1];
+
 /** Box object */
 export class Box extends BasicMapObject{
   HEADER = "box";
@@ -9,11 +11,13 @@ export class Box extends BasicMapObject{
   buildMesh(mesh: IMesh): void{
     let defaultColor = false;
     if(!this.color){
-      this.color = [.61, .26, .12, 1];
       defaultColor = true;
     }
 
-    const {size, color} = this;
+    const {size, color} = {
+      color: DEFAULT_COLOR,
+      ...this
+    };
 
     // top
     mesh.vertices.push(-size[0], size[2], -size[1]);
