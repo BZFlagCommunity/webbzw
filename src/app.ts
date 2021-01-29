@@ -18,7 +18,7 @@ if(!gl){
   alert("WebGL 2.0 not available");
 }
 
-let source = localStorage.getItem("bzw") || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
+let source = localStorage.getItem("bzw") as string || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
 dom.textarea.value = source;
 
 let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
@@ -59,7 +59,7 @@ function handleFile(files: FileList | null | undefined){
 
 /** Save map to device */
 function saveMap(){
-  saveFile(`${map.objects.find((object: bzw.MapObject) => object instanceof bzw.objects.World)?.name || "map"}.bzw`, mapToBZW());
+  saveFile(`${map.objects.find((object: bzw.MapObject) => object instanceof bzw.objects.World)?.name || "map"}.bzw`, source);
 }
 
 /** Update line numbers to match source */
@@ -73,19 +73,24 @@ function trimSource(text: string): string{
 }
 
 /** Raw handler for textarea being changed */
-function _textareaChanged(){
+function _textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdate: boolean = false){
   // don't preform unnecessary updates if source hasn't changed
   if(trimSource(dom.textarea.value) === trimSource(source)){
     return;
   }
 
   if(dom.settings.syntaxHighlighting.checked){
+    if(forceHighlightUpdate){
+      deleteHighlightElement();
+    }
     highlight(source);
   }
 
   source = dom.textarea.value;
   updateLineNumbers();
-  parseSource();
+  if(shouldParseSource){
+    parseSource();
+  }
   updateMesh(gl);
 
   localStorage.setItem("bzw", source);
@@ -93,12 +98,12 @@ function _textareaChanged(){
 
 let timeoutId = 0;
 /** Smart handler for textarea being changed */
-function textareaChanged(){
+function textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdate: boolean = false){
   if(timeoutId){
     clearTimeout(timeoutId);
   }
 
-  timeoutId = setTimeout(() => _textareaChanged(), EDITOR_CHANGE_TIMEOUT);
+  timeoutId = setTimeout(() => _textareaChanged(shouldParseSource, forceHighlightUpdate), EDITOR_CHANGE_TIMEOUT);
 }
 
 /** Toggle current line as a comment */
@@ -183,14 +188,16 @@ dom.textarea.onkeydown = (e: KeyboardEvent) => {
   if(e.keyCode === 191 && e.ctrlKey){ // Ctrl+/ (toggle comment)
     e.preventDefault();
     toggleComment();
-  }else if(e.keyCode === 83 && e.ctrlKey){ // Ctrl+S (save)
-    e.preventDefault();
-    saveMap();
   }
 };
 
-let selectedMapObjectIndex: number;
-function selectedMapObjectChanged(){
+let selectedMapObjectIndex: number = -1;
+function setSelectedMapObject(newIndex: number){
+  if(newIndex === selectedMapObjectIndex){
+    return;
+  }
+  selectedMapObjectIndex = newIndex;
+
   if(selectedMapObjectIndex < 0){
     dom.tree.properties.style.display = "none";
     return;
@@ -203,13 +210,13 @@ function selectedMapObjectChanged(){
     dom.tree.properties.lastChild.remove();
   }
 
-  const properties = Object.keys(selectedMapObject);
-  const values = Object.values(selectedMapObject);
-
   // add element saying object type
   const typeElement = document.createElement("div");
   typeElement.innerText = `type: ${selectedMapObject.HEADER}`;
   dom.tree.properties.appendChild(typeElement);
+
+  const properties = Object.keys(selectedMapObject);
+  const values = Object.values(selectedMapObject);
 
   for(const i in properties){
     const property = properties[i];
@@ -242,64 +249,9 @@ function selectedMapObjectChanged(){
         }
 
         changedHandler(inputElement);
+        dom.textarea.value = mapToBZW();
 
-        // modify the bzw source
-
-        const lines: string[] = dom.textarea.value.split("\n").map(bzw.cleanLine);
-        let inObject = false;
-        let endCount = 0;
-
-        const rawLines = dom.textarea.value.split("\n");
-        const saveEdits = (lineNumber: number): void => {
-          dom.textarea.value = rawLines.join("\n");
-
-          setTimeout(() => {
-            dom.textarea.selectionStart = dom.textarea.value.indexOf(dom.textarea.value.split("\n").filter((_: string, i: number) => i >= lineNumber).join("\n"));
-            dom.textarea.selectionEnd = dom.textarea.selectionStart;
-
-            textareaChanged();
-          });
-        };
-
-        // FIXME what in the world is this? It should be a `number` but it's a `string` for some odd reason
-        for(const lineNumberAsAStringForSomeOddReason in lines){
-          const lineNumber = parseInt(lineNumberAsAStringForSomeOddReason);
-          const line = lines[lineNumber];
-
-          if(line[0] === "#"){
-            continue;
-          }
-
-          if(line === "end"){
-            endCount++;
-
-            // add line
-            if(inObject){
-              rawLines.splice(lineNumber, 0, property); // insert line
-              if(typeof value !== "boolean"){
-                rawLines[lineNumber] += ` ${value}`;
-              }
-
-              saveEdits(lineNumber);
-              break;
-            }
-          }else if(inObject && line.startsWith(property)){ // edit line
-            if(typeof value === "boolean"){
-              rawLines.splice(lineNumber, 1);
-            }else{
-              if(Array.isArray(value) && typeof value[0] === "number"){
-                console.log(value.join(" "));
-              }
-              const valueAsString = Array.isArray(value) && typeof value[0] === "number" ? `${value.join(" ")}` :`${inputElement.value}`;
-              rawLines[lineNumber] = `${rawLines[lineNumber].split(property)[0]}${property} ${valueAsString}`;
-            }
-
-            saveEdits(lineNumber);
-            break;
-          }else if(!inObject && line.startsWith(selectedMapObject.HEADER) && endCount === selectedMapObjectIndex){
-            inObject = true;
-          }
-        }
+        textareaChanged(undefined, true);
       });
 
       valueElement.appendChild(inputElement);
@@ -355,8 +307,7 @@ dom.tree.objects.addEventListener("click", (e: Event) => {
   target.classList.add("selected");
 
   const index = Array.from(target.parentElement.children).indexOf(target);
-  selectedMapObjectIndex = index;
-  selectedMapObjectChanged();
+  setSelectedMapObject(index);
 });
 
 window.addEventListener("dragenter", (e: DragEvent) => {
@@ -378,8 +329,10 @@ window.addEventListener("drop", (e: DragEvent) => {
 
 // custom keyboard shortcuts (global)
 window.onkeydown = (e: KeyboardEvent) => {
-  // Ctrl+O (open file)
-  if(e.keyCode === 79 && e.ctrlKey){
+  if(e.keyCode === 83 && e.ctrlKey){ // Ctrl+S (save)
+    e.preventDefault();
+    saveMap();
+  }else if(e.keyCode === 79 && e.ctrlKey){ // Ctrl+O (open file)
     e.preventDefault();
     dom.bzwFile.click();
   }
@@ -569,6 +522,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function parseSource(){
+  const oldSelected = map.objects[selectedMapObjectIndex]?.toString() ?? "";
+
   map = bzw.parse(source);
 
   // remove all children
@@ -582,9 +537,12 @@ function parseSource(){
     dom.tree.objects.appendChild(div);
   }
 
-  if(selectedMapObjectIndex > -1){
-    selectedMapObjectIndex = -1;
-    selectedMapObjectChanged();
+  if(selectedMapObjectIndex >= map.objects.length){ // objet no longer exists
+    setSelectedMapObject(-1);
+  }else if((map.objects[selectedMapObjectIndex]?.toString() ?? "") !== oldSelected){ // object has changed
+    const currentSelectedMapObjectIndex = parseInt(`${selectedMapObjectIndex}`); // make a deep clone
+    setSelectedMapObject(-1);
+    setSelectedMapObject(currentSelectedMapObjectIndex);
   }
 }
 

@@ -13,7 +13,7 @@ export function deleteHighlightElement(): void{
 /** Run highlighter */
 export function highlight(source?: string): void{
   const lines = dom.textarea.value.split("\n");
-  let sourceLines = source ? source.split("\n").length : lines.length;
+  const sourceLines = source ? source.split("\n").length : lines.length;
   const reset = Math.abs(sourceLines - lines.length) > 1;
 
   // if multiple lines changes brute force update
