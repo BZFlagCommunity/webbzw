@@ -28,6 +28,14 @@ export class Define extends MapObject{
   buildMesh(): void{
   }
 
+  toString(): string{
+    let ret = super.toString().split("\n");
+    ret[0] += ` ${this.id}`;
+    ret = ret.filter((line: string) => !line.endsWith(`id ${this.id}`) && !line.endsWith("children"));
+
+    return ret.join("\n") + "def";
+  }
+
   parseLine(line: string): void{
     // we don't call super becase we don't use any of the normal properties
 
