@@ -29,6 +29,11 @@ let map: bzw.IMap = {
   objects: []
 };
 
+/** Turn map into bzw */
+function mapToBZW(): string{
+  return map.objects.map((object: bzw.MapObject) => object.toString()).join("\n\n");
+}
+
 /** Handle a file being uploaded */
 function handleFile(files: FileList | null | undefined){
   const file = files ? files[0] : undefined;
@@ -54,7 +59,7 @@ function handleFile(files: FileList | null | undefined){
 
 /** Save map to device */
 function saveMap(){
-  saveFile("map.bzw", source);
+  saveFile(`${map.objects.find((object: bzw.MapObject) => object instanceof bzw.objects.World)?.name || "map"}.bzw`, mapToBZW());
 }
 
 /** Update line numbers to match source */
