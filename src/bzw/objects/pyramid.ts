@@ -1,5 +1,7 @@
 import {BasicMapObject, IMesh} from "../types.ts";
 
+const DEFAULT_COLOR = [.1, .3, 1, 1];
+
 /** Pyramid object */
 export class Pyramid extends BasicMapObject{
   HEADER = "pyramid";
@@ -7,11 +9,10 @@ export class Pyramid extends BasicMapObject{
   vertexCount = 48;
 
   buildMesh(mesh: IMesh): void{
-    if(!this.color){
-      this.color = [.1, .3, 1, 1];
-    }
-
-    const {size, color} = this;
+    const {size, color} = {
+      color: DEFAULT_COLOR,
+      ...this
+    };
 
     // bottom
     mesh.vertices.push( size[0], 0, -size[1]);
