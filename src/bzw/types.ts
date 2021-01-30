@@ -54,7 +54,7 @@ export abstract class MapObject{
       }
 
       // ignore empty values
-      if(!value){
+      if(!value || (Array.isArray(value) && value.filter((val: any) => val).length === 0)){
         continue;
       }
 
