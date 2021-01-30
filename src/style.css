@@ -309,11 +309,11 @@ textarea.show{
   border-radius: 1rem;
 }
 
-.tree, .line-numbers, .editor > *{
+.tree > *, .line-numbers, .editor > *{
   padding: .2rem .5rem;
   font-size: .8rem;
   font-family: "Source Code Pro", monospace;
-  line-height: 1.1em;
+  line-height: 1em;
 }
 
 .tree{
@@ -331,7 +331,7 @@ textarea.show{
 }
 
 .tree > .objects > div{
-  padding: .1rem .2rem;
+  padding: .1rem;
   color: var(--highlight-comment);
   cursor: pointer;
 }
