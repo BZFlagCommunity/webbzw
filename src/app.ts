@@ -126,16 +126,6 @@ dom.bzwFile.addEventListener("change", () => {
   handleFile(dom.bzwFile.files);
 });
 
-dom.textarea.onscroll = () => {
-  const highlighter = dom.editor.children.item(1);
-  if(highlighter){
-    highlighter.scrollTop = dom.textarea.scrollTop;
-    highlighter.scrollLeft = dom.textarea.scrollLeft;
-  }
-
-  dom.lineNumbersElement.scrollTop = dom.textarea.scrollTop;
-};
-
 dom.textarea.oninput = () => textareaChanged();
 
 // custom keyboard shotcuts (editor)

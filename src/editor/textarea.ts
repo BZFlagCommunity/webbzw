@@ -1,5 +1,15 @@
 import * as dom from "../dom/mod.ts";
 
+dom.textarea.addEventListener("scroll", () => {
+  const highlighter = dom.editor.children.item(1);
+  if(highlighter){
+    highlighter.scrollTop = dom.textarea.scrollTop;
+    highlighter.scrollLeft = dom.textarea.scrollLeft;
+  }
+
+  dom.lineNumbersElement.scrollTop = dom.textarea.scrollTop;
+});
+
 /** Toggle current line as a comment */
 export function toggleComment(){
   dom.textarea.focus();
