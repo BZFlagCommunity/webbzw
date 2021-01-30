@@ -1,0 +1,34 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repo ✨
+        uses: actions/checkout@v2
+
+      - name: Setup Deno 🦎
+        uses: denolib/setup-deno@v2.3.0
+        with:
+          deno-version: v1.7.0
+
+      - uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+        with:
+          semver_only: true
+
+      - name: Build 🧱
+        run: deno run --unstable --allow-read --allow-write --allow-env build.ts
+        env:
+          GIT_TAG: ${{ steps.get-latest-tag.outputs.tag }}
+
+      - name: Benchmark 🏁
+        run: deno run --allow-net benchmark.ts
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: build/

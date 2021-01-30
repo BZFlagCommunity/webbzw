@@ -1,22 +1,13 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow will install Deno and run tests across stable and nightly builds on Windows, Ubuntu and macOS.
-# For more information see: https://github.com/denolib/setup-deno
-
 name: CD
 
 on:
   push:
-    branches: [master]
     tags:
       - 'v*.*.*'
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Setup repo ✨
@@ -36,9 +27,6 @@ jobs:
         run: deno run --unstable --allow-read --allow-write --allow-env build.ts
         env:
           GIT_TAG: ${{ steps.get-latest-tag.outputs.tag }}
-
-      - name: Benchmark 🏁
-        run: deno run --allow-net benchmark.ts
 
       - uses: actions/upload-artifact@v2
         with:
@@ -75,7 +63,6 @@ jobs:
 
       - name: Release 📦
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: build/index.html
         env:
