@@ -2,11 +2,11 @@ import {bench, runBenchmarks} from "https://deno.land/std@0.84.0/testing/bench.t
 
 import {highlightHtml} from "./src/highlight/core.ts";
 
-const source = await fetch("https://raw.githubusercontent.com/The-Noah/tank-wars/master/map.bzw").then((res) => res.text());
+const source = await fetch("https://pastebin.com/raw/VrAN22c0").then((res) => res.text());
 
 bench({
-  name: "hightlight sample world",
-  runs: 1000,
+  name: "hightlight xtreme paintball",
+  runs: 100,
   func(b): void{
     b.start();
 
