@@ -211,17 +211,17 @@ function setSelectedMapObject(newIndex: number){
     switch(typeof value){
       case "string": {
         createInputElement("text", value, (inputElement) => {
-          map.objects[selectedMapObjectIndex][property] = inputElement.value;
+          (map.objects[selectedMapObjectIndex] as unknown as Record<string, string>)[property] = inputElement.value;
         });
       } break;
       case "number": {
         createInputElement("number", `${value}`, (inputElement) => {
-          map.objects[selectedMapObjectIndex][property] = inputElement.value;
+          (map.objects[selectedMapObjectIndex] as unknown as Record<string, number>)[property] = bzw.parseNum(inputElement.value);
         });
       } break;
       case "boolean": {
         createInputElement("checkbox", value, (inputElement) => {
-          map.objects[selectedMapObjectIndex][property] = inputElement.checked;
+          (map.objects[selectedMapObjectIndex] as unknown as Record<string, boolean>)[property] = inputElement.checked;
         });
       } break;
       case "undefined": {
@@ -235,7 +235,7 @@ function setSelectedMapObject(newIndex: number){
           }
 
           if(property === "color"){
-            map.objects[selectedMapObjectIndex][property] = [0, 0, 0, 1];
+            (map.objects[selectedMapObjectIndex] as unknown as Record<string, number[]>)[property] = [0, 0, 0, 1];
             dom.textarea.value = bzw.mapToBZW(map);
             textareaChanged(undefined, true);
 
@@ -253,7 +253,7 @@ function setSelectedMapObject(newIndex: number){
         if(Array.isArray(value) && typeof value[0] === "number"){
           for(const valueIndex in value){
             createInputElement("number", `${value[valueIndex]}`, (inputElement) => {
-              map.objects[selectedMapObjectIndex][property][valueIndex] = bzw.parseNum(inputElement.value);
+              (map.objects[selectedMapObjectIndex] as unknown as Record<string, number[]>)[property][valueIndex] = bzw.parseNum(inputElement.value);
             });
           }
 
@@ -268,7 +268,7 @@ function setSelectedMapObject(newIndex: number){
               }
 
               if(property === "color"){
-                map.objects[selectedMapObjectIndex][property] = undefined;
+                (map.objects[selectedMapObjectIndex] as unknown as Record<string, undefined>)[property] = undefined;
                 dom.textarea.value = bzw.mapToBZW(map);
                 textareaChanged(undefined, true);
 
