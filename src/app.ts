@@ -226,6 +226,14 @@ function setSelectedMapObject(newIndex: number){
       continue;
     }
 
+     // ignore specific object properties
+     if(
+      selectedMapObject.HEADER === "zone" && property === "color" ||
+      selectedMapObject.HEADER === "group" && property === "position"
+    ){
+      continue;
+    }
+
     const nameElement = document.createElement("span");
     nameElement.innerText = property;
     dom.tree.properties.appendChild(nameElement);

@@ -58,6 +58,14 @@ export abstract class MapObject{
         continue;
       }
 
+      // ignore specific object properties
+      if(
+        this.HEADER === "zone" && property === "color" ||
+        this.HEADER === "group" && property === "position"
+      ){
+        continue;
+      }
+
       ret += `${INDENT}${property}`;
 
       if(typeof value === "number" || typeof value === "string"){
