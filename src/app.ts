@@ -1,8 +1,9 @@
-import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import * as bzw from "./bzw/mod.ts";
 import * as dom from "./dom/mod.ts";
-import {saveFile, colorThemeChanged} from "./utils.ts";
-import "./editor/mod.ts";
+import * as editor from "./editor/mod.ts";
+
+import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
+import {trimText, saveFile, colorThemeChanged} from "./utils.ts";
 import {Renderer} from "./renderer/mod.ts";
 
 const EDITOR_CHANGE_TIMEOUT = 15;
@@ -47,14 +48,10 @@ function saveMap(){
   saveFile(`${map.objects.find((object: bzw.MapObject) => object instanceof bzw.objects.World)?.name || "map"}.bzw`, source);
 }
 
-function trimSource(text: string): string{
-  return text.split("\n").map((line: string) => line.replace(/\s+$/g, "")).join("\n");
-}
-
 /** Raw handler for textarea being changed */
 function _textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdate: boolean = false){
   // don't preform unnecessary updates if source hasn't changed
-  if(trimSource(dom.textarea.value) === trimSource(source)){
+  if(trimText(dom.textarea.value) === trimText(source)){
     return;
   }
 
@@ -85,27 +82,6 @@ function textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdate
   timeoutId = setTimeout(() => _textareaChanged(shouldParseSource, forceHighlightUpdate), EDITOR_CHANGE_TIMEOUT);
 }
 
-/** Toggle current line as a comment */
-function toggleComment(){
-  dom.textarea.focus();
-
-  let selectionStart = dom.textarea.selectionStart;
-  const currentLineNumber = dom.textarea.value.substr(0, selectionStart).split("\n").length - 1;
-  const lines = dom.textarea.value.split("\n");
-
-  if(lines[currentLineNumber].startsWith("#")){ // remove comment
-    lines[currentLineNumber] = lines[currentLineNumber].substr(1);
-    selectionStart--;
-  }else{ // add comment
-    lines[currentLineNumber] = "#" + lines[currentLineNumber];
-    selectionStart++;
-  }
-
-  dom.textarea.value = lines.join("\n");
-  textareaChanged();
-  dom.textarea.selectionEnd = selectionStart;
-}
-
 function setColorTheme(e?: Event){
   if(!e){
     return;
@@ -121,7 +97,7 @@ function setColorTheme(e?: Event){
   localStorage.setItem("colorTheme", target.innerText.toLowerCase().replace(/ /g, "-"));
   colorThemeChanged();
 }
-setColorTheme(); // FIXME: this is a hack so the function is not removed
+setColorTheme(); // HACK: this is so the function is not removed
 
 function syntaxHighlightingChanged(){
   if(dom.settings.syntaxHighlighting.checked){
@@ -166,7 +142,8 @@ dom.textarea.oninput = () => textareaChanged();
 dom.textarea.onkeydown = (e: KeyboardEvent) => {
   if(e.keyCode === 191 && e.ctrlKey){ // Ctrl+/ (toggle comment)
     e.preventDefault();
-    toggleComment();
+    editor.toggleComment();
+    textareaChanged();
   }
 };
 

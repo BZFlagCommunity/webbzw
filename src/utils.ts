@@ -22,3 +22,8 @@ export function saveFile(fileName: string, text: string){
 export function colorThemeChanged(){
   document.documentElement.setAttribute("data-theme", localStorage.getItem("colorTheme") ?? "default");
 }
+
+/** Trim whitespace from `text` */
+export function trimText(text: string): string{
+  return text.split("\n").map((line: string) => line.replace(/\s+$/g, "")).join("\n");
+}
