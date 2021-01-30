@@ -28,7 +28,11 @@ async function loadJS(){
     const {diagnostics, files} = await Deno.emit("src/app.ts", JSON.parse(await Deno.readTextFile("tsconfig.json")));
 
     if(diagnostics.length > 0){
-      console.warn(Deno.formatDiagnostics(diagnostics));
+      console.error(Deno.formatDiagnostics(diagnostics));
+
+      if(!serve){
+        Deno.exit(1);
+      }
     }
 
     // HACK: there shouldn't need to be any `replace` calls
