@@ -1,28 +1,18 @@
-import * as math from "./math.ts";
-import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
 import * as bzw from "./bzw/mod.ts";
 import * as dom from "./dom/mod.ts";
-import {getCoord, saveFile, colorThemeChanged} from "./utils.ts";
+import {saveFile, colorThemeChanged} from "./utils.ts";
 import "./editor/mod.ts";
+import {Renderer} from "./renderer/mod.ts";
 
-const MAX_ZOOM = -5;
-const MOUSE_SPEED = 75;
 const EDITOR_CHANGE_TIMEOUT = 15;
-const NEAR_PLANE = 1;
 
 colorThemeChanged();
 
-const gl = dom.canvas.getContext("webgl2") as WebGL2RenderingContext;
-if(!gl){
-  alert("WebGL 2.0 not available");
-}
+const renderer = new Renderer(dom.canvas);
 
 let source = localStorage.getItem("bzw") as string || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
 dom.textarea.value = source;
-
-let vbo: WebGLBuffer, cbo: WebGLBuffer, ebo: WebGLBuffer;
-let elementCount = 0;
 
 let map: bzw.IMap = {
   worldSize: 400,
@@ -80,7 +70,7 @@ function _textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdat
   if(shouldParseSource){
     parseSource();
   }
-  updateMesh(gl);
+  updateMesh();
 
   localStorage.setItem("bzw", source);
 }
@@ -384,186 +374,19 @@ window.onkeydown = (e: KeyboardEvent) => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  if(!dom.canvas){
-    return;
-  }
-
-  const viewMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-map.worldSize,1];
-  const modelMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
-
-  let drag = false;
-  let oldX = 0, oldY = 0;
-  let dX = 0, dY = 0;
-  let THETA = 0, PHI = 40, oldTime = 0;
-
-  // set canvas size to match element size
-  dom.canvas.width = dom.canvas.offsetWidth;
-  dom.canvas.height = dom.canvas.offsetHeight;
-
-  const mouseDown = (e: Event) => {
-    e.preventDefault();
-
-    drag = true;
-    oldX = getCoord(e, "X");
-    oldY = getCoord(e, "Y");
-  };
-
-  const mouseUp = () => {
-    drag = false;
-  };
-
-  const mouseMove = (e: Event) => {
-    e.preventDefault();
-
-    if(!drag){
-      return;
-    }
-
-    const x = getCoord(e, "X");
-    const y = getCoord(e, "Y");
-
-    dX = (x - oldX) * MOUSE_SPEED * Math.PI / dom.canvas.width;
-    dY = (y - oldY) * MOUSE_SPEED * Math.PI / dom.canvas.height;
-    THETA += dX;
-    PHI += dY;
-    oldX = x
-    oldY = y;
-  };
-
-  dom.canvas.addEventListener("mousedown", mouseDown, false);
-  dom.canvas.addEventListener("mouseup", mouseUp, false);
-  dom.canvas.addEventListener("mouseout", mouseUp, false);
-  dom.canvas.addEventListener("mousemove", mouseMove, false);
-  // mobile
-  dom.canvas.addEventListener("touchstart", mouseDown, false);
-  dom.canvas.addEventListener("touchend", mouseUp, false);
-  dom.canvas.addEventListener("touchmove", mouseMove, false);
-
-  dom.canvas.addEventListener("wheel", (e: WheelEvent): void => {
-    const delta = e.deltaY;
-    viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
-    viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -map.worldSize * 3 ? -map.worldSize * 3 : viewMatrix[14];
-  });
-
-  const shader = createShader(gl, VERTEX_SHADER, FRAGMENT_SHADER);
-  if(!shader){
-    return alert("Error creating shader");
-  }
-  gl.useProgram(shader);
-
-  const vMatrix = gl.getUniformLocation(shader, "view");
-  const mMatrix = gl.getUniformLocation(shader, "model");
-
-  const AXIS_LINE_LENGTH = 100;
-  const axisVertices = [
-    // x
-    0,                0, 0,
-    AXIS_LINE_LENGTH, 0, 0,
-    // y
-    0, 0,                0,
-    0, AXIS_LINE_LENGTH, 0,
-    // z
-    0, 0, 0,
-    0, 0, -AXIS_LINE_LENGTH,
-  ];
-  const axisColors = [
-    // x
-    1, 0, 0, 1, 1, 0, 0, 1,
-    // y
-    0, 1, 0, 1, 0, 1, 0, 1,
-    // z
-    0, 0, 1, 1, 0, 0, 1, 1
-  ];
-
-  const axisVao = gl.createVertexArray();
-  gl.bindVertexArray(axisVao);
-
-  const axisVbo = gl.createBuffer() as WebGLBuffer;
-  gl.bindBuffer(gl.ARRAY_BUFFER, axisVbo);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisVertices), gl.STATIC_DRAW);
-
-  const axisCbo = gl.createBuffer() as WebGLBuffer;
-  gl.bindBuffer(gl.ARRAY_BUFFER, axisCbo);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisColors), gl.STATIC_DRAW);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, axisVbo);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, axisCbo);
-  gl.enableVertexAttribArray(1);
-  gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
-
-  gl.bindVertexArray(null);
-  gl.deleteBuffer(axisVbo);
-  gl.deleteBuffer(axisCbo);
-
-  gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-  gl.enable(gl.CULL_FACE);
-  gl.clearColor(0, 0, 0, 0);
-
-  const render = (time: number) => {
-    if(oldTime === 0){
-      oldTime = time;
-    }
-    const dt = time - oldTime;
-    oldTime = time;
-
-    if(!drag && dom.settings.autoRotate.checked){
-      THETA += .015 * dt;
-    }
-
-    if(PHI > 90){
-      PHI = 90;
-    }else if(PHI < -90){
-      PHI = -90;
-    }
-
-    const finalModelMatrix = math.multiplyArrayOfMatrices([
-      math.rotateXMatrix(-PHI),
-      math.rotateYMatrix(-THETA),
-      modelMatrix,
-    ]);
-
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.viewport(0, 0, dom.canvas.width, dom.canvas.height);
-    gl.uniformMatrix4fv(gl.getUniformLocation(shader, "proj"), false, math.getProjection(60, dom.canvas.width/dom.canvas.height, NEAR_PLANE, map.worldSize * 5));
-
-    gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
-    gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
-
-    gl.drawElements(gl.TRIANGLES, elementCount, gl.UNSIGNED_SHORT, 0);
-
-    if(dom.settings.showAxis.checked){
-      gl.disable(gl.DEPTH_TEST);
-
-      gl.bindVertexArray(axisVao);
-      gl.drawArrays(gl.LINES, 0, 6);
-      gl.bindVertexArray(null);
-
-      gl.enable(gl.DEPTH_TEST);
-    }
-
-    requestAnimationFrame(render);
-  };
-
   // load settings
   dom.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
   dom.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
   dom.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
   parseSource();
-  updateMesh(gl);
+  updateMesh();
 
   setTimeout(() => {
     dom.updateLineNumbers();
     deleteHighlightElement();
     syntaxHighlightingChanged();
   });
-
-  requestAnimationFrame(render);
 });
 
 function parseSource(){
@@ -589,7 +412,7 @@ function parseSource(){
 }
 
 /** Update world mesh */
-function updateMesh(gl: WebGL2RenderingContext){
+function updateMesh(){
   const mesh: bzw.IMesh = {
     vertices: [],
     indices: [],
@@ -608,34 +431,9 @@ function updateMesh(gl: WebGL2RenderingContext){
     object.buildMesh(mesh);
   }
 
-  elementCount = mesh.indices.length;
-
-  gl.deleteBuffer(vbo);
-  gl.deleteBuffer(cbo);
-  gl.deleteBuffer(ebo);
-
-  vbo = gl.createBuffer() as WebGLBuffer;
-  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mesh.vertices), gl.STATIC_DRAW);
-
-  cbo = gl.createBuffer() as WebGLBuffer;
-  gl.bindBuffer(gl.ARRAY_BUFFER, cbo);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mesh.colors), gl.STATIC_DRAW);
-
-  ebo = gl.createBuffer() as WebGLBuffer;
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl.STATIC_DRAW);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 12, 0);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, cbo);
-  gl.enableVertexAttribArray(1);
-  gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 16, 0);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  renderer.worldSize = map.worldSize;
+  renderer.updateMesh(mesh);
 
   dom.statusBar.objects.innerText = `${map.objects.length} Objects`;
-  dom.statusBar.vertices.innerText = `${elementCount} Vertices`;
+  dom.statusBar.vertices.innerText = `${mesh.indices.length} Vertices`;
 }
