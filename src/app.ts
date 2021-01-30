@@ -281,6 +281,31 @@ function setSelectedMapObject(newIndex: number){
           map.objects[selectedMapObjectIndex][property] = inputElement.checked;
         });
       } break;
+      case "undefined": {
+        const createElement = document.createElement("button") as HTMLButtonElement;
+        createElement.classList.add("btn");
+        createElement.innerText = "Edit";
+
+        createElement.addEventListener("click", () => {
+          if(selectedMapObjectIndex === -1){
+            return;
+          }
+
+          if(property === "color"){
+            map.objects[selectedMapObjectIndex][property] = [0, 0, 0, 1];
+            dom.textarea.value = mapToBZW();
+            textareaChanged(undefined, true);
+
+            const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
+            selectedMapObjectIndex = -1;
+            setSelectedMapObject(index);
+          }else{
+            alert("something somewhere is messed up big time");
+          }
+        });
+
+        valueElement.appendChild(createElement);
+      } break;
       case "object": {
         if(Array.isArray(value) && typeof value[0] === "number"){
           for(const valueIndex in value){
@@ -289,9 +314,35 @@ function setSelectedMapObject(newIndex: number){
             });
           }
 
-          break;
+          if(property === "color"){
+            const deleteElement = document.createElement("button") as HTMLButtonElement;
+            deleteElement.classList.add("btn");
+            deleteElement.innerText = "Reset";
+
+            deleteElement.addEventListener("click", () => {
+              if(selectedMapObjectIndex === -1){
+                return;
+              }
+
+              if(property === "color"){
+                map.objects[selectedMapObjectIndex][property] = undefined;
+                dom.textarea.value = mapToBZW();
+                textareaChanged(undefined, true);
+
+                const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
+                selectedMapObjectIndex = -1;
+                setSelectedMapObject(index);
+              }else{
+                alert("something somewhere is messed up big time");
+              }
+            });
+
+            valueElement.appendChild(deleteElement);
+          }
+        }else{
+          valueElement.innerText = "unsupported property";
         }
-      } // notice no break as we may not handle it
+      } break;
       default:
         valueElement.innerText = "unsupported property";
         break;

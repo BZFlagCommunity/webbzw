@@ -1,6 +1,6 @@
 import {BasicMapObject, IMesh} from "../types.ts";
 
-const DEFAULT_COLOR = [.61, .26, .12, 1];
+const DEFAULT_COLOR: [number, number, number, number] = [.61, .26, .12, 1];
 
 /** Box object */
 export class Box extends BasicMapObject{
@@ -9,15 +9,13 @@ export class Box extends BasicMapObject{
   vertexCount = 72;
 
   buildMesh(mesh: IMesh): void{
-    let defaultColor = false;
-    if(!this.color){
-      defaultColor = true;
-    }
+    let {size, color} = this;
 
-    const {size, color} = {
-      color: DEFAULT_COLOR,
-      ...this
-    };
+    let defaultColor = false;
+    if(!color){
+      defaultColor = true;
+      color = DEFAULT_COLOR;
+    }
 
     // top
     mesh.vertices.push(-size[0], size[2], -size[1]);
@@ -34,8 +32,8 @@ export class Box extends BasicMapObject{
     this.pushIndices(mesh);
 
     // back
-    mesh.vertices.push( size[0], 0       , -size[1]);
-    mesh.vertices.push(-size[0], 0       , -size[1]);
+    mesh.vertices.push( size[0], 0,       -size[1]);
+    mesh.vertices.push(-size[0], 0,       -size[1]);
     mesh.vertices.push(-size[0], size[2], -size[1]);
     mesh.vertices.push( size[0], size[2], -size[1]);
     this.pushIndices(mesh);
@@ -43,13 +41,13 @@ export class Box extends BasicMapObject{
     // front
     mesh.vertices.push( size[0], size[2], size[1]);
     mesh.vertices.push(-size[0], size[2], size[1]);
-    mesh.vertices.push(-size[0], 0       , size[1]);
-    mesh.vertices.push( size[0], 0       , size[1]);
+    mesh.vertices.push(-size[0], 0,       size[1]);
+    mesh.vertices.push( size[0], 0,       size[1]);
     this.pushIndices(mesh);
 
     // left
-    mesh.vertices.push(-size[0], 0       , -size[1]);
-    mesh.vertices.push(-size[0], 0       ,  size[1]);
+    mesh.vertices.push(-size[0], 0,       -size[1]);
+    mesh.vertices.push(-size[0], 0,        size[1]);
     mesh.vertices.push(-size[0], size[2],  size[1]);
     mesh.vertices.push(-size[0], size[2], -size[1]);
     this.pushIndices(mesh);
@@ -57,8 +55,8 @@ export class Box extends BasicMapObject{
     // right
     mesh.vertices.push(size[0], size[2], -size[1]);
     mesh.vertices.push(size[0], size[2],  size[1]);
-    mesh.vertices.push(size[0], 0       ,  size[1]);
-    mesh.vertices.push(size[0], 0       , -size[1]);
+    mesh.vertices.push(size[0], 0,        size[1]);
+    mesh.vertices.push(size[0], 0,       -size[1]);
     this.pushIndices(mesh);
 
     this.applyRotPosShift(mesh);
