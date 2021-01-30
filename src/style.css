@@ -13,11 +13,13 @@
   --shadow-height: .2rem;
   --shadow-spread: .5rem;
   --scrollbar-size: .5rem;
+  --border-radius: .25rem;
 
   /* color theme */
   --background-color: #17171C;
   --border-color: #27272F;
   --text-color: #FFF;
+  --text-light-color: #BBB;
   --selection-color: rgba(255, 255, 255, .2);
 
   --highlight-default: #E9E9E9;
@@ -31,7 +33,8 @@
 
 :root[data-theme=high-contrast]{
   --background-color: #000;
-  --border-color: #444;
+  --border-color: #777;
+  --text-light-color: #FFF;
   --selection-color: rgba(255, 255, 255, .3);
 
   --highlight-default: #FFF;
@@ -52,9 +55,10 @@
 }
 
 :root[data-theme=one-half-light]{
-  --background-color: #FAFAFA;
-  --border-color: #FFF;
+  --background-color: #FFF;
+  --border-color: #EEE;
   --text-color: #000;
+  --text-light-color: #444;
   --selection-color: rgba(0, 0, 0, .2);
 
   --highlight-default: #383A42;
@@ -243,7 +247,7 @@ select{
   font-size: .8rem;
   font-weight: 500;
   border: none;
-  border-radius: 0;
+  border-radius: var(--border-radius);
   outline: none;
   cursor: pointer;
 }
@@ -272,7 +276,7 @@ textarea::-webkit-scrollbar, .tree > .objects::-webkit-scrollbar{
 }
 
 textarea::-webkit-scrollbar-thumb, .tree > .objects::-webkit-scrollbar-thumb{
-  background: var(--highlight-default);
+  background: var(--border-color);
   border-radius: var(--scrollbar-size);
 }
 
@@ -290,7 +294,7 @@ textarea.show{
   font-size: .8rem;
   font-family: "Source Code Pro", monospace;
   border: 1px solid var(--border-color);
-  border-radius: 0;
+  border-radius: var(--border-radius);
   outline: none;
   cursor: pointer;
 }
@@ -332,12 +336,12 @@ textarea.show{
 
 .tree > .objects > div{
   padding: .1rem;
-  color: var(--highlight-comment);
+  color: var(--text-light-color);
   cursor: pointer;
 }
 
 .tree > .objects > div.selected, .tree > .objects > div:hover{
-  color: var(--highlight-default);
+  color: var(--text-color);
 }
 
 .tree > .properties{
@@ -370,7 +374,7 @@ textarea.show{
   font-family: "Source Code Pro", monospace;
   font-size: .8rem;
   border: 1px solid var(--border-color);
-  border-radius: 0;
+  border-radius: var(--border-radius);
   outline: none;
 }
 
