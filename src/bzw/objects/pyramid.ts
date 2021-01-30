@@ -1,6 +1,6 @@
 import {BasicMapObject, IMesh} from "../types.ts";
 
-const DEFAULT_COLOR = [.1, .3, 1, 1];
+const DEFAULT_COLOR: [number, number, number, number] = [.1, .3, 1, 1];
 
 /** Pyramid object */
 export class Pyramid extends BasicMapObject{
@@ -9,10 +9,11 @@ export class Pyramid extends BasicMapObject{
   vertexCount = 48;
 
   buildMesh(mesh: IMesh): void{
-    const {size, color} = {
-      color: DEFAULT_COLOR,
-      ...this
-    };
+    let {size, color} = this;
+
+    if(!color){
+      color = DEFAULT_COLOR;
+    }
 
     // bottom
     mesh.vertices.push( size[0], 0, -size[1]);
@@ -22,27 +23,27 @@ export class Pyramid extends BasicMapObject{
     this.pushIndices(mesh);
 
     // front
-    mesh.vertices.push( size[0], 0       , size[1]);
-    mesh.vertices.push( 0       , size[2], 0);
-    mesh.vertices.push(-size[0], 0       , size[1]);
+    mesh.vertices.push( size[0], 0,       size[1]);
+    mesh.vertices.push( 0,       size[2], 0);
+    mesh.vertices.push(-size[0], 0,       size[1]);
     this.pushIndices2(mesh);
 
     // back
-    mesh.vertices.push(-size[0], 0       , -size[1]);
-    mesh.vertices.push( 0       , size[2],  0);
-    mesh.vertices.push( size[0], 0       , -size[1]);
+    mesh.vertices.push(-size[0], 0,        -size[1]);
+    mesh.vertices.push( 0,       size[2],  0);
+    mesh.vertices.push( size[0], 0,        -size[1]);
     this.pushIndices2(mesh);
 
     // left
-    mesh.vertices.push(-size[0], 0       , size[1]);
-    mesh.vertices.push( 0       , size[2], 0);
-    mesh.vertices.push(-size[0], 0       , -size[1]);
+    mesh.vertices.push(-size[0], 0,        size[1]);
+    mesh.vertices.push( 0,       size[2],  0);
+    mesh.vertices.push(-size[0], 0,       -size[1]);
     this.pushIndices2(mesh);
 
     // right
-    mesh.vertices.push(size[0], 0       , -size[1]);
-    mesh.vertices.push(0       , size[2], 0);
-    mesh.vertices.push(size[0], 0       , size[1]);
+    mesh.vertices.push(size[0], 0,        -size[1]);
+    mesh.vertices.push(0,       size[2],  0);
+    mesh.vertices.push(size[0], 0,        size[1]);
     this.pushIndices2(mesh);
 
     this.applyRotPosShift(mesh);

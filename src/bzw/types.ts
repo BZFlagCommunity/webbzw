@@ -8,7 +8,7 @@ export interface IMesh{
   vertices: number[];
   /** Indices */
   indices: number[];
-  /** Colors */
+  /** Vertex colors */
   colors: number[];
   /** Number of indices */
   indicesCount: number;
@@ -175,7 +175,7 @@ export abstract class VeryBasicMapObject extends MapObject{
 /** Basic definition of a map object - contains properties common to a lot of objects */
 export abstract class BasicMapObject extends VeryBasicMapObject{
   size: [number, number, number] = [0, 0, 0];
-  color?: [number, number, number, number];
+  color?: [number, number, number, number] = undefined; // explicitly set to `undefined` so it always exists
 
   parseLine(line: string): void{
     super.parseLine(line);
