@@ -7,6 +7,11 @@ export interface IMap{
   objects: MapObject[];
 }
 
+/** Turn map into bzw source */
+export function mapToBZW(map: IMap): string{
+  return map.objects.map((object: MapObject) => object.toString()).join("\n\n");
+}
+
 /** Remove trailing comments and extra whitespace from line */
 export function cleanLine(line: string): string{
   // remove trailing comment if there is one

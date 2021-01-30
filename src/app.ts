@@ -29,11 +29,6 @@ let map: bzw.IMap = {
   objects: []
 };
 
-/** Turn map into bzw */
-function mapToBZW(): string{
-  return map.objects.map((object: bzw.MapObject) => object.toString()).join("\n\n");
-}
-
 /** Handle a file being uploaded */
 function handleFile(files: FileList | null | undefined){
   const file = files ? files[0] : undefined;
@@ -62,12 +57,6 @@ function saveMap(){
   saveFile(`${map.objects.find((object: bzw.MapObject) => object instanceof bzw.objects.World)?.name || "map"}.bzw`, source);
 }
 
-/** Update line numbers to match source */
-function updateLineNumbers(){
-  dom.lineNumbersElement.innerHTML = [...Array(source.split("\n").length).keys()].map((i) => i + 1).join("\n");
-  dom.lineNumbersElement.scrollTop = dom.textarea.scrollTop;
-}
-
 function trimSource(text: string): string{
   return text.split("\n").map((line: string) => line.replace(/\s+$/g, "")).join("\n");
 }
@@ -87,7 +76,7 @@ function _textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdat
   }
 
   source = dom.textarea.value;
-  updateLineNumbers();
+  dom.updateLineNumbers();
   if(shouldParseSource){
     parseSource();
   }
@@ -191,7 +180,7 @@ dom.textarea.onkeydown = (e: KeyboardEvent) => {
   }
 };
 
-let selectedMapObjectIndex: number = -1;
+let selectedMapObjectIndex: number = 0;
 function setSelectedMapObject(newIndex: number){
   if(newIndex === selectedMapObjectIndex){
     return;
@@ -205,10 +194,7 @@ function setSelectedMapObject(newIndex: number){
 
   const selectedMapObject = map.objects[selectedMapObjectIndex];
 
-  // remove all children
-  while(dom.tree.properties.lastChild){
-    dom.tree.properties.lastChild.remove();
-  }
+  dom.removeAllChildren(dom.tree.properties);
 
   // add element saying object type
   const typeElement = document.createElement("div");
@@ -257,7 +243,7 @@ function setSelectedMapObject(newIndex: number){
         }
 
         changedHandler(inputElement);
-        dom.textarea.value = mapToBZW();
+        dom.textarea.value = bzw.mapToBZW(map);
 
         textareaChanged(undefined, true);
       });
@@ -293,7 +279,7 @@ function setSelectedMapObject(newIndex: number){
 
           if(property === "color"){
             map.objects[selectedMapObjectIndex][property] = [0, 0, 0, 1];
-            dom.textarea.value = mapToBZW();
+            dom.textarea.value = bzw.mapToBZW(map);
             textareaChanged(undefined, true);
 
             const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
@@ -326,7 +312,7 @@ function setSelectedMapObject(newIndex: number){
 
               if(property === "color"){
                 map.objects[selectedMapObjectIndex][property] = undefined;
-                dom.textarea.value = mapToBZW();
+                dom.textarea.value = bzw.mapToBZW(map);
                 textareaChanged(undefined, true);
 
                 const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
@@ -572,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateMesh(gl);
 
   setTimeout(() => {
-    updateLineNumbers();
+    dom.updateLineNumbers();
     deleteHighlightElement();
     syntaxHighlightingChanged();
   });
@@ -585,10 +571,7 @@ function parseSource(){
 
   map = bzw.parse(source);
 
-  // remove all children
-  while(dom.tree.objects.lastChild){
-    dom.tree.objects.lastChild.remove();
-  }
+  dom.removeAllChildren(dom.tree.objects);
 
   for(const object of map.objects){
     const div = document.createElement("div");
@@ -599,9 +582,9 @@ function parseSource(){
   if(selectedMapObjectIndex >= map.objects.length){ // objet no longer exists
     setSelectedMapObject(-1);
   }else if((map.objects[selectedMapObjectIndex]?.toString() ?? "") !== oldSelected){ // object has changed
-    const currentSelectedMapObjectIndex = parseInt(`${selectedMapObjectIndex}`); // make a deep clone
-    setSelectedMapObject(-1);
-    setSelectedMapObject(currentSelectedMapObjectIndex);
+    const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
+    selectedMapObjectIndex = -1;
+    setSelectedMapObject(index);
   }
 }
 
