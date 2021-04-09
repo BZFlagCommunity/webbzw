@@ -13,7 +13,7 @@ jobs:
       - name: Setup Deno 🦎
         uses: denolib/setup-deno@v2.3.0
         with:
-          deno-version: v1.7.0
+          deno-version: v1.8.3
 
       - uses: actions-ecosystem/action-get-latest-tag@v1
         id: get-latest-tag

@@ -1,9 +1,9 @@
 {
   "recommendations": [
     "editorconfig.editorconfig",
-    "denoland.vscode-deno-canary",
     "digitalbrainstem.javascript-ejs-support",
     "me-dutour-mathieu.vscode-github-actions",
-    "gruntfuggly.todo-tree"
+    "gruntfuggly.todo-tree",
+    "denoland.vscode-deno"
   ]
 }

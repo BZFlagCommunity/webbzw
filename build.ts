@@ -11,7 +11,7 @@ let template = "";
 let css = "";
 let js = "";
 
-function compress(text: string, force: boolean = false): string{
+function compress(text: string, force = false): string{
   return serve && !force ? text : text.split("\n").map((line) => line.trim()).join("");
 }
 
@@ -36,17 +36,7 @@ async function loadJS(){
     }
 
     // HACK: there shouldn't need to be any `replace` calls
-    js = compress(files["deno:///bundle.js"].replace(/Box1/g, "Box").replace("const Box = Box;\n", "").replace("const MeshBox = MeshBox;\n", "").replace("const mod = function() {", "").replace(`return {
-        MeshBox: MeshBox,
-        MeshPyramid: MeshPyramid,
-        Base: Base,
-        Group: Group,
-        Define: Define,
-        Zone: Zone,
-        World: World,
-        Box: Box
-    };
-}();`, "").replace(/mod\./g, ""));
+    js = compress(files["deno:///bundle.js"].replace(/Pyramid1/g, "Pyramid").replace(/Box1/g, "Box"));
   }catch(err){
     console.error(err);
   }
@@ -54,15 +44,12 @@ async function loadJS(){
 
 async function build(): Promise<string>{
   while(template === ""){
-    console.log("a");
     await loadTemplate();
   }
   while(css === ""){
-    console.log("b");
     await loadCSS();
   }
   while(js === ""){
-    console.log("c");
     await loadJS();
   }
 

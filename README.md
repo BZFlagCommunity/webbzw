@@ -1,7 +1,7 @@
 # webbzw
 
 [![CD](https://github.com/BZFlagCommunity/webbzw/workflows/CD/badge.svg)](https://github.com/BZFlagCommunity/webbzw/actions)
-[![Deno](https://img.shields.io/badge/Deno-v1.7.0-blue)](https://deno.land)
+[![Deno](https://img.shields.io/badge/Deno-v1.8.3-blue)](https://deno.land)
 
 Preview and edit BZW files on the web.
 
@@ -17,7 +17,7 @@ The list of supported map features can be found in issue [#2](https://github.com
 
 ## Building
 
-> [Deno](https://deno.land/) v1.7.0+ is required to build the application.
+> [Deno](https://deno.land/) v1.8.3+ is required to build the application.
 
 **Build**
 ```sh
