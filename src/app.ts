@@ -107,7 +107,7 @@ dom.bzwFile.addEventListener("change", () => {
   handleFile(dom.bzwFile.files);
 });
 
-let selectedMapObjectIndex = 0;
+let selectedMapObjectIndex = -1;
 function setSelectedMapObject(newIndex: number){
   if(newIndex === selectedMapObjectIndex){
     return;
@@ -410,3 +410,17 @@ function updateMesh(){
   dom.statusBar.objects.innerText = `${map.objects.length} Objects`;
   dom.statusBar.vertices.innerText = `${mesh.indices.length} Vertices`;
 }
+
+/** Remove object from map */
+function removeObject(){
+  if(selectedMapObjectIndex < 0){
+    return;
+  }
+
+  map.objects.splice(selectedMapObjectIndex, 1);
+  setSelectedMapObject(-1);
+
+  source = bzw.mapToBZW(map);
+  sourceChanged();
+}
+removeObject();

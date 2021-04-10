@@ -309,7 +309,7 @@ select{
 }
 
 .panel__actions > svg:not(:last-child){
-  margin-left: .75rem;
+  margin-right: .5rem;
 }
 
 .panel__content{
