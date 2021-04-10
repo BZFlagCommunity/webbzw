@@ -82,25 +82,27 @@ function addObject(type?: string){
   }
 
   source = bzw.mapToBZW(map);
-  sourceChanged();
+  _sourceChanged(false);
+
+  setSelectedMapObject(map.objects.length - 1);
 }
 addObject();
 
 /** Raw handler for textarea being changed */
-function _sourceChanged(){
-  parseSource();
+function _sourceChanged(updateSelected = true){
+  parseSource(updateSelected);
   updateMesh();
   localStorage.setItem(`map-${storageName}`, source);
 }
 
 let timeoutId = 0;
 /** Smart handler for textarea being changed */
-function sourceChanged(){
+function sourceChanged(updateSelected = true){
   if(timeoutId){
     clearTimeout(timeoutId);
   }
 
-  timeoutId = setTimeout(() => _sourceChanged(), EDITOR_CHANGE_TIMEOUT);
+  timeoutId = setTimeout(() => _sourceChanged(updateSelected), EDITOR_CHANGE_TIMEOUT);
 }
 
 dom.bzwFile.addEventListener("change", () => {
@@ -272,6 +274,12 @@ function setSelectedMapObject(newIndex: number){
 
     dom.panels.properties.appendChild(valueElement);
   }
+
+  for(const selected of dom.panels.objects.querySelectorAll<HTMLDivElement>(".selected")){
+    selected.classList.remove("selected");
+  }
+
+  Array.from(dom.panels.objects.children)[selectedMapObjectIndex].classList.add("selected");
 }
 
 dom.panels.objects.addEventListener("click", (e: Event) => {
@@ -279,11 +287,6 @@ dom.panels.objects.addEventListener("click", (e: Event) => {
   if(!target || !target.parentElement || !target.parentElement.classList.contains("panel__content")){
     return;
   }
-
-  for(const selected of dom.panels.objects.querySelectorAll<HTMLDivElement>(".selected")){
-    selected.classList.remove("selected");
-  }
-  target.classList.add("selected");
 
   const index = Array.from(target.parentElement.children).indexOf(target);
   setSelectedMapObject(index);
@@ -318,7 +321,14 @@ window.onkeydown = (e: KeyboardEvent) => {
     e.preventDefault();
     dom.bzwFile.click();
   }else if(e.keyCode === 83 && e.ctrlKey){ // Ctrl+S (save)
+    e.preventDefault();
     alert("WebBZW automatically saves your work! You can use Ctrl+D to download the file or Ctrl+C to copy the contents to your clipboard.")
+  }else if(e.keyCode === 65 && e.altKey){ // Alt+A (add object)
+    e.preventDefault();
+    addObject(prompt("Type of object:"));
+  }else if(e.keyCode === 82 && e.altKey){ // Alt+R (remove object)
+    e.preventDefault();
+    removeObject();
   }
 };
 
@@ -338,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
   _sourceChanged();
 });
 
-function parseSource(){
+function parseSource(updateSelected = true){
   const oldSelected = map.objects[selectedMapObjectIndex]?.toString() ?? "";
 
   map = bzw.parse(source);
@@ -351,9 +361,7 @@ function parseSource(){
     dom.panels.objects.appendChild(div);
   }
 
-  if(selectedMapObjectIndex >= map.objects.length){ // objet no longer exists
-    setSelectedMapObject(-1);
-  }else if((map.objects[selectedMapObjectIndex]?.toString() ?? "") !== oldSelected){ // object has changed
+  if(updateSelected && (map.objects[selectedMapObjectIndex]?.toString() ?? "") !== oldSelected){ // object has changed
     const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
     selectedMapObjectIndex = -1;
     setSelectedMapObject(index);
@@ -413,14 +421,15 @@ function updateMesh(){
 
 /** Remove object from map */
 function removeObject(){
-  if(selectedMapObjectIndex < 0){
+  if(selectedMapObjectIndex < 1){
     return;
   }
 
   map.objects.splice(selectedMapObjectIndex, 1);
-  setSelectedMapObject(-1);
 
   source = bzw.mapToBZW(map);
-  sourceChanged();
+  _sourceChanged(false);
+
+  setSelectedMapObject(selectedMapObjectIndex - 1);
 }
 removeObject();

@@ -32,6 +32,25 @@
         </div>
       </div>
       <div class="parent">
+        <span>Edit</span>
+        <div class="menu">
+          <span class="parent">
+            Object
+            <span class="shortcut">&gt;</span>
+            <div class="menu submenu">
+              <span onclick="addObject(prompt('Type of object:'))">
+                Add
+                <span class="shortcut">Alt+A</span>
+              </span>
+              <span onclick="removeObject()">
+                Remove
+                <span class="shortcut">Alt+R</span>
+              </span>
+            </div>
+          </span>
+        </div>
+      </div>
+      <div class="parent">
         <span>View</span>
         <div class="menu">
           <span onclick="settings.autoRotate.click()">
