@@ -10,8 +10,9 @@ Preview and edit BZW files on the web.
 ## Supported Features
 
 - [x] Real-time preview
-- [x] Syntax highlighting
+- [x] ~~Syntax highlighting~~ *temporarily removed, will be added back in the future*
 - [x] Drag 'n drop files
+- [x] Edit multiple maps at the same time
 
 The list of supported map features can be found in issue [#2](https://github.com/The-Noah/webbzw/issues/2).
 
