@@ -397,6 +397,7 @@ function updateMesh(){
   }
 
   // sort by alpha
+  // FIXME: should be dynamically sorted based on viewport
   for(const object of [...map.objects].sort((a: any, b: any) => (a.color?.[3] ?? -1) > (b.color?.[3] ?? 1) ? 1 : -1)){
     object.buildMesh(mesh);
   }

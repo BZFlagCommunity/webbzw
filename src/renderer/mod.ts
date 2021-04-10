@@ -72,6 +72,12 @@ export class Renderer{
       PHI += dY;
       oldX = x
       oldY = y;
+
+      if(PHI > 90){
+        PHI = 90;
+      }else if(PHI < 0){
+        PHI = 0;
+      }
     };
 
     canvas.addEventListener("mousedown", mouseDown, false);
@@ -161,12 +167,6 @@ export class Renderer{
 
       if(!drag && dom.settings.autoRotate.checked){
         THETA += .015 * dt;
-      }
-
-      if(PHI > 90){
-        PHI = 90;
-      }else if(PHI < -90){
-        PHI = -90;
       }
 
       const modelMatrix = math.multiplyArrayOfMatrices([

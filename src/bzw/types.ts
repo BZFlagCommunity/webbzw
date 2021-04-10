@@ -69,10 +69,13 @@ export abstract class MapObject{
       ret += `${INDENT}${property}`;
 
       if(typeof value === "number" || typeof value === "string"){
+        // simple value
         ret += ` ${value}`;
       }else if(typeof value === "object" && Array.isArray(value) && typeof value[0] !== "object"){
+        // array
         ret += ` ${value.join(" ")}`;
       }else if(typeof value === "object" && Array.isArray(value) && typeof value[0] === "object"){
+        // complex value
         value = value.map((val: any) => val.toString().split("\n").map((line: string) => `${INDENT}${line}`).join("\n"));
         ret += `\n${value.join("\n\n")}`;
       }
