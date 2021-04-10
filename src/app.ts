@@ -256,7 +256,7 @@ function setSelectedMapObject(newIndex: number){
 
 dom.panels.objects.addEventListener("click", (e: Event) => {
   const target = e.target as HTMLElement;
-  if(!target || !target.parentElement || !target.parentElement.classList.contains("objects")){
+  if(!target || !target.parentElement || !target.parentElement.classList.contains("panel__content")){
     return;
   }
 
