@@ -176,7 +176,7 @@ export abstract class VeryBasicMapObject extends MapObject{
 
 /** Basic definition of a map object - contains properties common to a lot of objects */
 export abstract class BasicMapObject extends VeryBasicMapObject{
-  size: [number, number, number] = [0, 0, 0];
+  size: [number, number, number] = [10, 10, 10];
   color?: [number, number, number, number] = undefined; // explicitly set to `undefined` so it always exists
 
   parseLine(line: string): void{

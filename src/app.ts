@@ -57,6 +57,35 @@ function deleteMap(){
   window.location.href = "/";
 }
 
+/** Add object to map using a user prompt */
+function addObject(type?: string){
+  if(!type){
+    return;
+  }
+
+  if(type === "box"){
+    map.objects.push(new bzw.objects.Box());
+  }else if(type === "meshbox"){
+    map.objects.push(new bzw.objects.MeshBox());
+  }else if(type === "pyramid"){
+    map.objects.push(new bzw.objects.Pyramid());
+  }else if(type === "meshpyr"){
+    map.objects.push(new bzw.objects.MeshPyramid());
+  }else if(type === "base"){
+    map.objects.push(new bzw.objects.Base());
+  }else if(type === "zone"){
+    map.objects.push(new bzw.objects.Zone());
+  }else if(type === "physics"){
+    map.objects.push(new bzw.objects.Physics());
+  }else{
+    return alert("Unsupported object type");
+  }
+
+  source = bzw.mapToBZW(map);
+  sourceChanged();
+}
+addObject();
+
 /** Raw handler for textarea being changed */
 function _sourceChanged(){
   parseSource();

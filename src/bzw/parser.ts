@@ -80,7 +80,7 @@ export function parse(source: string): IMap{
     }else if(line.startsWith("group")){
       current = "group";
       map.objects.push(new objects.Group(line));
-    }else if(line.startsWith("physics")){
+    }else if(line === "physics"){
       current = "physics";
       map.objects.push(new objects.Physics(line));
     }else{

@@ -283,6 +283,10 @@ select{
   overflow: auto;
 }
 
+.panel svg{
+  stroke: var(--text-color);
+}
+
 .panel__header{
   margin-bottom: .5rem;
   font-size: .9rem;
@@ -294,7 +298,18 @@ select{
 
 .panel__header > svg{
   margin-left: .75rem;
-  stroke: var(--text-color);
+}
+
+.panel__actions{
+  margin-bottom: .5rem;
+}
+
+.panel__actions > svg{
+  cursor: pointer;
+}
+
+.panel__actions > svg:not(:last-child){
+  margin-left: .75rem;
 }
 
 .panel__content{
