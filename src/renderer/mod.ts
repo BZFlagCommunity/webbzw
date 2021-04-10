@@ -3,7 +3,7 @@ import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
 import * as math from "../math.ts";
 import {getCoord} from "../utils.ts";
 import {IMesh} from "../bzw/types.ts";
-import * as dom from "../dom/mod.ts";
+import * as dom from "../dom.ts";
 
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 75;

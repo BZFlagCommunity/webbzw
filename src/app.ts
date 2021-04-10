@@ -1,5 +1,5 @@
 import * as bzw from "./bzw/mod.ts";
-import * as dom from "./dom/mod.ts";
+import * as dom from "./dom.ts";
 import "./editor/mod.ts";
 
 import {saveFile, colorThemeChanged, capitalize} from "./utils.ts";
