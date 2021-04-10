@@ -1,8 +1,8 @@
 import * as bzw from "./bzw/mod.ts";
 import * as dom from "./dom/mod.ts";
-import * as editor from "./editor/mod.ts";
+import "./editor/mod.ts";
 
-import {saveFile, colorThemeChanged} from "./utils.ts";
+import {saveFile, colorThemeChanged, capitalize} from "./utils.ts";
 import {Renderer} from "./renderer/mod.ts";
 
 const EDITOR_CHANGE_TIMEOUT = 15;
@@ -109,7 +109,7 @@ function setSelectedMapObject(newIndex: number){
 
   // add element saying object type
   const typeElement = document.createElement("div");
-  typeElement.innerText = `type: ${selectedMapObject.HEADER}`;
+  typeElement.innerText = `Type: ${capitalize(selectedMapObject.HEADER)}`;
   dom.panels.properties.appendChild(typeElement);
 
   const properties = Object.keys(selectedMapObject);
@@ -132,7 +132,13 @@ function setSelectedMapObject(newIndex: number){
     }
 
     const nameElement = document.createElement("span");
-    nameElement.innerText = property;
+    nameElement.innerText = `${capitalize(property.split(/([A-Z])/g).map((value, i, array) => {
+      if(value.length > 1 && i > 0){
+        return `${array[i - 1]}${value}`;
+      }
+
+      return value;
+    }).filter((value) => value.length !== 1).join(" "))}`;
     dom.panels.properties.appendChild(nameElement);
 
     const valueElement = document.createElement("div");

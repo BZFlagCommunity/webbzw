@@ -22,3 +22,8 @@ export function saveFile(fileName: string, text: string){
 export function colorThemeChanged(){
   document.documentElement.setAttribute("data-theme", localStorage.getItem("colorTheme") ?? "default");
 }
+
+/** Capitalize the first letter of the given string */
+export function capitalize(value: string): string{
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+}
