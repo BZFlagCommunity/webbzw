@@ -298,6 +298,20 @@ select{
   overflow: auto;
 }
 
+.panel__content::-webkit-scrollbar{
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+.panel__content::-webkit-scrollbar-thumb{
+  background: var(--border-color);
+  border-radius: var(--scrollbar-size);
+}
+
+.panel__content::-webkit-scrollbar-thumb:hover{
+  background: var(--text-color);
+}
+
 .btn{
   padding: .2rem .5rem;
   background: none;
