@@ -361,6 +361,10 @@ select{
   grid-row: 2;
 }
 
+#properties > .panel__content{
+  font-size: .8rem;
+}
+
 #properties > .panel__content > div{
   display: flex;
   flex-direction: row;
