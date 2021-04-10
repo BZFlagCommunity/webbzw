@@ -8,16 +8,17 @@ import * as dom from "../dom/mod.ts";
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 75;
 const NEAR_PLANE = 1;
-const AXIS_LINE_LENGTH = 150;
+const AXIS_LINE_LENGTH = 20;
 
 export class Renderer{
-  worldSize: number = 400;
+  worldSize = 400;
+  axisPosition: [number, number, number] = [0, 0, 0];
 
   private gl?: WebGL2RenderingContext;
   private vbo: WebGLBuffer | null = null;
   private cbo: WebGLBuffer | null = null;
   private ebo: WebGLBuffer | null = null;
-  private elementCount: number = 0;
+  private elementCount = 0;
 
   constructor(canvas?: HTMLCanvasElement){
     if(!canvas){
@@ -32,7 +33,6 @@ export class Renderer{
     }
 
     const viewMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,-this.worldSize,1];
-    const modelMatrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
 
     let drag = false;
     let oldX = 0, oldY = 0;
@@ -101,14 +101,14 @@ export class Renderer{
 
     const axisVertices = [
       // x
-      0,                0, 0,
-      AXIS_LINE_LENGTH, 0, 0,
-      // y
-      0, 0,                0,
-      0, AXIS_LINE_LENGTH, 0,
-      // z
       0, 0, 0,
-      0, 0, -AXIS_LINE_LENGTH,
+      1, 0, 0,
+      // y
+      0, 0, 0,
+      0, 1, 0,
+      // z
+      0, 0,  0,
+      0, 0, -1,
     ];
     const axisColors = [
       // x
@@ -169,10 +169,9 @@ export class Renderer{
         PHI = -90;
       }
 
-      const finalModelMatrix = math.multiplyArrayOfMatrices([
+      const modelMatrix = math.multiplyArrayOfMatrices([
         math.rotateXMatrix(-PHI),
         math.rotateYMatrix(-THETA),
-        modelMatrix,
       ]);
 
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -180,11 +179,16 @@ export class Renderer{
       this.gl.uniformMatrix4fv(this.gl.getUniformLocation(shader, "proj"), false, math.getProjection(60, canvas.width/canvas.height, NEAR_PLANE, this.worldSize * 5));
 
       this.gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
-      this.gl.uniformMatrix4fv(mMatrix, false, finalModelMatrix);
+      this.gl.uniformMatrix4fv(mMatrix, false, modelMatrix);
 
       this.gl.drawElements(this.gl.TRIANGLES, this.elementCount, this.gl.UNSIGNED_SHORT, 0);
 
       if(dom.settings.showAxis.checked){
+        this.gl.uniformMatrix4fv(mMatrix, false, math.multiplyArrayOfMatrices([
+          modelMatrix,
+          [AXIS_LINE_LENGTH,0,0,0, 0,AXIS_LINE_LENGTH,0,0, 0,0,AXIS_LINE_LENGTH,0, this.axisPosition[0],this.axisPosition[2],-this.axisPosition[1],1]
+        ]));
+
         this.gl.disable(this.gl.DEPTH_TEST);
 
         this.gl.bindVertexArray(axisVao);

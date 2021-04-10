@@ -103,7 +103,12 @@ function setSelectedMapObject(newIndex: number){
     return;
   }
 
-  const selectedMapObject = map.objects[selectedMapObjectIndex];
+  const selectedMapObject = map.objects[selectedMapObjectIndex] as bzw.MapObject;
+  if((selectedMapObject as any).position){
+    renderer.axisPosition = (selectedMapObject as any).position;
+  }else{
+    renderer.axisPosition = [0, 0, 0];
+  }
 
   dom.removeAllChildren(dom.panels.properties);
 
