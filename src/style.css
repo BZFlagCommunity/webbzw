@@ -122,19 +122,18 @@ input[type=checkbox]{
 }
 
 header{
-  padding: 0 1rem;
+  padding: 0 .5rem;
   background-color: var(--border-color);
   display: flex;
   flex-direction: row;
-  box-shadow: 0 var(--shadow-height) var(--shadow-spread) var(--shadow-color);
+  align-items: center;
   z-index: 9;
 }
 
-header > span{
+header > svg{
   margin-right: 1rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
+  fill: var(--text-color);
+  cursor: pointer;
 }
 
 nav{
@@ -160,7 +159,7 @@ nav > div:hover, nav .menu > span:hover{
 }
 
 nav > .parent > span{
-  padding: .2rem .75rem;
+  padding: .2rem .5rem;
   display: block;
 }
 
@@ -174,7 +173,7 @@ nav .parent:hover > .menu{
 
 nav .menu{
   width: 15rem;
-  padding: .5rem 0;
+  padding: .2rem 0;
   background-color: var(--background-color);
   position: absolute;
   display: none;
@@ -188,7 +187,7 @@ nav .menu{
 nav .menu.submenu{
   margin-top: -1px;
   margin-left: -2px;
-  top: -.5rem;
+  top: -.2rem;
   left: 15rem;
 }
 
@@ -197,7 +196,7 @@ nav > .menu:not(.submenu){
 }
 
 nav .menu > span{
-  padding: .3rem 1rem;
+  padding: .3rem .5rem;
   font-size: .85rem;
   display: flex;
   align-items: center;
@@ -227,9 +226,11 @@ footer > span:not(:last-child){
 }
 
 main{
+  min-height: 0;
   flex: 1;
-  display: flex;
-  overflow: auto;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  grid-template-rows: auto;
 }
 
 main > *:not(.resizer):not(.line-numbers){
@@ -269,23 +270,51 @@ textarea::selection{
   background-color: var(--selection-color);
 }
 
-textarea::-webkit-scrollbar, .tree > .objects::-webkit-scrollbar{
+textarea::-webkit-scrollbar, .panel__content::-webkit-scrollbar{
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
-  border-left: 1px solid var(--border-color);
 }
 
-textarea::-webkit-scrollbar-thumb, .tree > .objects::-webkit-scrollbar-thumb{
+textarea::-webkit-scrollbar-thumb, .panel__content::-webkit-scrollbar-thumb{
   background: var(--border-color);
   border-radius: var(--scrollbar-size);
 }
 
-textarea::-webkit-scrollbar-thumb:hover, .tree > .objects::-webkit-scrollbar-thumb:hover{
+textarea::-webkit-scrollbar-thumb:hover, .panel__content::-webkit-scrollbar-thumb:hover{
   background: var(--text-color);
 }
 
 textarea.show{
   color: var(--highlight-default);
+}
+
+.panel{
+  padding: .2rem .5rem;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #000;
+  overflow: auto;
+}
+
+.panel__header{
+  margin-bottom: .5rem;
+  font-size: .9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.panel__header > svg{
+  margin-left: .75rem;
+  stroke: var(--text-color);
+  cursor: grab;
+}
+
+.panel__content{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: auto;
 }
 
 .btn{
@@ -303,72 +332,59 @@ textarea.show{
   background-color: var(--border-color);
 }
 
-.beta{
-  margin-left: .5rem;
-  padding: .1rem .5rem;
-  background-color: #F005;
-  font-size: .8rem;
-  font-weight: 500;
-  border: 1px solid #F00;
-  border-radius: 1rem;
-}
-
-.tree > *, .line-numbers, .editor > *{
+.line-numbers, .editor > *{
   padding: .2rem .5rem;
   font-size: .8rem;
   font-family: "Source Code Pro", monospace;
   line-height: 1em;
 }
 
-.tree{
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--border-color);
+.objects{
+  grid-column: 1;
+  grid-row: 1;
 }
 
-.tree > .objects{
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: auto;
+.objects > .panel__content{
+  font-size: .8rem;
+  font-family: "Source Code Pro", monospace;
+  line-height: 1em;
   user-select: none;
 }
 
-.tree > .objects > div{
+.objects > .panel__content > div{
   padding: .1rem;
   color: var(--text-light-color);
   cursor: pointer;
 }
 
-.tree > .objects > div.selected, .tree > .objects > div:hover{
+.objects > .panel__content > div.selected, .objects > .panel__content > div:hover{
   color: var(--text-color);
 }
 
-.tree > .properties{
-  display: none; /* flex */
-  flex-direction: column;
-  border-top: 1px solid var(--border-color);
+.properties{
+  grid-column: 1;
+  grid-row: 2;
 }
 
-.tree > .properties > div{
+.properties > .panel__content > div{
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.tree > .properties > div:not(:last-child){
+.properties > .panel__content > div:not(:last-child){
   margin-bottom: .5rem;
 }
 
-.tree > .properties > div > *:not(input[type=checkbox]){
+.properties > .panel__content > div > *:not(input[type=checkbox]){
   flex: 1;
 }
 
-.tree > .properties > div > *:not(:last-child){
+.properties > .panel__content > div > *:not(:last-child){
   margin-right: .2rem;
 }
 
-.tree > .properties input{
+.properties > .panel__content input{
   padding: .2rem .5rem;
   background: none;
   font-family: "Source Code Pro", monospace;
@@ -378,8 +394,17 @@ textarea.show{
   outline: none;
 }
 
-.tree > .properties input:not([type=checkbox]){
+.properties > .panel__content input:not([type=checkbox]){
   width: 100%;
+}
+
+.preview{
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.preview canvas{
+  flex: 1;
 }
 
 .line-numbers{

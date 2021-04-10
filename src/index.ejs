@@ -9,7 +9,7 @@
 </head>
 <body>
   <header>
-    <span>Web BZW <span class="beta">Beta</span></span>
+    <svg onclick="window.location.href = '/'" width="20" height="21" viewBox="0 0 20 21" xmlns="http://www.w3.org/2000/svg"><path d="M20 11.5091L10 0.6L0 11.5091H3.55795V20.6H8.17675V15.1455H11.8718V20.6H16.4906V11.5091H20Z"/></svg>
     <nav>
       <div class="parent">
         <span>File</span>
@@ -73,19 +73,39 @@
     <input type="file" id="bzw-file" accept=".bzw">
   </header>
   <main>
-    <div class="tree">
-      <div class="objects"></div>
-      <div class="properties"></div>
+    <div class="panel objects">
+      <div class="panel__header">
+        Objects
+        <svg onclick="alert('not implemented yet')" width="10" height="8" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg"><line y1="1" x2="10" y2="1"/><line y1="4" x2="10" y2="4"/><line y1="7" x2="10" y2="7"/></svg>
+      </div>
+      <div class="panel__content"></div>
     </div>
-    <pre class="line-numbers"></pre>
-    <div class="editor">
-      <textarea spellcheck="false"></textarea>
-      <pre class="highlight">
-        <span class="comment"># loading...</span>
-      </pre>
+    <div class="panel properties">
+      <div class="panel__header">
+        Properties
+        <svg onclick="alert('not implemented yet')" width="10" height="8" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg"><line y1="1" x2="10" y2="1"/><line y1="4" x2="10" y2="4"/><line y1="7" x2="10" y2="7"/></svg>
+      </div>
+      <div class="panel__content"></div>
     </div>
-    <div class="resizer"></div>
-    <canvas></canvas>
+    <div style="display:none">
+      <pre class="line-numbers"></pre>
+      <div class="editor">
+        <textarea spellcheck="false"></textarea>
+        <pre class="highlight">
+          <span class="comment"># loading...</span>
+        </pre>
+      </div>
+    </div>
+    <!-- <div class="resizer"></div> -->
+    <div class="panel preview">
+      <div class="panel__header">
+        Preview
+        <svg onclick="alert('not implemented yet')" width="10" height="8" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg"><line y1="1" x2="10" y2="1"/><line y1="4" x2="10" y2="4"/><line y1="7" x2="10" y2="7"/></svg>
+      </div>
+      <div class="panel__content">
+        <canvas></canvas>
+      </div>
+    </div>
   </main>
   <footer>
     <span id="objects"></span>

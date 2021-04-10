@@ -65,7 +65,7 @@ async function build(): Promise<string>{
   return await renderToString(template, {
     version,
     css,
-    js
+    js,
   });
 }
 

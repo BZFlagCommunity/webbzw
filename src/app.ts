@@ -137,7 +137,7 @@ dom.textarea.onkeydown = (e: KeyboardEvent) => {
   }
 };
 
-let selectedMapObjectIndex: number = 0;
+let selectedMapObjectIndex = 0;
 function setSelectedMapObject(newIndex: number){
   if(newIndex === selectedMapObjectIndex){
     return;
@@ -145,18 +145,17 @@ function setSelectedMapObject(newIndex: number){
   selectedMapObjectIndex = newIndex;
 
   if(selectedMapObjectIndex < 0){
-    dom.tree.properties.style.display = "none";
     return;
   }
 
   const selectedMapObject = map.objects[selectedMapObjectIndex];
 
-  dom.removeAllChildren(dom.tree.properties);
+  dom.removeAllChildren(dom.panels.properties);
 
   // add element saying object type
   const typeElement = document.createElement("div");
   typeElement.innerText = `type: ${selectedMapObject.HEADER}`;
-  dom.tree.properties.appendChild(typeElement);
+  dom.panels.properties.appendChild(typeElement);
 
   const properties = Object.keys(selectedMapObject);
   const values = Object.values(selectedMapObject);
@@ -179,7 +178,7 @@ function setSelectedMapObject(newIndex: number){
 
     const nameElement = document.createElement("span");
     nameElement.innerText = property;
-    dom.tree.properties.appendChild(nameElement);
+    dom.panels.properties.appendChild(nameElement);
 
     const valueElement = document.createElement("div");
 
@@ -291,19 +290,17 @@ function setSelectedMapObject(newIndex: number){
         break;
     }
 
-    dom.tree.properties.appendChild(valueElement);
+    dom.panels.properties.appendChild(valueElement);
   }
-
-  dom.tree.properties.style.display = "flex";
 }
 
-dom.tree.objects.addEventListener("click", (e: Event) => {
+dom.panels.objects.addEventListener("click", (e: Event) => {
   const target = e.target as HTMLElement;
   if(!target || !target.parentElement || !target.parentElement.classList.contains("objects")){
     return;
   }
 
-  for(const selected of dom.tree.objects.querySelectorAll<HTMLDivElement>(".selected")){
+  for(const selected of dom.panels.objects.querySelectorAll<HTMLDivElement>(".selected")){
     selected.classList.remove("selected");
   }
   target.classList.add("selected");
@@ -340,6 +337,17 @@ window.onkeydown = (e: KeyboardEvent) => {
   }
 };
 
+document.addEventListener("copy", (e: ClipboardEvent) => {
+  e.preventDefault();
+  (e.clipboardData || window.clipboardData).setData("text/plain", source);
+}, false);
+
+document.addEventListener("paste", (e: ClipboardEvent) => {
+  e.preventDefault();
+  dom.textarea.value = (e.clipboardData || window.clipboardData).getData("text");
+  textareaChanged();
+}, false);
+
 document.addEventListener("DOMContentLoaded", () => {
   // load settings
   dom.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
@@ -361,12 +369,12 @@ function parseSource(){
 
   map = bzw.parse(source);
 
-  dom.removeAllChildren(dom.tree.objects);
+  dom.removeAllChildren(dom.panels.objects);
 
   for(const object of map.objects){
     const div = document.createElement("div");
     div.innerText = object.name || object.HEADER;
-    dom.tree.objects.appendChild(div);
+    dom.panels.objects.appendChild(div);
   }
 
   if(selectedMapObjectIndex >= map.objects.length){ // objet no longer exists
