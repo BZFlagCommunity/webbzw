@@ -11,7 +11,12 @@ colorThemeChanged();
 
 const renderer = new Renderer(dom.canvas);
 
-let source = localStorage.getItem("bzw") as string || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
+let storageName = window.decodeURI(window.location.hash.slice(1) || "New Map");
+if(storageName === "New Map"){
+  history.replaceState(null, null, `#${window.encodeURI(storageName)}`);
+}
+
+let source = localStorage.getItem(`map-${storageName}`) ?? `# sample world\n\nworld\n  name New Map\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
 
 let map: bzw.IMap = {
   worldSize: 400,
@@ -43,14 +48,20 @@ function handleFile(files: FileList | null | undefined){
 
 /** Save map to device */
 function saveMap(){
-  saveFile(`${map.objects.find((object: bzw.MapObject) => object instanceof bzw.objects.World)?.name || "map"}.bzw`, source);
+  saveFile(`${storageName}.bzw`, source);
+}
+
+/** Delete map from browser storage */
+function deleteMap(){
+  localStorage.removeItem(`map-${storageName}`);
+  window.location.href = "/";
 }
 
 /** Raw handler for textarea being changed */
 function _sourceChanged(){
   parseSource();
   updateMesh();
-  localStorage.setItem("bzw", source);
+  localStorage.setItem(`map-${storageName}`, source);
 }
 
 let timeoutId = 0;
@@ -299,6 +310,9 @@ window.onkeydown = (e: KeyboardEvent) => {
   }else if(e.keyCode === 79 && e.ctrlKey){ // Ctrl+O (open file)
     e.preventDefault();
     dom.bzwFile.click();
+  }else if(e.keyCode === 68 && e.ctrlKey && e.shiftKey){ // Ctrl+Sift+D (delete file)
+    e.preventDefault();
+    deleteMap();
   }
 };
 
@@ -318,8 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
   dom.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
   dom.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
 
-  parseSource();
-  updateMesh();
+  _sourceChanged();
 });
 
 function parseSource(){
@@ -341,6 +354,14 @@ function parseSource(){
     const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
     selectedMapObjectIndex = -1;
     setSelectedMapObject(index);
+  }
+
+  // update map name
+  const oldStorageName = storageName;
+  storageName = map.objects.find((object: bzw.MapObject) => object instanceof bzw.objects.World)?.name || storageName;
+  if(storageName !== oldStorageName){
+    localStorage.removeItem(`map-${oldStorageName}`);
+    history.replaceState(null, null, `#${window.encodeURI(storageName)}`);
   }
 }
 
