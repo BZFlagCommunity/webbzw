@@ -25,9 +25,6 @@ jobs:
         env:
           GIT_TAG: ${{ steps.get-latest-tag.outputs.tag }}
 
-      - name: Benchmark 🏁
-        run: deno run --allow-net benchmark.ts
-
       - uses: actions/upload-artifact@v2
         with:
           name: build
