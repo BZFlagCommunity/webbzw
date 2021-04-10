@@ -39,9 +39,10 @@ export class Renderer{
     let dX = 0, dY = 0;
     let THETA = 0, PHI = 40, oldTime = 0;
 
-    // set canvas size to match element size
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    new ResizeObserver(() => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }).observe(canvas);
 
     const mouseDown = (e: Event) => {
       e.preventDefault();
@@ -78,15 +79,15 @@ export class Renderer{
     canvas.addEventListener("mouseout", mouseUp, false);
     canvas.addEventListener("mousemove", mouseMove, false);
     // mobile
-    canvas.addEventListener("touchstart", mouseDown, false);
+    canvas.addEventListener("touchstart", mouseDown, {passive: false});
     canvas.addEventListener("touchend", mouseUp, false);
-    canvas.addEventListener("touchmove", mouseMove, false);
+    canvas.addEventListener("touchmove", mouseMove, {passive: false});
 
     canvas.addEventListener("wheel", (e: WheelEvent): void => {
       const delta = e.deltaY;
       viewMatrix[14] += delta / Math.abs(delta) * (viewMatrix[14] / 10);
       viewMatrix[14] = viewMatrix[14] > MAX_ZOOM ? MAX_ZOOM : viewMatrix[14] < -this.worldSize * 3 ? -this.worldSize * 3 : viewMatrix[14];
-    });
+    }, {passive: true});
 
     const shader = createShader(this.gl, VERTEX_SHADER, FRAGMENT_SHADER);
     if(!shader){

@@ -233,10 +233,6 @@ main{
   grid-template-rows: auto;
 }
 
-main > *:not(.resizer):not(.line-numbers){
-  flex: 1;
-}
-
 pre{
   margin: 0;
 }
@@ -332,13 +328,6 @@ textarea.show{
   background-color: var(--border-color);
 }
 
-.line-numbers, .editor > *{
-  padding: .2rem .5rem;
-  font-size: .8rem;
-  font-family: "Source Code Pro", monospace;
-  line-height: 1em;
-}
-
 .objects{
   grid-column: 1;
   grid-row: 1;
@@ -405,90 +394,4 @@ textarea.show{
 
 .preview canvas{
   flex: 1;
-}
-
-.line-numbers{
-  margin: 0;
-  color: #888;
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--border-color);
-  overflow: hidden;
-  user-select: none;
-}
-
-.editor{
-  display: flex;
-  position: relative;
-  border-right: 1px solid var(--border-color);
-}
-
-.editor > *{
-  flex: 1;
-  overflow: auto;
-}
-
-.resizer{
-  --width: .5rem;
-
-  width: var(--width);
-  margin-left: calc(var(--width) * -.3);
-  margin-right: calc(var(--width) * -.7);
-  cursor: ew-resize;
-  z-index: 2;
-}
-
-.highlight{
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/* make empty lines take up vertical space */
-.highlight > div:empty::after{
-  content: ".";
-  visibility: hidden;
-}
-
-.highlight div{
-  color: var(--highlight-default);
-}
-
-.highlight .comment{
-  color: var(--highlight-comment);
-}
-
-.highlight .number{
-  color: var(--highlight-number);
-}
-
-.highlight .symbol{
-  color: var(--highlight-symbol);
-}
-
-.highlight .header{
-  color: var(--highlight-headers);
-}
-
-.highlight .keyword{
-  color: var(--highlight-keyword);
-}
-
-.highlight .flag{
-  color: var(--highlight-flag);
-}
-
-@media only screen and (max-width: 768px){
-  main{
-    flex-direction: column;
-  }
-
-  .line-numbers{
-    display: none
-  }
 }

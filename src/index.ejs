@@ -25,15 +25,6 @@
         </div>
       </div>
       <div class="parent">
-        <span>Edit</span>
-        <div class="menu">
-          <span onclick="toggleComment()">
-            Toggle Commnt
-            <span class="shortcut">Ctrl+/</span>
-          </span>
-        </div>
-      </div>
-      <div class="parent">
         <span>View</span>
         <div class="menu">
           <span onclick="settings.autoRotate.click()">
@@ -43,10 +34,6 @@
           <span onclick="settings.showAxis.click()">
             <input type="checkbox" id="show-axis" onclick="event.stopPropagation()">
             Show Axis
-          </span>
-          <span onclick="settings.syntaxHighlighting.click()">
-            <input type="checkbox" id="syntax-highlighting" onclick="event.stopPropagation()">
-            Syntax Highlighting
           </span>
           <span class="parent">
             Color Theme
@@ -87,16 +74,6 @@
       </div>
       <div class="panel__content"></div>
     </div>
-    <div style="display:none">
-      <pre class="line-numbers"></pre>
-      <div class="editor">
-        <textarea spellcheck="false"></textarea>
-        <pre class="highlight">
-          <span class="comment"># loading...</span>
-        </pre>
-      </div>
-    </div>
-    <!-- <div class="resizer"></div> -->
     <div class="panel preview">
       <div class="panel__header">
         Preview

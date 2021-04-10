@@ -2,8 +2,7 @@ import * as bzw from "./bzw/mod.ts";
 import * as dom from "./dom/mod.ts";
 import * as editor from "./editor/mod.ts";
 
-import {highlight, deleteHighlightElement} from "./highlight/mod.ts";
-import {trimText, saveFile, colorThemeChanged} from "./utils.ts";
+import {saveFile, colorThemeChanged} from "./utils.ts";
 import {Renderer} from "./renderer/mod.ts";
 
 const EDITOR_CHANGE_TIMEOUT = 15;
@@ -13,7 +12,6 @@ colorThemeChanged();
 const renderer = new Renderer(dom.canvas);
 
 let source = localStorage.getItem("bzw") as string || `# sample world\n\nworld\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
-dom.textarea.value = source;
 
 let map: bzw.IMap = {
   worldSize: 400,
@@ -32,8 +30,8 @@ function handleFile(files: FileList | null | undefined){
 
   reader.addEventListener("load", () => {
     const text = reader.result;
-    dom.textarea.value = text as string;
-    textareaChanged();
+    source = text as string;
+    sourceChanged();
   });
 
   reader.addEventListener("error", () => {
@@ -49,37 +47,20 @@ function saveMap(){
 }
 
 /** Raw handler for textarea being changed */
-function _textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdate: boolean = false){
-  // don't preform unnecessary updates if source hasn't changed
-  if(trimText(dom.textarea.value) === trimText(source)){
-    return;
-  }
-
-  if(dom.settings.syntaxHighlighting.checked){
-    if(forceHighlightUpdate){
-      deleteHighlightElement();
-    }
-    highlight(source);
-  }
-
-  source = dom.textarea.value;
-  dom.updateLineNumbers();
-  if(shouldParseSource){
-    parseSource();
-  }
+function _sourceChanged(){
+  parseSource();
   updateMesh();
-
   localStorage.setItem("bzw", source);
 }
 
 let timeoutId = 0;
 /** Smart handler for textarea being changed */
-function textareaChanged(shouldParseSource: boolean = true, forceHighlightUpdate: boolean = false){
+function sourceChanged(){
   if(timeoutId){
     clearTimeout(timeoutId);
   }
 
-  timeoutId = setTimeout(() => _textareaChanged(shouldParseSource, forceHighlightUpdate), EDITOR_CHANGE_TIMEOUT);
+  timeoutId = setTimeout(() => _sourceChanged(), EDITOR_CHANGE_TIMEOUT);
 }
 
 function setColorTheme(e?: Event){
@@ -99,16 +80,6 @@ function setColorTheme(e?: Event){
 }
 setColorTheme(); // HACK: this is so the function is not removed
 
-function syntaxHighlightingChanged(){
-  if(dom.settings.syntaxHighlighting.checked){
-    dom.textarea.classList.remove("show");
-    highlight();
-  }else{
-    dom.textarea.classList.add("show");
-    deleteHighlightElement();
-  }
-}
-
 dom.settings.autoRotate.addEventListener("change", () => {
   localStorage.setItem("autoRotate", dom.settings.autoRotate.checked ? "true" : "false");
 });
@@ -117,25 +88,9 @@ dom.settings.showAxis.addEventListener("change", () => {
   localStorage.setItem("showAxis", dom.settings.showAxis.checked ? "true" : "false");
 });
 
-dom.settings.syntaxHighlighting.addEventListener("change", () => {
-  localStorage.setItem("syntaxHighlighting", dom.settings.syntaxHighlighting.checked ? "true" : "false");
-  syntaxHighlightingChanged();
-});
-
 dom.bzwFile.addEventListener("change", () => {
   handleFile(dom.bzwFile.files);
 });
-
-dom.textarea.oninput = () => textareaChanged();
-
-// custom keyboard shotcuts (editor)
-dom.textarea.onkeydown = (e: KeyboardEvent) => {
-  if(e.keyCode === 191 && e.ctrlKey){ // Ctrl+/ (toggle comment)
-    e.preventDefault();
-    editor.toggleComment();
-    textareaChanged();
-  }
-};
 
 let selectedMapObjectIndex = 0;
 function setSelectedMapObject(newIndex: number){
@@ -199,9 +154,8 @@ function setSelectedMapObject(newIndex: number){
         }
 
         changedHandler(inputElement);
-        dom.textarea.value = bzw.mapToBZW(map);
-
-        textareaChanged(undefined, true);
+        source = bzw.mapToBZW(map);
+        sourceChanged();
       });
 
       valueElement.appendChild(inputElement);
@@ -235,8 +189,8 @@ function setSelectedMapObject(newIndex: number){
 
           if(property === "color"){
             (map.objects[selectedMapObjectIndex] as unknown as Record<string, number[]>)[property] = [0, 0, 0, 1];
-            dom.textarea.value = bzw.mapToBZW(map);
-            textareaChanged(undefined, true);
+            source = bzw.mapToBZW(map);
+            sourceChanged();
 
             const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
             selectedMapObjectIndex = -1;
@@ -268,8 +222,8 @@ function setSelectedMapObject(newIndex: number){
 
               if(property === "color"){
                 (map.objects[selectedMapObjectIndex] as unknown as Record<string, undefined>)[property] = undefined;
-                dom.textarea.value = bzw.mapToBZW(map);
-                textareaChanged(undefined, true);
+                source = bzw.mapToBZW(map);
+                sourceChanged();
 
                 const index = parseInt(`${selectedMapObjectIndex}`); // deep clone
                 selectedMapObjectIndex = -1;
@@ -344,24 +298,17 @@ document.addEventListener("copy", (e: ClipboardEvent) => {
 
 document.addEventListener("paste", (e: ClipboardEvent) => {
   e.preventDefault();
-  dom.textarea.value = (e.clipboardData || window.clipboardData).getData("text");
-  textareaChanged();
+  source = (e.clipboardData || window.clipboardData).getData("text");
+  sourceChanged();
 }, false);
 
 document.addEventListener("DOMContentLoaded", () => {
   // load settings
   dom.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
   dom.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
-  dom.settings.syntaxHighlighting.checked = localStorage.getItem("syntaxHighlighting") !== "false";
 
   parseSource();
   updateMesh();
-
-  setTimeout(() => {
-    dom.updateLineNumbers();
-    deleteHighlightElement();
-    syntaxHighlightingChanged();
-  });
 });
 
 function parseSource(){
