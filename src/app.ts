@@ -299,12 +299,12 @@ window.onkeydown = (e: KeyboardEvent) => {
 
 document.addEventListener("copy", (e: ClipboardEvent) => {
   e.preventDefault();
-  (e.clipboardData || window.clipboardData).setData("text/plain", source);
+  (e.clipboardData || (window as any).clipboardData as DataTransfer).setData("text/plain", source);
 }, false);
 
 document.addEventListener("paste", (e: ClipboardEvent) => {
   e.preventDefault();
-  source = (e.clipboardData || window.clipboardData).getData("text");
+  source = (e.clipboardData || (window as any).clipboardData as DataTransfer).getData("text");
   sourceChanged();
 }, false);
 
