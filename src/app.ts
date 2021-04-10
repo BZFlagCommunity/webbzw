@@ -279,15 +279,17 @@ window.addEventListener("drop", (e: DragEvent) => {
 
 // custom keyboard shortcuts (global)
 window.onkeydown = (e: KeyboardEvent) => {
-  if(e.keyCode === 83 && e.ctrlKey){ // Ctrl+S (save)
+  if(e.keyCode === 68 && e.ctrlKey && e.shiftKey){ // Ctrl+Sift+D (delete file)
+    e.preventDefault();
+    deleteMap();
+  }else if(e.keyCode === 68 && e.ctrlKey){ // Ctrl+D (download)
     e.preventDefault();
     saveMap();
   }else if(e.keyCode === 79 && e.ctrlKey){ // Ctrl+O (open file)
     e.preventDefault();
     dom.bzwFile.click();
-  }else if(e.keyCode === 68 && e.ctrlKey && e.shiftKey){ // Ctrl+Sift+D (delete file)
-    e.preventDefault();
-    deleteMap();
+  }else if(e.keyCode === 83 && e.ctrlKey){ // Ctrl+S (save)
+    alert("WebBZW automatically saves your work! You can use Ctrl+D to download the file or Ctrl+C to copy the contents to your clipboard.")
   }
 };
 
