@@ -14,7 +14,7 @@ const renderer = new Renderer(dom.canvas);
 const randomMapID = Math.random().toString(36).slice(2);
 let storageName = window.decodeURI(window.location.hash.slice(1) || randomMapID);
 if(storageName === randomMapID){
-  history.replaceState(null, null, `#${window.encodeURI(storageName)}`);
+  history.replaceState(null, "", `#${window.encodeURI(storageName)}`);
 }
 
 let source = localStorage.getItem(`map-${storageName}`) ?? `# sample world\n\nworld\n  name ${randomMapID}\n  size 200\nend\n\nbox\n  position 0 0 0\n  size 30 30 15\n  rotation 45\nend\n\npyramid\n  position 50 50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 50 0\n  size 5 5 50\nend\n\npyramid\n  position 50 -50 0\n  size 5 5 50\nend\n\npyramid\n  position -50 -50 0\n  size 5 5 50\nend\n\nbase\n  position -170 0 0\n  size 30 30 .5\n  color 1\nend\n\nbase\n  position 170 0 0\n  size 30 30 .5\n  color 2\nend\n`;
@@ -376,7 +376,7 @@ function parseSource(){
     }
 
     localStorage.removeItem(`map-${storageName}`);
-    history.replaceState(null, null, `#${window.encodeURI(newStorageName)}`);
+    history.replaceState(null, "", `#${window.encodeURI(newStorageName)}`);
     storageName = newStorageName;
   }
 }
