@@ -5,8 +5,10 @@ const DEFAULT_COLOR: [number, number, number, number] = [.1, .3, 1, 1];
 /** Pyramid object */
 export class Pyramid extends BasicMapObject{
   HEADER = "pyramid";
-
   vertexCount = 48;
+
+  drivethrough: boolean = false;
+  shootthrough: boolean = false;
 
   buildMesh(mesh: IMesh): void{
     let {size, color} = this;
@@ -60,5 +62,17 @@ export class Pyramid extends BasicMapObject{
     mesh.indices.push(mesh.indicesCount + 1);
     mesh.indices.push(mesh.indicesCount + 2);
     mesh.indicesCount += 3;
+  }
+
+  parseLine(line: string): void{
+    super.parseLine(line);
+
+    const parts = line.split(" ");
+
+    if(parts[0] === "drivethrough"){
+      this.drivethrough = true;
+    }else if(parts[0] === "shootthrough"){
+      this.shootthrough = true;
+    }
   }
 }

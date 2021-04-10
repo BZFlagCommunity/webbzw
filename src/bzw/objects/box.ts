@@ -5,8 +5,11 @@ const DEFAULT_COLOR: [number, number, number, number] = [.61, .26, .12, 1];
 /** Box object */
 export class Box extends BasicMapObject{
   HEADER = "box";
-
   vertexCount = 72;
+
+  // FIXME this is added to box-like children, but this should not be the case. Instead crate a generic `BoxLike` class to extend from instead
+  drivethrough: boolean = false;
+  shootthrough: boolean = false;
 
   buildMesh(mesh: IMesh): void{
     let {size, color} = this;
@@ -69,5 +72,17 @@ export class Box extends BasicMapObject{
     }
     this.pushColors(mesh, 8, color[0] * .9, color[1] * .9, color[2] * .9, color[3]); // front-back
     this.pushColors(mesh, 8, color[0] * .8, color[1] * .8, color[2] * .8, color[3]); // left-right
+  }
+
+  parseLine(line: string): void{
+    super.parseLine(line);
+
+    const parts = line.split(" ");
+
+    if(parts[0] === "drivethrough"){
+      this.drivethrough = true;
+    }else if(parts[0] === "shootthrough"){
+      this.shootthrough = true;
+    }
   }
 }

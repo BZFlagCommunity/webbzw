@@ -7,7 +7,6 @@ const OUTER_WALLS = false; // TODO make this a view option
 /** World object */
 export class World extends MapObject{
   HEADER = "world";
-
   vertexCount = 60;
 
   size: number = 400;
