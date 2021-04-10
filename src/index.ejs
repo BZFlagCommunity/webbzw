@@ -11,7 +11,25 @@
   <div class="welcome">
     <h1>Welcome to WebBZW!</h1>
     <p>Easily create and view BZFlag maps all within your browser</p>
+    <div class="maps"></div>
     <a href="/editor">Open Editor</a>
   </div>
+  <script>
+    const maps = document.querySelector(".maps");
+
+    for(const key in localStorage){
+      if(!key.startsWith("map-")){
+        continue;
+      }
+
+      const map = key.slice(4);
+
+      const container = document.createElement("div");
+      container.innerText = window.decodeURI(map);
+      container.onclick = () => window.location.href = `/editor#${map}`;
+
+      maps.appendChild(container);
+    }
+  </script>
 </body>
 </html>

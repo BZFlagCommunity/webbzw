@@ -66,6 +66,7 @@ body{
 }
 
 .welcome{
+  width: 100%;
   text-align: center;
   flex: 1;
   align-self: center;
@@ -81,7 +82,6 @@ body{
 }
 
 .welcome a{
-  margin-top: 2rem;
   padding: 1rem 2rem;
   background-color: #0FA;
   color: #FFF;
@@ -91,6 +91,26 @@ body{
   align-self: center;
   border-radius: var(--border-radius);
   box-shadow: 0 0 1rem #0FAA;
+}
+
+.maps{
+  margin: 6rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 15rem);
+  grid-auto-rows: 15rem;
+  grid-gap: 1rem;
+  justify-content: center;
+}
+
+.maps > div{
+  padding: .5rem;
+  background-color: var(--border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--border-radius);
+  box-shadow: 0 .2rem 1rem rgba(0, 0, 0, .1);
+  cursor: pointer;
 }
 
 h1{
