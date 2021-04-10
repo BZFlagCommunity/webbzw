@@ -325,7 +325,7 @@ window.onkeydown = (e: KeyboardEvent) => {
     alert("WebBZW automatically saves your work! You can use Ctrl+D to download the file or Ctrl+C to copy the contents to your clipboard.")
   }else if(e.keyCode === 65 && e.altKey){ // Alt+A (add object)
     e.preventDefault();
-    addObject(prompt("Type of object:"));
+    addObject(prompt("Type of object:") ?? undefined);
   }else if(e.keyCode === 82 && e.altKey){ // Alt+R (remove object)
     e.preventDefault();
     removeObject();
