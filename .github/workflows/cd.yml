@@ -64,6 +64,8 @@ jobs:
       - name: Release 📦
         uses: softprops/action-gh-release@v1
         with:
-          files: build/index.html
+          files: |
+            build/index.html
+            build/editor.html
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

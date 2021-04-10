@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600,900&display=swap");
 
 *{
   color: var(--text-color);
@@ -63,6 +63,34 @@ body{
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.welcome{
+  text-align: center;
+  flex: 1;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.welcome h1{
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.welcome a{
+  margin-top: 2rem;
+  padding: 1rem 2rem;
+  background-color: #0FA;
+  color: #FFF;
+  font-weight: 900;
+  text-decoration: none;
+  text-transform: uppercase;
+  align-self: center;
+  border-radius: var(--border-radius);
+  box-shadow: 0 0 1rem #0FAA;
 }
 
 h1{

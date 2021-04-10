@@ -8,89 +8,10 @@
   <style><%- css %></style>
 </head>
 <body>
-  <header>
-    <svg onclick="window.location.href = '/'" width="20" height="21" viewBox="0 0 20 21" xmlns="http://www.w3.org/2000/svg"><path d="M20 11.5091L10 0.6L0 11.5091H3.55795V20.6H8.17675V15.1455H11.8718V20.6H16.4906V11.5091H20Z"/></svg>
-    <nav>
-      <div class="parent">
-        <span>File</span>
-        <div class="menu">
-          <span onclick="bzwFile.click()">
-            Open
-            <span class="shortcut">Ctrl+O</span>
-          </span>
-          <span onclick="saveMap()">
-            Save
-            <span class="shortcut">Ctrl+S</span>
-          </span>
-        </div>
-      </div>
-      <div class="parent">
-        <span>View</span>
-        <div class="menu">
-          <span onclick="settings.autoRotate.click()">
-            <input type="checkbox" id="auto-rotate" onclick="event.stopPropagation()">
-            Auto Rotate
-          </span>
-          <span onclick="settings.showAxis.click()">
-            <input type="checkbox" id="show-axis" onclick="event.stopPropagation()">
-            Show Axis
-          </span>
-          <span class="parent">
-            Color Theme
-            <span class="shortcut">&gt;</span>
-            <div class="menu submenu" onclick="setColorTheme(event)">
-              <span>Default</span>
-              <span>High Contrast</span>
-              <span>One Dark Pro</span>
-              <span>One Half Light</span>
-              <span>Palenight</span>
-              <span>One Monokai</span>
-            </div>
-          </span>
-        </div>
-      </div>
-      <div class="parent">
-        <span>Help</span>
-        <div class="menu">
-          <span><a href="https://github.com/BZFlagCommunity/webbzw/issues/new?labels=bug" target="_blank" rel="noopener noreferrer">Report a Bug</a></span>
-          <span><a href="https://github.com/BZFlagCommunity/webbzw/releases/<%= version %>" target="_blank" rel="noopener noreferrer"><%= version %></a></span>
-        </div>
-      </div>
-    </nav>
-    <input type="file" id="bzw-file" accept=".bzw">
-  </header>
-  <main>
-    <div class="panel" id="objects">
-      <div class="panel__header">
-        Objects
-        <svg onclick="alert('not implemented yet')" width="10" height="8" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg"><line y1="1" x2="10" y2="1"/><line y1="4" x2="10" y2="4"/><line y1="7" x2="10" y2="7"/></svg>
-      </div>
-      <div class="panel__content"></div>
-    </div>
-    <div class="panel" id="properties">
-      <div class="panel__header">
-        Properties
-        <svg onclick="alert('not implemented yet')" width="10" height="8" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg"><line y1="1" x2="10" y2="1"/><line y1="4" x2="10" y2="4"/><line y1="7" x2="10" y2="7"/></svg>
-      </div>
-      <div class="panel__content"></div>
-    </div>
-    <div class="panel" id="preview">
-      <div class="panel__header">
-        Preview
-        <svg onclick="alert('not implemented yet')" width="10" height="8" viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg"><line y1="1" x2="10" y2="1"/><line y1="4" x2="10" y2="4"/><line y1="7" x2="10" y2="7"/></svg>
-      </div>
-      <div class="panel__content">
-        <canvas></canvas>
-      </div>
-    </div>
-  </main>
-  <footer>
-    <span id="status--objects"></span>
-    <span id="status--vertices"></span>
-    <span style="flex:1"></span>
-    <span><a href="https://github.com/BZFlagCommunity/webbzw" target="_blank" rel="noopener noreferrer">GitHub</a></span>
-    <span>Copyright &copy; 2021 <a href="https://thenoah.dev" target="_blank" rel="noopener noreferrer">The Noah</a></span>
-  </footer>
-  <script><%- js %></script>
+  <div class="welcome">
+    <h1>Welcome to WebBZW!</h1>
+    <p>Easily create and view BZFlag maps all within your browser</p>
+    <a href="/editor">Open Editor</a>
+  </div>
 </body>
 </html>

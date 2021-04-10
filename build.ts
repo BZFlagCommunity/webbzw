@@ -7,7 +7,8 @@ import ws from "https://deno.land/x/deno_ws@0.1.4/mod.ts";
 
 const serve = Deno.args[0] === "serve";
 
-let template = "";
+let indexTemplate = "";
+let editorTemplate = "";
 let css = "";
 let js = "";
 
@@ -15,8 +16,12 @@ function compress(text: string, force = false): string{
   return serve && !force ? text : text.split("\n").map((line) => line.trim()).join("");
 }
 
-async function loadTemplate(){
-  template = await Deno.readTextFile("./src/index.ejs");
+async function loadIndexTemplate(){
+  indexTemplate = await Deno.readTextFile("./src/index.ejs");
+}
+
+async function loadEditorTemplate(){
+  editorTemplate = await Deno.readTextFile("./src/editor.ejs");
 }
 
 async function loadCSS(){
@@ -42,9 +47,12 @@ async function loadJS(){
   }
 }
 
-async function build(): Promise<string>{
-  while(template === ""){
-    await loadTemplate();
+async function build(): Promise<{index: string, editor: string}>{
+  while(indexTemplate === ""){
+    await loadIndexTemplate();
+  }
+  while(editorTemplate === ""){
+    await loadEditorTemplate();
   }
   while(css === ""){
     await loadCSS();
@@ -62,14 +70,20 @@ async function build(): Promise<string>{
     version = Deno.env.get("GIT_TAG") ?? "unknown";
   }
 
-  return await renderToString(template, {
-    version,
-    css,
-    js,
-  });
+  return {
+    index: await renderToString(indexTemplate, {
+      css,
+    }),
+    editor: await renderToString(editorTemplate, {
+      version,
+      css,
+      js,
+    }),
+  }
 }
 
-await loadTemplate();
+await loadIndexTemplate();
+await loadEditorTemplate();
 await loadCSS();
 await loadJS();
 
@@ -87,8 +101,11 @@ if(serve){
 
   const _reload = async (event: Deno.FsEvent): Promise<void> => {
     if(event.paths[0].endsWith("index.ejs")){
-      console.log("template changed");
-      await loadTemplate();
+      console.log("index template changed");
+      await loadIndexTemplate();
+    }else if(event.paths[0].endsWith("editor.ejs")){
+      console.log("editor template changed");
+      await loadEditorTemplate();
     }else if(event.paths[0].endsWith("style.css")){
       console.log("css changed");
       await loadCSS();
@@ -129,14 +146,23 @@ if(serve){
     // }
 
     try{
+      const pages = await build();
+      let html;
+
+      if(req.url === "/editor"){
+        html = pages.editor;
+      }else{
+        html = pages.index;
+      }
+
       req.respond({
         status: 200,
-        body: await build() + RELOAD_HTML
+        body: html + RELOAD_HTML,
       });
     }catch(err){
       req.respond({
         status: 500,
-        body: `<!DOCTYPE html><html><body><pre>${err}</pre>${RELOAD_HTML}</body></html>`
+        body: `<!DOCTYPE html><html><body><pre>${err}</pre>${RELOAD_HTML}</body></html>`,
       });
     }
   }
@@ -153,5 +179,7 @@ if(serve){
 
   // await Deno.copyFile(WASM_PATH, "./build/wasm.wasm");
 
-  await Deno.writeTextFile("build/index.html", await build());
+  const pages = await build();
+  await Deno.writeTextFile("build/index.html", pages.index);
+  await Deno.writeTextFile("build/editor.html", pages.editor);
 }
