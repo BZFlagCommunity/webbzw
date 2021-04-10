@@ -300,12 +300,12 @@ textarea.show{
   font-weight: 500;
   display: flex;
   align-items: center;
+  cursor: grab;
 }
 
 .panel__header > svg{
   margin-left: .75rem;
   stroke: var(--text-color);
-  cursor: grab;
 }
 
 .panel__content{
@@ -330,52 +330,53 @@ textarea.show{
   background-color: var(--border-color);
 }
 
-.objects{
+#objects{
   grid-column: 1;
   grid-row: 1;
 }
 
-.objects > .panel__content{
+#objects > .panel__content{
   font-size: .8rem;
   font-family: "Source Code Pro", monospace;
   line-height: 1em;
   user-select: none;
 }
 
-.objects > .panel__content > div{
+#objects > .panel__content > div{
   padding: .1rem;
   color: var(--text-light-color);
   cursor: pointer;
 }
 
-.objects > .panel__content > div.selected, .objects > .panel__content > div:hover{
+#objects > .panel__content > div.selected,
+#objects > .panel__content > div:hover{
   color: var(--text-color);
 }
 
-.properties{
+#properties{
   grid-column: 1;
   grid-row: 2;
 }
 
-.properties > .panel__content > div{
+#properties > .panel__content > div{
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.properties > .panel__content > div:not(:last-child){
+#properties > .panel__content > div:not(:last-child){
   margin-bottom: .5rem;
 }
 
-.properties > .panel__content > div > *:not(input[type=checkbox]){
+#properties > .panel__content > div > *:not(input[type=checkbox]){
   flex: 1;
 }
 
-.properties > .panel__content > div > *:not(:last-child){
+#properties > .panel__content > div > *:not(:last-child){
   margin-right: .2rem;
 }
 
-.properties > .panel__content input{
+#properties > .panel__content input{
   padding: .2rem .5rem;
   background: none;
   font-family: "Source Code Pro", monospace;
@@ -385,15 +386,16 @@ textarea.show{
   outline: none;
 }
 
-.properties > .panel__content input:not([type=checkbox]){
+#properties > .panel__content input:not([type=checkbox]){
   width: 100%;
 }
 
-.preview{
+#preview{
   grid-column: 2;
   grid-row: 1 / 3;
 }
 
-.preview canvas{
+#preview canvas{
+  min-height: 100px;
   flex: 1;
 }
