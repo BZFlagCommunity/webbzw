@@ -26,11 +26,10 @@ export function parseNum(str: string, fallback: number = 0): number{
 
 /** Base definition of a map object - should contain properties that are across **all** objects */
 export abstract class MapObject{
-  name: string = "";
-
+  abstract HEADER: string;
   vertexCount: number = 0;
 
-  abstract HEADER: string;
+  name: string = "";
 
   constructor(line?: string){
   }

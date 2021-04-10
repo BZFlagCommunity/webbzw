@@ -7,3 +7,4 @@ export * from "./meshpyr.ts";
 export * from "./zone.ts";
 export * from "./define.ts";
 export * from "./group.ts";
+export * from "./physics.ts";

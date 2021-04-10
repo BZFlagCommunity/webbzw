@@ -80,6 +80,9 @@ export function parse(source: string): IMap{
     }else if(line.startsWith("group")){
       current = "group";
       map.objects.push(new objects.Group(line));
+    }else if(line.startsWith("physics")){
+      current = "physics";
+      map.objects.push(new objects.Physics(line));
     }else{
       switch(current){
         case "world":
@@ -91,6 +94,7 @@ export function parse(source: string): IMap{
         case "zone":
         case "define":
         case "group":
+        case "physics":
           map.objects[map.objects.length - 1].parseLine(line);
 
           if(current === "world" && line.startsWith("size")){
