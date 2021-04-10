@@ -1,13 +1,12 @@
 import * as bzw from "./bzw/mod.ts";
 import * as dom from "./dom.ts";
+import * as settings from "./settings.ts";
 import "./editor/mod.ts";
 
-import {saveFile, colorThemeChanged, capitalize} from "./utils.ts";
+import {saveFile, capitalize} from "./utils.ts";
 import {Renderer} from "./renderer/mod.ts";
 
 const EDITOR_CHANGE_TIMEOUT = 15;
-
-colorThemeChanged();
 
 const renderer = new Renderer(dom.canvas);
 
@@ -74,31 +73,6 @@ function sourceChanged(){
 
   timeoutId = setTimeout(() => _sourceChanged(), EDITOR_CHANGE_TIMEOUT);
 }
-
-function setColorTheme(e?: Event){
-  if(!e){
-    return;
-  }
-
-  const target = (e.target as HTMLElement);
-
-  // ignore if we clicked the menu element
-  if(target.classList.contains("menu")){
-    return;
-  }
-
-  localStorage.setItem("colorTheme", target.innerText.toLowerCase().replace(/ /g, "-"));
-  colorThemeChanged();
-}
-setColorTheme(); // HACK: this is so the function is not removed
-
-dom.settings.autoRotate.addEventListener("change", () => {
-  localStorage.setItem("autoRotate", dom.settings.autoRotate.checked ? "true" : "false");
-});
-
-dom.settings.showAxis.addEventListener("change", () => {
-  localStorage.setItem("showAxis", dom.settings.showAxis.checked ? "true" : "false");
-});
 
 dom.bzwFile.addEventListener("change", () => {
   handleFile(dom.bzwFile.files);
@@ -329,10 +303,7 @@ document.addEventListener("paste", (e: ClipboardEvent) => {
 }, false);
 
 document.addEventListener("DOMContentLoaded", () => {
-  // load settings
-  dom.settings.autoRotate.checked = localStorage.getItem("autoRotate") === "true";
-  dom.settings.showAxis.checked = localStorage.getItem("showAxis") !== "false";
-
+  settings.load();
   _sourceChanged();
 });
 
