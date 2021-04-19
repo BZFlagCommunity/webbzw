@@ -1,8 +1,7 @@
-import {IMesh} from "../types.ts";
-import {Box} from "./box.ts";
+import {BoxLike, IMesh} from "../types.ts";
 
 /** (Team) Base object */
-export class Base extends Box{
+export class Base extends BoxLike{
   HEADER = "base";
 
   buildMesh(mesh: IMesh): void{
