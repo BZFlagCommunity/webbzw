@@ -28,7 +28,13 @@ for(const panel of document.querySelectorAll<HTMLElement>(".panel")){
   }, false);
 
   panel.addEventListener("drop", (e: DragEvent) => {
+    if(e.dataTransfer?.files){
+      return;
+    }
+
     e.stopPropagation();
+    e.preventDefault();
+
     panel.style.borderColor = "";
 
     const id = e.dataTransfer?.getData("text/plain");
