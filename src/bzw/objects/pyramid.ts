@@ -50,9 +50,7 @@ export class Pyramid extends BasicMapObject{
 
     this.applyRotPosShift(mesh);
 
-    this.pushColors(mesh, 4, color[0] * .8, color[1] * .8, color[2] * .8, color[3]);
-    this.pushColors(mesh, 6, color[0] * .9, color[1] * .9, color[2] * .9, color[3]);
-    this.pushColors(mesh, 6, color[0], color[1], color[2], color[3]);
+    this.pushColors(mesh, 16, color[0], color[1], color[2], color[3]);
   }
 
   // FIXME: this should be part of `pushIndices` with a dynamic number

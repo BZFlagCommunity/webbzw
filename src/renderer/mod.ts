@@ -17,6 +17,7 @@ export class Renderer{
   private gl?: WebGL2RenderingContext;
   private vbo: WebGLBuffer | null = null;
   private cbo: WebGLBuffer | null = null;
+  private nbo: WebGLBuffer | null = null;
   private ebo: WebGLBuffer | null = null;
   private elementCount = 0;
 
@@ -218,6 +219,7 @@ export class Renderer{
 
     this.gl.deleteBuffer(this.vbo);
     this.gl.deleteBuffer(this.cbo);
+    this.gl.deleteBuffer(this.nbo);
     this.gl.deleteBuffer(this.ebo);
 
     this.vbo = this.gl.createBuffer() as WebGLBuffer;
@@ -227,6 +229,11 @@ export class Renderer{
     this.cbo = this.gl.createBuffer() as WebGLBuffer;
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.cbo);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(mesh.colors), this.gl.STATIC_DRAW);
+
+    const normals = calculateNormals(mesh.vertices, mesh.indices);
+    this.nbo = this.gl.createBuffer() as WebGLBuffer;
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.nbo);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(normals), this.gl.STATIC_DRAW);
 
     this.ebo = this.gl.createBuffer() as WebGLBuffer;
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.ebo);
@@ -240,6 +247,48 @@ export class Renderer{
     this.gl.enableVertexAttribArray(1);
     this.gl.vertexAttribPointer(1, 4, this.gl.FLOAT, false, 16, 0);
 
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.nbo);
+    this.gl.enableVertexAttribArray(2);
+    this.gl.vertexAttribPointer(2, 3, this.gl.FLOAT, false, 12, 0);
+
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
   }
+}
+
+function calculateNormals(vertices: number[], indices: number[]): number[]{
+  const x = 0;
+  const y = 1;
+  const z = 2;
+  const ns: number[] = [];
+
+  // we work on triads of vertices to calculate normals so
+  // i = i+3 (i = indices index)
+  for(let i = 0; i < indices.length; i += 3){
+    const v1 = [];
+    const v2 = [];
+    const normal = [];
+
+    // p1 - p0
+    v1[x] = vertices[3 * indices[i + 1] + x] - vertices[3 * indices[i] + x];
+    v1[y] = vertices[3 * indices[i + 1] + y] - vertices[3 * indices[i] + y];
+    v1[z] = vertices[3 * indices[i + 1] + z] - vertices[3 * indices[i] + z];
+    // p0 - p1
+    v2[x] = vertices[3 * indices[i + 2] + x] - vertices[3 * indices[i + 1] + x];
+    v2[y] = vertices[3 * indices[i + 2] + y] - vertices[3 * indices[i + 1] + y];
+    v2[z] = vertices[3 * indices[i + 2] + z] - vertices[3 * indices[i + 1] + z];
+
+    // cross product by Sarrus Rule
+    normal[x] = v1[y] * v2[z] - v1[z] * v2[y];
+    normal[y] = v1[z] * v2[x] - v1[x] * v2[z];
+    normal[z] = v1[x] * v2[y] - v1[y] * v2[x];
+
+    // update the normals of that triangle: sum of vectors
+    for(let j = 0; j < 3; j++){
+      ns[3 * indices[i + j] + x] = normal[x];
+      ns[3 * indices[i + j] + y] = normal[y];
+      ns[3 * indices[i + j] + z] = normal[z];
+    }
+  }
+
+  return ns;
 }

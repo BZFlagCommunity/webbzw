@@ -1,6 +1,7 @@
 export const VERTEX_SHADER = `#version 300 es
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec4 color;
+layout(location = 2) in vec3 normal;
 
 out vec4 vColor;
 
@@ -8,8 +9,16 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 model;
 
-void main(void){
-  vColor = color;
+const vec3 SUN_POSITION_0 = normalize(vec3(0.3, 1.0, 0.8));
+const vec3 SUN_POSITION_1 = normalize(vec3(-0.3, 0.1, -0.8));
+const float AMBIENT = 0.3;
+
+float calculateLighting(vec3 sun){
+  return max(dot(normalize(normal), sun), 0.0);
+}
+
+void main(){
+  vColor = vec4(vec3(calculateLighting(SUN_POSITION_0) + calculateLighting(SUN_POSITION_1)), 1.0) * color;
 
   gl_Position = proj * view * model * vec4(position, 1.0);
 }`;
@@ -21,7 +30,7 @@ in vec4 vColor;
 
 out vec4 finalColor;
 
-void main(void){
+void main(){
   if(vColor.a < .05){
     discard;
   }
