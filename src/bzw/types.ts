@@ -138,7 +138,6 @@ export abstract class VeryBasicMapObject extends MapObject{
   /** Apply this object's `rotation`, `position` and `shift` to `mesh` */
   protected applyRotPosShift(mesh: IMesh): void{
     if(this.vertexCount === 0){
-      console.error("this should not happen");
       return;
     }
 
@@ -159,7 +158,6 @@ export abstract class VeryBasicMapObject extends MapObject{
   /** Apply this objects rotation */
   protected applyRotation(mesh: IMesh): void{
     if(this.vertexCount === 0){
-      console.error("this should not happen");
       return;
     }
 
