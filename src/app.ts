@@ -350,15 +350,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function parseSource(updateSelected = true){
   const oldSelected = map.objects[selectedMapObjectIndex]?.toString() ?? "";
+  const oldLength = map.objects.length;
 
   map = bzw.parse(source);
 
-  dom.removeAllChildren(dom.panels.objects);
+  if(!updateSelected || map.objects.length !== oldLength){
+    dom.removeAllChildren(dom.panels.objects);
 
-  for(const object of map.objects){
-    const div = document.createElement("div");
-    div.innerText = object.name || object.HEADER;
-    dom.panels.objects.appendChild(div);
+    for(const object of map.objects){
+      const div = document.createElement("div");
+      div.innerText = `${object.name || object.HEADER} [${object.HEADER}]`;
+      dom.panels.objects.appendChild(div);
+    }
   }
 
   if(updateSelected && (map.objects[selectedMapObjectIndex]?.toString() ?? "") !== oldSelected){ // object has changed
