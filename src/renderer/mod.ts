@@ -25,7 +25,11 @@ export class Renderer{
       return;
     }
 
-    this.gl = canvas.getContext("webgl2") as WebGL2RenderingContext
+    this.gl = canvas.getContext("webgl2", {
+      antialias: true,
+      alpha: true,
+      depth: true,
+    }) as WebGL2RenderingContext
 
     if(!this.gl){
       alert("WebGL 2.0 not available");
@@ -152,6 +156,7 @@ export class Renderer{
     this.gl.enable(this.gl.BLEND);
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
     this.gl.enable(this.gl.CULL_FACE);
+    this.gl.cullFace(this.gl.BACK);
     this.gl.clearColor(0, 0, 0, 0);
 
     const render = (time: number) => {

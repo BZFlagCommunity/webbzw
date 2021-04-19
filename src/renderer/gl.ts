@@ -14,7 +14,7 @@ void main(void){
   gl_Position = proj * view * model * vec4(position, 1.0);
 }`;
 
-export const FRAGMENT_SHADER =`#version 300 es
+export const FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 
 in vec4 vColor;
