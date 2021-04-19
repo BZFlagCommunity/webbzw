@@ -9,8 +9,9 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 model;
 
-const vec3 SUN_POSITION_0 = normalize(vec3(0.3, 1.0, 0.8));
-const vec3 SUN_POSITION_1 = normalize(vec3(-0.3, 0.1, -0.8));
+const vec3 SUN_POSITION_0 = normalize(vec3(0.3, 0.5, 0.8));
+const vec3 SUN_POSITION_1 = normalize(vec3(-0.3, 0.5, -0.8));
+const vec3 SUN_POSITION_2 = normalize(vec3(0.0, -1.0, 0.0));
 const float AMBIENT = 0.3;
 
 float calculateLighting(vec3 sun){
@@ -18,7 +19,7 @@ float calculateLighting(vec3 sun){
 }
 
 void main(){
-  vColor = vec4(vec3(calculateLighting(SUN_POSITION_0) + calculateLighting(SUN_POSITION_1)), 1.0) * color;
+  vColor = vec4(vec3(calculateLighting(SUN_POSITION_0) + calculateLighting(SUN_POSITION_1) + (calculateLighting(SUN_POSITION_2) * 0.7)), 1.0) * color;
 
   gl_Position = proj * view * model * vec4(position, 1.0);
 }`;
