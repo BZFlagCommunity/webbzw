@@ -28,7 +28,7 @@ for(const panel of document.querySelectorAll<HTMLElement>(".panel")){
   }, false);
 
   panel.addEventListener("drop", (e: DragEvent) => {
-    if(e.dataTransfer?.files){
+    if(e.dataTransfer?.files.length ?? 0 > 0){
       return;
     }
 
