@@ -19,7 +19,7 @@ float calculateLighting(vec3 sun){
 }
 
 void main(){
-  vColor = vec4(vec3(calculateLighting(SUN_POSITION_0) + calculateLighting(SUN_POSITION_1) + (calculateLighting(SUN_POSITION_2) * 0.7)), 1.0) * color;
+  vColor = vec4(vec3(max(calculateLighting(SUN_POSITION_0) + calculateLighting(SUN_POSITION_1) + (calculateLighting(SUN_POSITION_2) * 0.7), AMBIENT)), 1.0) * color;
 
   gl_Position = proj * view * model * vec4(position, 1.0);
 }`;
