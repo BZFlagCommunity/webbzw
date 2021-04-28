@@ -80,8 +80,8 @@ export class Renderer{
 
       if(PHI > 90){
         PHI = 90;
-      }else if(PHI < 0){
-        PHI = 0;
+      }else if(PHI < -90){
+        PHI = -90;
       }
     };
 
@@ -178,6 +178,7 @@ export class Renderer{
       const modelMatrix = math.multiplyArrayOfMatrices([
         math.rotateXMatrix(-PHI),
         math.rotateYMatrix(-THETA),
+        [1,0,0,0, 0,1,0,0, 0,0,1,0, -this.axisPosition[0],-this.axisPosition[2],this.axisPosition[1],1]
       ]);
 
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
