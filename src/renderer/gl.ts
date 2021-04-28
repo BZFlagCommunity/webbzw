@@ -39,6 +39,21 @@ void main(){
   finalColor = vColor;
 }`;
 
+export const AXIS_VERTEX_SHADER = `#version 300 es
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec4 color;
+
+out vec4 vColor;
+
+uniform mat4 proj;
+uniform mat4 view;
+uniform mat4 model;
+
+void main(){
+  vColor = color;
+  gl_Position = proj * view * model * vec4(position, 1.0);
+}`;
+
 export function createShader(gl: WebGL2RenderingContext , vertCode: string, fragCode: string): WebGLProgram | null{
   const vertShader = gl.createShader(gl.VERTEX_SHADER);
   if(!vertShader){

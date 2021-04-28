@@ -1,4 +1,4 @@
-import {VERTEX_SHADER, FRAGMENT_SHADER, createShader} from "./gl.ts";
+import {VERTEX_SHADER, FRAGMENT_SHADER, AXIS_VERTEX_SHADER, createShader} from "./gl.ts";
 
 import * as math from "../math.ts";
 import {getCoord} from "../utils.ts";
@@ -8,7 +8,7 @@ import * as dom from "../dom.ts";
 const MAX_ZOOM = -5;
 const MOUSE_SPEED = 75;
 const NEAR_PLANE = 1;
-const AXIS_LINE_LENGTH = 20;
+const AXIS_LINE_LENGTH = 30;
 
 export class Renderer{
   worldSize = 400;
@@ -101,14 +101,19 @@ export class Renderer{
     }, {passive: true});
 
     const shader = createShader(this.gl, VERTEX_SHADER, FRAGMENT_SHADER);
-    if(!shader){
+    const axisShader = createShader(this.gl, AXIS_VERTEX_SHADER, FRAGMENT_SHADER);
+    if(!shader || !axisShader){
       alert("Error creating shader");
       return;
     }
-    this.gl.useProgram(shader);
 
+    this.gl.useProgram(shader);
     const vMatrix = this.gl.getUniformLocation(shader, "view");
     const mMatrix = this.gl.getUniformLocation(shader, "model");
+
+    this.gl.useProgram(axisShader);
+    const avMatrix = this.gl.getUniformLocation(axisShader, "view");
+    const amMatrix = this.gl.getUniformLocation(axisShader, "model");
 
     const axisVertices = [
       // x
@@ -183,15 +188,20 @@ export class Renderer{
 
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
       this.gl.viewport(0, 0, canvas.width, canvas.height);
-      this.gl.uniformMatrix4fv(this.gl.getUniformLocation(shader, "proj"), false, math.getProjection(60, canvas.width/canvas.height, NEAR_PLANE, this.worldSize * 5));
 
+      this.gl.useProgram(shader);
+      this.gl.uniformMatrix4fv(this.gl.getUniformLocation(shader, "proj"), false, math.getProjection(60, canvas.width/canvas.height, NEAR_PLANE, this.worldSize * 5));
       this.gl.uniformMatrix4fv(vMatrix, false, viewMatrix);
       this.gl.uniformMatrix4fv(mMatrix, false, modelMatrix);
 
       this.gl.drawElements(this.gl.TRIANGLES, this.elementCount, this.gl.UNSIGNED_SHORT, 0);
 
       if(dom.settings.showAxis.checked){
-        this.gl.uniformMatrix4fv(mMatrix, false, math.multiplyArrayOfMatrices([
+        this.gl.useProgram(axisShader);
+        this.gl.uniformMatrix4fv(this.gl.getUniformLocation(axisShader, "proj"), false, math.getProjection(60, canvas.width/canvas.height, NEAR_PLANE, this.worldSize * 5));
+        this.gl.uniformMatrix4fv(avMatrix, false, viewMatrix);
+
+        this.gl.uniformMatrix4fv(amMatrix, false, math.multiplyArrayOfMatrices([
           modelMatrix,
           [AXIS_LINE_LENGTH,0,0,0, 0,AXIS_LINE_LENGTH,0,0, 0,0,AXIS_LINE_LENGTH,0, this.axisPosition[0],this.axisPosition[2],-this.axisPosition[1],1]
         ]));
